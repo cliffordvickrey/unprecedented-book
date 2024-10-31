@@ -1,0 +1,36 @@
+{
+  "name": "cliffordvickrey/book2024",
+  "description": "Various tools related to book project",
+  "type": "project",
+  "replace": {
+    "symfony/polyfill-php80": "*",
+    "symfony/polyfill-php81": "*"
+  },
+  "require": {
+    "ext-iconv": "*",
+    "guzzlehttp/guzzle": "^7.4",
+    "php": ">=8.3",
+    "webmozart/assert": "^1.11"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.12",
+    "friendsofphp/php-cs-fixer": "^3.64"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "CliffordVickrey\\Book2024\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "cliffordvickrey",
+      "email": "clifforddavidvickrey@gmail.com"
+    }
+  ],
+  "scripts": {
+    "analyse": "vendor/bin/phpstan analyse",
+    "check": "vendor/bin/php-cs-fixer fix check",
+    "fix": "vendor/bin/php-cs-fixer fix"
+  }
+}
