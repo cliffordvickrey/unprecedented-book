@@ -16,6 +16,17 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
     /** @var array<string, string>|null */
     private ?array $slugsByCandidateId = null;
 
+    public function hasCandidateId(string $candidateId): bool
+    {
+        try {
+            $this->getByCandidateId($candidateId);
+        } catch (BookOutOfBoundsException) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function getByCandidateId(string $candidateId): CandidateAggregate
     {
         $slugsByCandidateId = $this->getSlugsByCandidateId();

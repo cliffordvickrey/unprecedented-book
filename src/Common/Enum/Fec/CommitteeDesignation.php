@@ -12,4 +12,16 @@ enum CommitteeDesignation: string
     case J = 'J'; // Joint fundraiser
     case P = 'P'; // Principal campaign committee
     case U = 'U'; // Unauthorized
+
+    public function getSlug(): string
+    {
+        return match ($this) {
+            self::A => 'authorized',
+            self::B => 'pac',
+            self::D => 'leadership',
+            self::J => 'joint',
+            self::P => 'principal',
+            self::U => 'unauthorized',
+        };
+    }
 }

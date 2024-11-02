@@ -22,10 +22,24 @@ class CommitteeAggregate extends Aggregate
     /** @var array<int, Committee> */
     #[PropOrder(4)]
     public array $infoByYear = [];
-    /** @var array<int, CandidateCommitteeLinkage> */
+    /** @var list<CandidateCommitteeLinkage> */
     #[PropOrder(5)]
-    public array $cclByYear = [];
-    /** @var array<int, LeadershipPacLinkage> */
+    public array $ccl = [];
+    /** @var list<LeadershipPacLinkage> */
     #[PropOrder(6)]
-    public array $leadershipPacLinkageByYear = [];
+    public array $leadershipPacLinkage = [];
+    public ?string $primaryCandidateSlug = null;
+    /** @var list<string> */
+    public array $candidateSlugs = [];
+
+    /**
+     * @return list<string>
+     */
+    public function getCandidateIds(): array
+    {
+        return array_values(array_unique(array_map(
+            static fn (CandidateCommitteeLinkage|LeadershipPacLinkage $pac) => (string) $pac->CAND_ID,
+            [...$this->ccl, ...$this->leadershipPacLinkage]
+        )));
+    }
 }

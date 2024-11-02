@@ -132,7 +132,7 @@ class EntityHydrator implements EntityHydratorInterface
             return null;
         }
 
-        return (bool) $prop;
+        return (bool) $value;
     }
 
     private static function parseFloat(mixed $value, EntityProp $prop): ?float

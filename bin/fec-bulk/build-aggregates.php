@@ -13,6 +13,7 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\CommitteeSummary;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeProperties;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
+use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
@@ -67,6 +68,7 @@ call_user_func(function () {
     // region committees
     $reader = new CsvReader(__DIR__.'/../../data/csv/cm/cm.csv');
 
+    /** @var array<string, CommitteeAggregate> $committeeAggregates */
     $committeeAggregates = [];
 
     $headers = array_map(strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
@@ -112,7 +114,11 @@ call_user_func(function () {
 
         $committeeAggregate = $committeeAggregates[$committeeSummary->CMTE_ID] ?? null;
 
-        Assert::notNull($committeeAggregate, sprintf('Committee with ID %s not found', $committeeSummary->CMTE_ID));
+        if (null === $committeeAggregate) {
+            printf('[summary] Committee with ID %s not found%s', $committeeSummary->CMTE_ID, \PHP_EOL);
+            $reader->next();
+            continue;
+        }
 
         $committeeAggregate->committeeTotalsByYear[$committeeSummary->file_id] = $totals;
 
@@ -124,7 +130,7 @@ call_user_func(function () {
     // endregion
 
     // region CCL
-    $reader = new CsvReader(__DIR__.'/../../data/csv/committee_summary/committee_summary.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/ccl/ccl.csv');
 
     $headers = array_map(strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
 
@@ -137,9 +143,13 @@ call_user_func(function () {
 
         $committeeAggregate = $committeeAggregates[(string) $ccl->CMTE_ID] ?? null;
 
-        Assert::notNull($committeeAggregate, sprintf('Committee with ID %s not found', $ccl->CMTE_ID));
+        if (null === $committeeAggregate) {
+            printf('[CCL] Committee with ID %s not found%s', $ccl->CMTE_ID, \PHP_EOL);
+            $reader->next();
+            continue;
+        }
 
-        $committeeAggregate->cclByYear[$ccl->file_id] = $ccl;
+        $committeeAggregate->ccl[] = $ccl;
 
         $reader->next();
     }
@@ -165,13 +175,13 @@ call_user_func(function () {
 
         $committeeAggregate = $committeeAggregates[(string) $candidateLeadershipPacLinkage->CMTE_ID] ?? null;
 
-        Assert::notNull(
-            $committeeAggregate,
-            sprintf('Committee with ID %s not found', $candidateLeadershipPacLinkage->CMTE_ID)
-        );
+        if (null === $committeeAggregate) {
+            printf('[leadership] Committee with ID %s not found%s', $candidateLeadershipPacLinkage->CMTE_ID, \PHP_EOL);
+            $reader->next();
+            continue;
+        }
 
-        $committeeAggregate->leadershipPacLinkageByYear[$candidateLeadershipPacLinkage->file_id] =
-            $candidateLeadershipPacLinkage;
+        $committeeAggregate->leadershipPacLinkage[] = $candidateLeadershipPacLinkage;
 
         $reader->next();
     }
@@ -181,45 +191,127 @@ call_user_func(function () {
     // endregion
 
     // region parse names and slugs
-    $parsed = [];
+    $parsedCommittees = [];
 
     foreach ($committeeAggregates as $committeeAggregate) {
         Assert::notEmpty($committeeAggregate->infoByYear);
 
         $lastInfo = $committeeAggregate->infoByYear[array_key_last($committeeAggregate->infoByYear)];
 
+        $candidateIds = $committeeAggregate->getCandidateIds();
+
         $committeeProperties = new CommitteeProperties();
+        $committeeProperties->id = $committeeAggregate->id;
+        $committeeProperties->name = $committeeAggregate->name;
         $committeeProperties->committeeDesignation = $lastInfo->CMTE_DSGN;
+        $committeeProperties->candidateSlugs = array_values(array_unique(array_filter(array_map(
+            static fn (string $candidateId) => $candidateAggregateRepository->hasCandidateId($candidateId)
+                ? $candidateAggregateRepository->getByCandidateId($candidateId)->slug
+                : null,
+            $candidateIds
+        ))));
 
-        if (!empty($committeeAggregate->cclByYear)) {
-            $lastKey = array_key_last($committeeAggregate->cclByYear);
-            $lastCcl = $committeeAggregate->cclByYear[$lastKey];
-            $candidateAggregate = $candidateAggregateRepository->getByCandidateId($lastCcl->CAND_ID);
-            $candidateInfo = $candidateAggregate->getInfo($lastCcl->file_id, $lastCcl->CAND_ID);
-            Assert::notNull($candidateInfo);
+        if (!empty($committeeAggregate->ccl)) {
+            $lastKey = array_key_last($committeeAggregate->ccl);
+            $lastCcl = $committeeAggregate->ccl[$lastKey];
 
-            $committeeProperties->candidateSlug = $candidateAggregate->slug;
-            $committeeProperties->candidateOffice = $candidateInfo->CAND_OFFICE;
-            $committeeProperties->state = $candidateInfo->CAND_OFFICE_ST;
-            $committeeProperties->district = $candidateInfo->CAND_OFFICE_DISTRICT;
+            try {
+                $candidateAggregate = $candidateAggregateRepository->getByCandidateId($lastCcl->CAND_ID);
+                $candidateInfo = $candidateAggregate->getInfo($lastCcl->file_id, $lastCcl->CAND_ID)
+                    ?? throw new BookOutOfBoundsException();
+                $committeeProperties->candidateSlug = $candidateAggregate->slug;
+                $committeeProperties->candidateOffice = $candidateInfo->CAND_OFFICE;
+                $committeeProperties->state = $candidateInfo->CAND_ELECTION_YR;
+                $committeeProperties->district = $candidateInfo->CAND_OFFICE_DISTRICT;
+                $committeeProperties->year = $candidateInfo->file_id;
+            } catch (BookOutOfBoundsException) {
+                printf('[CCL] Candidate with ID %s not found%s', $lastCcl->CAND_ID, \PHP_EOL);
+            }
         }
 
-        if (!empty($committeeAggregate->leadershipPacLinkageByYear)) {
-            $lastKey = array_key_last($committeeAggregate->cclByYear);
-            $lastLeadership = $committeeAggregate->leadershipPacLinkageByYear[$lastKey];
-            $candidateAggregate = $candidateAggregateRepository->getByCandidateId($lastLeadership->CAND_ID);
-            $candidateInfo = $candidateAggregate->getInfo($lastLeadership->file_id, $lastLeadership->CAND_ID);
-            Assert::notNull($candidateInfo);
+        if (!empty($committeeAggregate->leadershipPacLinkage)) {
+            $lastKey = array_key_last($committeeAggregate->leadershipPacLinkage);
+            $lastLeadership = $committeeAggregate->leadershipPacLinkage[$lastKey];
 
-            $committeeProperties->candidateSlug = $candidateAggregate->slug;
-            $committeeProperties->isLeadership = true;
+            try {
+                $candidateAggregate = $candidateAggregateRepository->getByCandidateId($lastLeadership->CAND_ID);
+                $candidateInfo = $candidateAggregate->getInfo($lastLeadership->file_id, $lastLeadership->CAND_ID)
+                    ?? throw new BookOutOfBoundsException();
+                $committeeProperties->candidateSlug = $candidateAggregate->slug;
+                $committeeProperties->isLeadership = true;
+                $committeeProperties->year = $candidateInfo->CAND_ELECTION_YR;
+            } catch (BookOutOfBoundsException) {
+                printf('[leadership] Candidate with ID %s not found%s', $lastLeadership->CAND_ID, \PHP_EOL);
+            }
         }
 
-        $parsed[$committeeAggregate->id] = $committeeProperties;
+        $parsedCommittees[$committeeAggregate->id] = $committeeProperties;
     }
 
-    $json = JsonUtilities::jsonEncode($parsed, true);
-    FileUtilities::saveContents(__DIR__.'/parsed.json', $json);
+    // endregion
+
+    // region generate committee slugs
+    $slugCandidates = array_reduce($parsedCommittees, static function (array $carry, CommitteeProperties $props) {
+        $slug = $props->getSlug();
+
+        if (!isset($carry[$slug])) {
+            $carry[$slug] = [$props->id];
+
+            return $carry;
+        }
+
+        $carry[$slug][] = $props->id;
+
+        return $carry;
+    }, []);
+
+    $disambiguatedSlugs = array_filter($slugCandidates, static fn ($group) => 1 === count($group));
+    $slugsThatNeedDisambiguation = array_diff_key($slugCandidates, $disambiguatedSlugs);
+
+    foreach ($slugsThatNeedDisambiguation as $committeeIds) {
+        foreach ($committeeIds as $committeeId) {
+            $disambiguationCandidates = [];
+
+            $committeeIdsToTest = array_filter(
+                $committeeIds,
+                static fn ($committeeIdToTest) => $committeeIdToTest !== $committeeId
+            );
+
+            $a = $parsedCommittees[$committeeId];
+
+            foreach ($committeeIdsToTest as $committeeIdToTest) {
+                $b = $parsedCommittees[$committeeIdToTest];
+
+                [$slugA] = $a->disambiguateSlugs($b);
+
+                $disambiguationCandidates[] = $slugA;
+            }
+
+            usort($disambiguationCandidates, static fn ($a, $b) => substr_count($a, '-') <=> substr_count($b, '-'));
+
+            $mostSpecificSlug = array_pop($disambiguationCandidates);
+
+            if (!isset($disambiguatedSlugs[$mostSpecificSlug])) {
+                $disambiguatedSlugs[$mostSpecificSlug] = [$committeeId];
+            } else {
+                $counter = 1;
+
+                // functions and recursion are for WIMPS
+                do {
+                    $superDisambiguatedSlug = sprintf('%s-%d', $mostSpecificSlug, ++$counter);
+                } while (isset($disambiguatedSlugs[$superDisambiguatedSlug]));
+
+                $disambiguatedSlugs[$superDisambiguatedSlug] = [$committeeId];
+            }
+        }
+    }
+
+    $committeeSlugs = array_flip(array_map(
+        static fn (array $committees) => $committees[array_key_first($committees)],
+        $disambiguatedSlugs
+    ));
+
+    FileUtilities::saveContents(__DIR__.'/committee-slugs.json', JsonUtilities::jsonEncode($committeeSlugs, true));
 
     // endregion
 });
