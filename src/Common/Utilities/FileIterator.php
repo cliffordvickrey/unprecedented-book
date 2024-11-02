@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Utilities;
 
-use Webmozart\Assert\Assert;
-
 /**
  * @extends \RecursiveIteratorIterator<\RecursiveDirectoryIterator>
  */
@@ -13,12 +11,8 @@ final class FileIterator extends \RecursiveIteratorIterator
 {
     public function __construct(string $path)
     {
-        $absoluteCanonicalPath = realpath($path);
-
-        Assert::string($absoluteCanonicalPath, \sprintf('%s is not a valid path.', $path));
-        Assert::directory($absoluteCanonicalPath);
-
-        parent::__construct(new \RecursiveDirectoryIterator($absoluteCanonicalPath));
+        $absoluteCanonicalDirname = FileUtilities::getAbsoluteCanonicalDirname($path);
+        parent::__construct(new \RecursiveDirectoryIterator($absoluteCanonicalDirname));
     }
 
     /**

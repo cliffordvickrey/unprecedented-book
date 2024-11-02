@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Entity\ValueObject;
 
 use CliffordVickrey\Book2024\Common\Entity\Entity;
+use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
@@ -22,6 +23,14 @@ class CommitteeProperties extends Entity implements \Countable
     public ?string $state = null;
     public ?string $district = null;
     public ?int $year = null;
+
+    public function setCandidate(Candidate $candidate): void
+    {
+        $this->candidateOffice = $candidate->CAND_OFFICE;
+        $this->state = $candidate->CAND_ST;
+        $this->district = $candidate->CAND_OFFICE_DISTRICT;
+        $this->year = $candidate->CAND_ELECTION_YR;
+    }
 
     /**
      * @return array{0: string, 1: string}

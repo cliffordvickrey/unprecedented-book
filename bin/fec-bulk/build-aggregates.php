@@ -13,6 +13,7 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\CommitteeSummary;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeProperties;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
+use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
@@ -27,7 +28,7 @@ chdir(__DIR__);
 
 call_user_func(function () {
     // region candidate aggregates
-    $reader = new CsvReader(__DIR__.'/../../data/csv/cn/cn.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/cn.csv');
 
     $headers = array_map(strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
 
@@ -60,13 +61,15 @@ call_user_func(function () {
     $reader->close();
 
     $candidateAggregateRepository = new CandidateAggregateRepository();
+    $candidateAggregateRepository->deleteAll();
+
     array_walk(
         $candidateAggregates,
         static fn (CandidateAggregate $aggregate) => $candidateAggregateRepository->saveAggregate($aggregate)
     );
 
     // region committees
-    $reader = new CsvReader(__DIR__.'/../../data/csv/cm/cm.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/cm.csv');
 
     /** @var array<string, CommitteeAggregate> $committeeAggregates */
     $committeeAggregates = [];
@@ -97,7 +100,7 @@ call_user_func(function () {
     // endregion
 
     // region committee totals
-    $reader = new CsvReader(__DIR__.'/../../data/csv/committee_summary/committee_summary.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/committee_summary.csv');
 
     $headers = array_map(strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
 
@@ -130,7 +133,7 @@ call_user_func(function () {
     // endregion
 
     // region CCL
-    $reader = new CsvReader(__DIR__.'/../../data/csv/ccl/ccl.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/ccl.csv');
 
     $headers = array_map(strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
 
@@ -159,10 +162,7 @@ call_user_func(function () {
     // endregion
 
     // region candidate leadership PAC linkages
-    $reader = new CsvReader(
-        __DIR__
-        .'/../../data/csv/candidate_leadership_pac_linkage/candidate_leadership_pac_linkage.csv'
-    );
+    $reader = new CsvReader(__DIR__.'/../../data/csv/candidate_leadership_pac_linkage.csv');
 
     $headers = array_map(strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
 
@@ -212,18 +212,22 @@ call_user_func(function () {
         ))));
 
         if (!empty($committeeAggregate->ccl)) {
-            $lastKey = array_key_last($committeeAggregate->ccl);
-            $lastCcl = $committeeAggregate->ccl[$lastKey];
+            // prefer principal campaign committees
+            $pccCcl = array_filter(
+                $committeeAggregate->ccl,
+                static fn (CandidateCommitteeLinkage $ccl) => CommitteeDesignation::P === $ccl->CMTE_DSGN
+            );
+
+            $ccl = $pccCcl ?: $committeeAggregate->ccl;
+
+            $lastCcl = $ccl[array_key_last($ccl)];
 
             try {
                 $candidateAggregate = $candidateAggregateRepository->getByCandidateId($lastCcl->CAND_ID);
                 $candidateInfo = $candidateAggregate->getInfo($lastCcl->file_id, $lastCcl->CAND_ID)
                     ?? throw new BookOutOfBoundsException();
                 $committeeProperties->candidateSlug = $candidateAggregate->slug;
-                $committeeProperties->candidateOffice = $candidateInfo->CAND_OFFICE;
-                $committeeProperties->state = $candidateInfo->CAND_ELECTION_YR;
-                $committeeProperties->district = $candidateInfo->CAND_OFFICE_DISTRICT;
-                $committeeProperties->year = $candidateInfo->file_id;
+                $committeeProperties->setCandidate($candidateInfo);
             } catch (BookOutOfBoundsException) {
                 printf('[CCL] Candidate with ID %s not found%s', $lastCcl->CAND_ID, \PHP_EOL);
             }
@@ -239,7 +243,7 @@ call_user_func(function () {
                     ?? throw new BookOutOfBoundsException();
                 $committeeProperties->candidateSlug = $candidateAggregate->slug;
                 $committeeProperties->isLeadership = true;
-                $committeeProperties->year = $candidateInfo->CAND_ELECTION_YR;
+                $committeeProperties->setCandidate($candidateInfo);
             } catch (BookOutOfBoundsException) {
                 printf('[leadership] Candidate with ID %s not found%s', $lastLeadership->CAND_ID, \PHP_EOL);
             }
@@ -287,7 +291,10 @@ call_user_func(function () {
                 $disambiguationCandidates[] = $slugA;
             }
 
-            usort($disambiguationCandidates, static fn ($a, $b) => substr_count($a, '-') <=> substr_count($b, '-'));
+            usort(
+                $disambiguationCandidates,
+                static fn ($a, $b) => (substr_count($a, '-') <=> substr_count($b, '-')) ?: (strlen($a) <=> strlen($b))
+            );
 
             $mostSpecificSlug = array_pop($disambiguationCandidates);
 

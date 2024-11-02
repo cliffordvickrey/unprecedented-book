@@ -29,12 +29,12 @@ class CandidateAggregate extends Aggregate
             return $info;
         }
 
-        if (null !== $candidateId) {
-            return $this->getInfo($year);
-        }
-
         if (null !== $year) {
             return $this->getInfo(candidateId: $candidateId);
+        }
+
+        if (null !== $candidateId) {
+            return $this->getInfo($year);
         }
 
         return null;

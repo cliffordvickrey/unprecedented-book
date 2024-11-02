@@ -83,9 +83,8 @@ final readonly class EntityProp
         }
 
         if (null === $type) {
-            $fullyQualifiedClassStr = self::getFullyQualifiedClassStr($typeName);
-            self::assertValidClassStr($fullyQualifiedClassStr);
-            $classStr = $fullyQualifiedClassStr;
+            $classStr = self::getFullyQualifiedClassStr($typeName);
+            self::assertValidClassStr($classStr);
             $type = EntityPropType::obj;
         }
 

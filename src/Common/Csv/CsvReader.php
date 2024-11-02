@@ -20,6 +20,9 @@ final class CsvReader extends AbstractResource implements \Iterator
     private int $counter = 0;
     private bool $valid = true;
 
+    /**
+     * @param non-empty-string $delimiter
+     */
     public function __construct(string $filename, private readonly string $delimiter = ',')
     {
         parent::__construct($filename);
@@ -83,7 +86,7 @@ final class CsvReader extends AbstractResource implements \Iterator
             return JsonUtilities::jsonDecode($ln);
         }
 
-        return str_replace('\\', '', explode('|', trim($ln)));
+        return str_replace('\\', '', explode($this->delimiter, trim($ln)));
     }
 
     public function valid(): bool

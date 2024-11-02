@@ -20,7 +20,7 @@ chdir(__DIR__);
 
 call_user_func(function () {
     // first, get the candidate slugs
-    $reader = new CsvReader(__DIR__.'/../../data/csv/cn/cn-slugs.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/cn-slugs.csv');
 
     $reader->next();
 
@@ -89,13 +89,11 @@ call_user_func(function () {
             $outHeaders = [...$outHeaders, 'name', 'slug', 'id'];
         }
 
-        $writer = new CsvWriter(__DIR__."/../../data/csv/$slug/$slug.csv");
+        $writer = new CsvWriter(__DIR__."/../../data/csv/$slug.csv");
         $writer->write($outHeaders);
 
         foreach ($files as $file) {
-            $absoluteCanonicalFile = realpath($file);
-
-            Assert::string($absoluteCanonicalFile, sprintf('Could not read file %s', $file));
+            $absoluteCanonicalFile = FileUtilities::getAbsoluteCanonicalFilename($file);
 
             echo "Reading $absoluteCanonicalFile...".\PHP_EOL;
 

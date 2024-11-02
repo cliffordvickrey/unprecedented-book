@@ -38,6 +38,12 @@ abstract class AggregateRepository implements AggregateRepositoryInterface
         return $aggregate;
     }
 
+    public function deleteAll(): void
+    {
+        // careful!
+        FileUtilities::unlink($this->getDirname(), recursive: true);
+    }
+
     public function saveAggregate(Aggregate $aggregate): void
     {
         $filename = $this->getFilename($aggregate->slug);
@@ -67,12 +73,16 @@ abstract class AggregateRepository implements AggregateRepositoryInterface
      */
     protected function getAllSlugs(): array
     {
-        $filename = $this->getFilename('_');
-        $dir = \dirname($filename, 2);
-
-        $filenames = FileIterator::getFilenames($dir, 'json');
+        $filenames = FileIterator::getFilenames($this->getDirname(), 'json');
 
         return array_map(static fn (string $filename) => basename($filename, '.json'), $filenames);
+    }
+
+    protected function getDirname(): string
+    {
+        $filename = $this->getFilename('_');
+
+        return \dirname($filename, 2);
     }
 
     abstract protected function getDirectory(): string;
