@@ -32,6 +32,35 @@ class CommitteeAggregate extends Aggregate
     /** @var list<string> */
     public array $candidateSlugs = [];
 
+    public function getMostActiveYear(): ?int
+    {
+        $totalsByYear = $this->committeeTotalsByYear;
+
+        if (0 === \count($totalsByYear)) {
+            return null;
+        }
+
+        if ($this->getAllTimeTotalIndividualReceipts() <= 0.0) {
+            return null;
+        }
+
+        uasort(
+            $totalsByYear,
+            static fn (CommitteeTotals $a, CommitteeTotals $b) => $a->getTotalIndividualReceipts()
+                <=> $b->getTotalIndividualReceipts()
+        );
+
+        return array_key_last($totalsByYear);
+    }
+
+    public function getAllTimeTotalIndividualReceipts(): float
+    {
+        return array_sum(array_map(
+            static fn (CommitteeTotals $totals) => $totals->getTotalIndividualReceipts(),
+            $this->committeeTotalsByYear
+        ));
+    }
+
     /**
      * @return list<string>
      */

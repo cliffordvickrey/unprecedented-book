@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Utilities;
 
 use CliffordVickrey\Book2024\Common\Entity\Entity;
+use Webmozart\Assert\Assert;
 
 class CastingUtilities
 {
@@ -146,5 +147,56 @@ class CastingUtilities
     public static function toEntity(mixed $value, string $classStr): Entity
     {
         return $classStr::create($value);
+    }
+
+    public static function toNumeric(mixed $val): float|int|null
+    {
+        if (!\is_scalar($val)) {
+            $val = self::toString($val);
+        }
+
+        if (!is_numeric($val)) {
+            return null;
+        }
+
+        if (\is_int($val)) {
+            return $val;
+        }
+
+        $val = (float) $val;
+
+        if (MathUtilities::isWholeNumber($val)) {
+            return (int) $val;
+        }
+
+        return $val;
+    }
+
+    /**
+     * @return numeric-string
+     */
+    public static function toNumericString(mixed $value): string
+    {
+        $numericValue = self::toNumeric($value);
+
+        if (null === $numericValue) {
+            return '0';
+        }
+
+        $strVal = (string) $numericValue;
+
+        if (\is_int($numericValue)) {
+            return $strVal;
+        }
+
+        if (!str_contains($strVal, 'E')) {
+            return $strVal;
+        }
+
+        $strVal = preg_replace('/^1\./', '0.', (string) ($numericValue + 1.0));
+        Assert::string($strVal);
+        Assert::numeric($strVal);
+
+        return $strVal;
     }
 }

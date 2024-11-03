@@ -55,17 +55,25 @@ abstract class AggregateRepository implements AggregateRepositoryInterface
 
     protected function getFilename(string $slug): string
     {
-        $slug = preg_replace('/[^a-zA-Z0-9_]/', '', $slug);
+        $slug = preg_replace('/[^a-zA-Z0-9_-]/', '', $slug);
 
         Assert::string($slug);
 
+        return __DIR__."/../../../data/aggregate/{$this->getDirectory()}/{$this->getSubDir($slug)}/$slug.json";
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    protected function getSubDir(string $slug): string
+    {
         $subDir = substr($slug, 0, 1);
 
         if ('' === $subDir) {
-            $subDir = '_';
+            return '_';
         }
 
-        return __DIR__."/../../../data/aggregate/{$this->getDirectory()}/$subDir/$slug.json";
+        return $subDir;
     }
 
     /**

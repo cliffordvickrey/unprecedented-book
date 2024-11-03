@@ -47,14 +47,16 @@ class FileUtilities
             return;
         }
 
+        $failureMsg = \sprintf('Could not delete file or folder: %s', $absoluteCanonicalPath);
+
         if (is_file($absoluteCanonicalPath)) {
-            unlink($absoluteCanonicalPath);
+            Assert::true(unlink($absoluteCanonicalPath), $failureMsg);
 
             return;
         }
 
         if (!$recursive) {
-            rmdir($path);
+            Assert::true(rmdir($absoluteCanonicalPath), $failureMsg);
 
             return;
         }
@@ -77,7 +79,7 @@ class FileUtilities
             static fn ($fileOrFolder) => self::unlink($fileOrFolder, true)
         );
 
-        rmdir($path);
+        Assert::true(rmdir($absoluteCanonicalPath), $failureMsg);
     }
 
     public static function getContents(string $filename): string

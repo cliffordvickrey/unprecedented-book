@@ -10,8 +10,23 @@ use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
+/**
+ * @phpstan-type Diff array{
+ *     office?: string,
+ *     designation?: string,
+ *     state?: string,
+ *     district?: string,
+ *     year?: string
+ * }
+ */
 class CommitteeProperties extends Entity implements \Countable
 {
+    public const string PART_OFFICE = 'office';
+    public const string PART_DESIGNATION = 'designation';
+    public const string PART_STATE = 'state';
+    public const string PART_DISTRICT = 'district';
+    public const string PART_YEAR = 'year';
+
     public string $id = '';
     public string $name = '';
     public ?CommitteeDesignation $committeeDesignation = null;
@@ -27,7 +42,7 @@ class CommitteeProperties extends Entity implements \Countable
     public function setCandidate(Candidate $candidate): void
     {
         $this->candidateOffice = $candidate->CAND_OFFICE;
-        $this->state = $candidate->CAND_ST;
+        $this->state = $candidate->CAND_OFFICE_ST;
         $this->district = $candidate->CAND_OFFICE_DISTRICT;
         $this->year = $candidate->CAND_ELECTION_YR;
     }
@@ -35,58 +50,72 @@ class CommitteeProperties extends Entity implements \Countable
     /**
      * @return array{0: string, 1: string}
      */
-    public function disambiguateSlugs(self $b): array
+    public function performQuickAndDirtyDisambiguation(self $b): array
+    {
+        $diffA = $this->diff($b);
+        $diffB = $b->diff($b);
+
+        $trailingA = '';
+        $trailingB = '';
+
+        unset($diffA[self::PART_OFFICE]);
+
+        foreach ($diffA as $k => $valueA) {
+            $valueB = $diffB[$k] ?? '';
+            $trailingA = "-$valueA";
+            $trailingB = "-$valueB";
+            break;
+        }
+
+        return [$this->getSlug().$trailingA, $b->getSlug().$trailingB];
+    }
+
+    /**
+     * @return Diff
+     */
+    public function diff(self $b): array
     {
         $a = $this;
+
+        $diff = [];
+
         $slugA = $a->getSlug();
         $slugB = $b->getSlug();
 
         if ($slugA !== $slugB) {
-            return [$slugA, $slugB];
+            $diff[self::PART_OFFICE] = $a->getOfficeSlug();
         }
 
         $designationA = $a->getCommitteeDesignationSlug();
         $designationB = $b->getCommitteeDesignationSlug();
 
         if ($designationA !== $designationB) {
-            return [
-                $slugA.'-'.$designationA,
-                $slugB.'-'.$designationB,
-            ];
+            $diff[self::PART_DESIGNATION] = $designationA;
         }
 
         if (
-            CandidateOffice::P !== $this->candidateOffice
+            CandidateOffice::P !== $a->candidateOffice
             && null !== $a->state
             && null !== $b->state
             && $a->state !== $b->state
         ) {
-            return [
-                $slugA.'-'.$a->state,
-                $slugB.'-'.$b->state,
-            ];
+            $diff[self::PART_STATE] = $a->state;
         }
 
         if (
-            CandidateOffice::H === $this->candidateOffice
+            CandidateOffice::H === $a->candidateOffice
             && null !== $a->district
             && null !== $b->district
             && $a->district !== $b->district
         ) {
-            return [
-                $slugA.'-'.$a->district,
-                $slugB.'-'.$b->district,
-            ];
+            $diff[self::PART_DISTRICT] = $a->district;
         }
 
         if (null !== $a->year && null !== $b->year && $a->year !== $b->year) {
-            return [
-                $slugA.\sprintf('-%d', $a->year),
-                $slugB.\sprintf('-%d', $b->year),
-            ];
+            $diff[self::PART_YEAR] = \sprintf('%d', $a->year);
         }
 
-        return [$slugA, $slugB];
+        return $diff;
     }
 
     public function getSlug(): string
@@ -99,9 +128,12 @@ class CommitteeProperties extends Entity implements \Countable
             return StringUtilities::slugify($this->name);
         }
 
-        $trailing = '-'.($this->candidateOffice?->getSlug() ?? 'unknown');
+        return $candidateSlug.'-'.$this->getOfficeSlug();
+    }
 
-        return $candidateSlug.$trailing;
+    public function getOfficeSlug(): string
+    {
+        return $this->candidateOffice?->getSlug() ?? 'unknown';
     }
 
     public function getCommitteeDesignationSlug(): string

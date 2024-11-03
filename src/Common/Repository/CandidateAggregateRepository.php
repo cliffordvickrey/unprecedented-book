@@ -7,6 +7,8 @@ namespace CliffordVickrey\Book2024\Common\Repository;
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CandidateAggregate;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
 use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
+use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
+use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
 
 /**
  * @extends AggregateRepository<CandidateAggregate>
@@ -46,9 +48,29 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
      */
     private function getSlugsByCandidateId(): array
     {
-        $this->slugsByCandidateId ??= $this->mapSlugsByCandidateId();
+        $this->slugsByCandidateId ??= $this->resolveSlugsByCandidateId();
 
         return $this->slugsByCandidateId;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function resolveSlugsByCandidateId(): array
+    {
+        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-candidate-id.csv';
+
+        if (is_file($filename)) {
+            $json = FileUtilities::getContents($filename);
+
+            return JsonUtilities::jsonDecode($json);
+        }
+
+        $map = $this->mapSlugsByCandidateId();
+
+        FileUtilities::saveContents($filename, JsonUtilities::jsonEncode($map, true));
+
+        return $map;
     }
 
     /**

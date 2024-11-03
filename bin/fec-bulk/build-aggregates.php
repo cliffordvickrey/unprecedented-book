@@ -16,9 +16,8 @@ use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
+use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
-use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
-use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
 use Webmozart\Assert\Assert;
 
 ini_set('memory_limit', '-1');
@@ -213,14 +212,23 @@ call_user_func(function () {
 
         if (!empty($committeeAggregate->ccl)) {
             // prefer principal campaign committees
-            $pccCcl = array_filter(
-                $committeeAggregate->ccl,
+            $CCLs = $committeeAggregate->ccl;
+
+            $CCLs = array_values(array_filter(
+                $CCLs,
                 static fn (CandidateCommitteeLinkage $ccl) => CommitteeDesignation::P === $ccl->CMTE_DSGN
-            );
+            )) ?: $CCLs;
 
-            $ccl = $pccCcl ?: $committeeAggregate->ccl;
+            $mostActiveYear = $committeeAggregate->getMostActiveYear();
 
-            $lastCcl = $ccl[array_key_last($ccl)];
+            if (null !== $mostActiveYear) {
+                $CCLs = array_values(array_filter(
+                    $CCLs,
+                    static fn (CandidateCommitteeLinkage $ccl) => $ccl->file_id === $mostActiveYear
+                )) ?: $CCLs;
+            }
+
+            $lastCcl = $CCLs[array_key_last($CCLs)];
 
             try {
                 $candidateAggregate = $candidateAggregateRepository->getByCandidateId($lastCcl->CAND_ID);
@@ -234,8 +242,17 @@ call_user_func(function () {
         }
 
         if (!empty($committeeAggregate->leadershipPacLinkage)) {
-            $lastKey = array_key_last($committeeAggregate->leadershipPacLinkage);
-            $lastLeadership = $committeeAggregate->leadershipPacLinkage[$lastKey];
+            $leaderships = $committeeAggregate->leadershipPacLinkage;
+            $mostActiveYear = $committeeAggregate->getMostActiveYear();
+
+            if (null !== $mostActiveYear) {
+                $leaderships = array_values(array_filter(
+                    $leaderships,
+                    static fn (LeadershipPacLinkage $leadership) => $leadership->file_id === $mostActiveYear
+                )) ?: $leaderships;
+            }
+
+            $lastLeadership = $leaderships[array_key_last($leaderships)];
 
             try {
                 $candidateAggregate = $candidateAggregateRepository->getByCandidateId($lastLeadership->CAND_ID);
@@ -272,9 +289,12 @@ call_user_func(function () {
     $disambiguatedSlugs = array_filter($slugCandidates, static fn ($group) => 1 === count($group));
     $slugsThatNeedDisambiguation = array_diff_key($slugCandidates, $disambiguatedSlugs);
 
+    /** @var array<string, list<string>> $similarSlugGroups */
+    $similarSlugGroups = [];
+
     foreach ($slugsThatNeedDisambiguation as $committeeIds) {
         foreach ($committeeIds as $committeeId) {
-            $disambiguationCandidates = [];
+            $disambiguationCandidatesA = [];
 
             $committeeIdsToTest = array_filter(
                 $committeeIds,
@@ -286,29 +306,92 @@ call_user_func(function () {
             foreach ($committeeIdsToTest as $committeeIdToTest) {
                 $b = $parsedCommittees[$committeeIdToTest];
 
-                [$slugA] = $a->disambiguateSlugs($b);
+                [$slugA] = $a->performQuickAndDirtyDisambiguation($b);
 
-                $disambiguationCandidates[] = $slugA;
+                $disambiguationCandidatesA[] = $slugA;
             }
 
             usort(
-                $disambiguationCandidates,
+                $disambiguationCandidatesA,
                 static fn ($a, $b) => (substr_count($a, '-') <=> substr_count($b, '-')) ?: (strlen($a) <=> strlen($b))
             );
 
-            $mostSpecificSlug = array_pop($disambiguationCandidates);
+            $disambiguatedSlug = array_pop($disambiguationCandidatesA);
 
-            if (!isset($disambiguatedSlugs[$mostSpecificSlug])) {
-                $disambiguatedSlugs[$mostSpecificSlug] = [$committeeId];
-            } else {
-                $counter = 1;
+            if (!isset($similarSlugGroups[$disambiguatedSlug])) {
+                $similarSlugGroups[$disambiguatedSlug] = [$committeeId];
+                continue;
+            }
 
-                // functions and recursion are for WIMPS
-                do {
-                    $superDisambiguatedSlug = sprintf('%s-%d', $mostSpecificSlug, ++$counter);
-                } while (isset($disambiguatedSlugs[$superDisambiguatedSlug]));
+            $similarSlugGroups[$disambiguatedSlug][] = $committeeId;
+        }
+    }
 
-                $disambiguatedSlugs[$superDisambiguatedSlug] = [$committeeId];
+    foreach ($similarSlugGroups as $slug => $committeeIds) {
+        $disambiguatedSlugsInGroup = [];
+
+        if (count($committeeIds) < 2 || !str_contains($slug, '-')) {
+            $disambiguatedSlugsInGroup[$slug] = $committeeIds;
+        } else {
+            foreach ($committeeIds as $committeeId) {
+                $a = $parsedCommittees[$committeeId];
+
+                $committeeIdsToTest = array_filter(
+                    $committeeIds,
+                    static fn ($committeeIdToTest) => $committeeIdToTest !== $committeeId
+                );
+
+                $diffMemo = [
+                    CommitteeProperties::PART_DESIGNATION => null,
+                    CommitteeProperties::PART_STATE => null,
+                    CommitteeProperties::PART_DISTRICT => null,
+                    CommitteeProperties::PART_YEAR => null,
+                ];
+
+                foreach ($committeeIdsToTest as $committeeIdToTest) {
+                    $b = $parsedCommittees[$committeeIdToTest];
+                    $diff = $a->diff($b);
+
+                    foreach ($diff as $diffKey => $diffValue) {
+                        if (!array_key_exists($diffKey, $diffMemo)) {
+                            continue;
+                        }
+
+                        $diffMemo[$diffKey] = $diffValue;
+                    }
+                }
+
+                $trailing = implode('-', array_values(array_filter($diffMemo, static fn ($val) => null !== $val)));
+
+                if ('' !== $trailing) {
+                    $trailing = "-$trailing";
+                }
+
+                $disambiguatedSlug = $slug.$trailing;
+
+                if (!isset($disambiguatedSlugsInGroup[$disambiguatedSlug])) {
+                    $disambiguatedSlugsInGroup[$disambiguatedSlug] = [$committeeId];
+                    continue;
+                }
+
+                $disambiguatedSlugsInGroup[$disambiguatedSlug][] = $committeeId;
+            }
+        }
+
+        foreach ($disambiguatedSlugsInGroup as $disambiguatedSlug => $disambiguatedCommitteeIds) {
+            foreach ($disambiguatedCommitteeIds as $disambiguatedCommitteeId) {
+                if (!isset($disambiguatedSlugs[$disambiguatedSlug])) {
+                    $disambiguatedSlugs[$disambiguatedSlug] = [$disambiguatedCommitteeId];
+                } else {
+                    $counter = 1;
+
+                    // functions and recursion are for WIMPS
+                    do {
+                        $trulyUniqueSlug = sprintf('%s-%d', $disambiguatedSlug, ++$counter);
+                    } while (isset($disambiguatedSlugs[$trulyUniqueSlug]));
+
+                    $disambiguatedSlugs[$trulyUniqueSlug] = [$disambiguatedCommitteeId];
+                }
             }
         }
     }
@@ -318,7 +401,25 @@ call_user_func(function () {
         $disambiguatedSlugs
     ));
 
-    FileUtilities::saveContents(__DIR__.'/committee-slugs.json', JsonUtilities::jsonEncode($committeeSlugs, true));
+    array_walk(
+        $committeeAggregates,
+        static fn (CommitteeAggregate $aggregate) => $aggregate->slug = $committeeSlugs[$aggregate->id]
+    );
+
+    // endregion
+
+    // region save committees
+
+    $committeeAggregateRepository = new CommitteeAggregateRepository();
+    $committeeAggregateRepository->deleteAll();
+
+    array_walk(
+        $committeeAggregates,
+        static fn (CommitteeAggregate $aggregate) => $committeeAggregateRepository->saveAggregate($aggregate)
+    );
+
+    // trigger mapping of committee IDs to slugs
+    $committeeAggregateRepository->hasCommitteeId('[null]');
 
     // endregion
 });
