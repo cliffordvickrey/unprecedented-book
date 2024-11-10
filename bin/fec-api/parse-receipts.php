@@ -258,6 +258,11 @@ call_user_func(function () {
                     $committeeId = $committeeAggregate?->id;
                 }
 
+                if (null !== $committeeId && !$committeeAggregateRepository->hasCommitteeId($committeeId)) {
+                    printf('[warning] Unknown committee ID, "%s"%s', $committeeId, \PHP_EOL);
+                    $committeeId = null;
+                }
+
                 $memosToCommitteeId[$unItemizedReceipt->memo_text] = $committeeId ?? false;
 
                 // irresolvable committee ID
@@ -280,7 +285,7 @@ call_user_func(function () {
                     if (1 === $smallItemizedReceipts[$hash]) {
                         unset($smallItemizedReceipts[$hash]);
                     } else {
-                        ++$smallItemizedReceipts[$hash];
+                        --$smallItemizedReceipts[$hash];
                     }
                 }
 
@@ -305,6 +310,7 @@ call_user_func(function () {
 
             if (!isset($smallItemizedReceipts[$hash])) {
                 // already merged
+                $smallItemizedReceiptReader->next();
                 continue;
             }
 
@@ -314,11 +320,15 @@ call_user_func(function () {
 
             if ($receiptCount > $smallItemizedReceipts[$hash]) {
                 // already merged, but other receipts that are similar to this need to be merged
+                $smallItemizedReceiptReader->next();
                 continue;
             }
 
             $receipt = Receipt::__set_state(array_combine($receiptHeaders, $row));
+
             $write($receipt);
+
+            $smallItemizedReceiptReader->next();
         }
 
         $smallItemizedReceiptReader->close();
