@@ -49,6 +49,12 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
         ?int $year = null,
         bool $fallback = false,
     ): ?CommitteeAggregate {
+        $committeeName = trim(strtoupper($committeeName));
+
+        if ('' === $committeeName) {
+            return null;
+        }
+
         $slugsByCommitteeId = $this->getSlugsByCommitteeNameAndYear();
 
         $slugsByYear = $slugsByCommitteeId[$committeeName] ?? null;
@@ -95,7 +101,7 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
      */
     private function resolveSlugsByCommitteeId(): array
     {
-        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-committee-id.csv';
+        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-committee-id.json';
 
         if (is_file($filename)) {
             $json = FileUtilities::getContents($filename);
@@ -115,7 +121,7 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
      */
     private function resolveSlugsByCommitteeNameAndYear(): array
     {
-        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-committee-name-and-year.csv';
+        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-committee-name-and-year.json';
 
         if (is_file($filename)) {
             $json = FileUtilities::getContents($filename);
@@ -141,11 +147,13 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
                 $aggregate = $this->getAggregate($slug);
 
                 foreach ($aggregate->infoByYear as $year => $committee) {
-                    $name = (string) $committee->CMTE_NAME;
+                    $name = trim((string) $committee->CMTE_NAME);
 
                     if ('' === $name) {
                         continue;
                     }
+
+                    $name = strtoupper($name);
 
                     if (!isset($carry[$name])) {
                         $carry[$name] = [];

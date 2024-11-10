@@ -56,6 +56,11 @@ class StringUtilities
         return trim($name);
     }
 
+    public static function md5(mixed $val): string
+    {
+        return md5(serialize($val));
+    }
+
     /**
      * @return ParsedName
      */

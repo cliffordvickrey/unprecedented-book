@@ -88,7 +88,17 @@ call_user_func(function () {
 
         $committeeAggregate = $committeeAggregates[$committee->CMTE_ID];
         $committeeAggregate->id = $committee->CMTE_ID;
-        $committeeAggregate->name = (string) $committee->CMTE_NAME;
+
+        $committeeName = trim(strtoupper((string) $committee->CMTE_NAME));
+
+        if ('' !== $committeeName) {
+            $committeeAggregate->name = $committeeName;
+        }
+
+        if ('' === $committeeAggregate->name) {
+            $committeeAggregate->name = 'none';
+        }
+
         $committeeAggregate->infoByYear[$committee->file_id] = $committee;
 
         $reader->next();
@@ -421,6 +431,7 @@ call_user_func(function () {
 
     // trigger mapping of committee IDs to slugs
     $committeeAggregateRepository->hasCommitteeId('[null]');
+    $committeeAggregateRepository->getByCommitteeName('[null]');
 
     // endregion
 });

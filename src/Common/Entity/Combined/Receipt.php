@@ -5,33 +5,49 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Entity\Combined;
 
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CommitteeAggregate;
-use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Entity\FecApi\ScheduleAReceipt;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\ItemizedIndividualReceipt;
+use CliffordVickrey\Book2024\Common\Entity\PropOrder;
 use CliffordVickrey\Book2024\Common\Enum\Fec\TransactionType;
 use CliffordVickrey\Book2024\Common\Enum\ReceiptSource;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
-class Receipt extends Entity
+class Receipt extends Donor
 {
-    public int $id = 0;
+    #[PropOrder(1)]
     public string $committee_slug = '';
+    #[PropOrder(2)]
     public ?string $candidate_slug = null;
+    #[PropOrder(3)]
     public string $fec_committee_id = '';
+    #[PropOrder(4)]
     public ?string $fec_candidate_id = null;
+    #[PropOrder(5)]
     public int $donor_id = 0;
+    #[PropOrder(6)]
     public TransactionType $transaction_type = TransactionType::_15E;
+    #[PropOrder(7)]
     public \DateTimeImmutable $transaction_date;
+    #[PropOrder(8)]
     public float $amount = 0.0;
-    public string $name = '';
-    public string $address = '';
-    public string $city = '';
-    public string $state = '';
-    public string $zip = '';
-    public string $occupation = '';
-    public string $employer = '';
+    #[PropOrder(9)]
     public bool $itemized = false;
+    #[PropOrder(10)]
     public ReceiptSource $source = ReceiptSource::AB;
+
+    public function toDonor(): Donor
+    {
+        $donor = new Donor();
+        $donor->name = $this->name;
+        $donor->address = $this->address;
+        $donor->city = $this->city;
+        $donor->state = $this->state;
+        $donor->zip = $this->zip;
+        $donor->occupation = $this->occupation;
+        $donor->employer = $this->employer;
+
+        return $donor;
+    }
 
     public static function fromScheduleAReceipt(ScheduleAReceipt $receipt): self
     {
@@ -67,6 +83,8 @@ class Receipt extends Entity
         }
 
         $self->amount = (float) $receipt->TRANSACTION_AMT;
+        $self->source = ReceiptSource::BK;
+
         $self->name = (string) $receipt->NAME;
         $self->city = (string) $receipt->CITY;
         $self->state = (string) $receipt->STATE;
@@ -74,7 +92,6 @@ class Receipt extends Entity
         $self->occupation = (string) $receipt->OCCUPATION;
         $self->employer = (string) $receipt->EMPLOYER;
         $self->itemized = true;
-        $self->source = ReceiptSource::BK;
 
         return $self;
     }
@@ -104,26 +121,14 @@ class Receipt extends Entity
         return $this->amount < 200.0;
     }
 
-    public function getZip5(): string
+    public function getReceiptHash(): string
     {
-        return StringUtilities::parseZip($this->zip)['zip5'];
-    }
-
-    public function getSurname(): string
-    {
-        $nameParts = explode(',', $this->name, 2);
-
-        return array_shift($nameParts);
-    }
-
-    public function getHash(): string
-    {
-        return md5(serialize([
+        return StringUtilities::md5([
             $this->fec_committee_id,
             $this->transaction_date->format('Y-m-d'),
             $this->amount,
             $this->getSurname(),
             $this->getZip5(),
-        ]));
+        ]);
     }
 }

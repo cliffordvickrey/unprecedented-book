@@ -58,7 +58,7 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
      */
     private function resolveSlugsByCandidateId(): array
     {
-        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-candidate-id.csv';
+        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-candidate-id.json';
 
         if (is_file($filename)) {
             $json = FileUtilities::getContents($filename);

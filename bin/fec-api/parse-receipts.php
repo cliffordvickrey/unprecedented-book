@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 use CliffordVickrey\Book2024\Common\Csv\CsvReader;
 use CliffordVickrey\Book2024\Common\Csv\CsvWriter;
+use CliffordVickrey\Book2024\Common\Entity\Combined\Donor;
 use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Entity\FecApi\ScheduleAReceipt;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\ItemizedIndividualReceipt;
@@ -17,7 +18,6 @@ use CliffordVickrey\Book2024\Common\Service\ReceiptWritingService;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\FileIterator;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
-use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
 use Webmozart\Assert\Assert;
 
 ini_set('memory_limit', '-1');
@@ -43,6 +43,11 @@ call_user_func(function () {
         Assert::string($committeeId);
         $memosToCommitteeId[$memo] = $committeeId;
     }
+
+    // donors
+    $donorsWriter = new CsvWriter(__DIR__.'/../../data/csv/_unique-donors.csv');
+    $donorsWriter->write(Donor::headers());
+    $donorsMemo = [];
 
     // collect all the API files we need to read from...
     $apiFiles = FileIterator::getFilenames(__DIR__.'/../../fec/api', 'csv');
@@ -75,7 +80,7 @@ call_user_func(function () {
     // blank slate
     $receiptWriter->deleteReceipts();
 
-    $cycles = [2016];
+    $cycles = [2012];
 
     foreach ($cycles as $cycle) {
         Assert::notEmpty(
@@ -88,38 +93,27 @@ call_user_func(function () {
         // memoize totals
         /** @var array<string, ImputedCommitteeTotals> $totalsMemo */
         $totalsMemo = [];
-        $write = function (Receipt $receipt) use (&$totalsMemo, $receiptWriter): void {
+        $write = function (Receipt $receipt) use (&$donorsMemo, $donorsWriter, $receiptWriter, &$totalsMemo): void {
             static $id = 0;
 
+            // write receipt
             $receipt->id = ++$id;
             $receiptWriter->write($receipt);
 
+            // parse totals
             $totals = $totalsMemo[$receipt->committee_slug] ?? new ImputedCommitteeTotals();
+            $totals->addReceipt($receipt);
+            $totalsMemo[$receipt->committee_slug] = $totals;
 
-            if (ReceiptSource::AB === $receipt->source) {
-                if ($receipt->itemized) {
-                    $totals->itemizedActBlue = MathUtilities::add($totals->itemizedActBlue, $receipt->amount);
-                } else {
-                    $totals->unItemizedActBlue = MathUtilities::add($totals->unItemizedActBlue, $receipt->amount);
-                }
-            } elseif (ReceiptSource::WR === $receipt->source) {
-                if ($receipt->itemized) {
-                    $totals->itemizedWinRed = MathUtilities::add($totals->itemizedWinRed, $receipt->amount);
-                } else {
-                    $totals->unItemizedWinRed = MathUtilities::add($totals->unItemizedWinRed, $receipt->amount);
-                }
-            } else {
-                if ($receipt->isSmall()) {
-                    $totals->itemizedBulkUnder200 = MathUtilities::add($totals->itemizedBulkUnder200, $receipt->amount);
-                } else {
-                    $totals->itemizedBulkEqualToOrGreaterTo200 = MathUtilities::add(
-                        $totals->itemizedBulkEqualToOrGreaterTo200,
-                        $receipt->amount
-                    );
-                }
+            // parse donors
+            $donorHash = $receipt->getDonorHash();
+
+            if (isset($donorsMemo[$donorHash])) {
+                return;
             }
 
-            $totalsMemo[$receipt->committee_slug] = $totals;
+            $donorsWriter->write($receipt->toDonor()->toArray(true));
+            $donorsMemo[$donorHash] = true;
         };
 
         // memoize small itemized receipts
@@ -182,7 +176,7 @@ call_user_func(function () {
 
             // defer writing if receipt is small (may need to be merged with ActBlue/WinRed data)
             if (TransactionType::_15E === $receipt->transaction_type && $receipt->isSmall()) {
-                $hash = $receipt->getHash();
+                $hash = $receipt->getReceiptHash();
 
                 if (!isset($smallItemizedReceipts[$hash])) {
                     $smallItemizedReceipts[$hash] = 1;
@@ -254,8 +248,6 @@ call_user_func(function () {
                     $memoText = preg_replace('/\(\)$/', '', trim($memoText));
                     Assert::string($memoText);
 
-                    $memoText = trim($memoText);
-
                     $year = $receipt->transaction_date->format('Y');
 
                     $committeeAggregate = $committeeAggregateRepository->getByCommitteeName(
@@ -275,8 +267,13 @@ call_user_func(function () {
                     continue;
                 }
 
+                // set committee info
+                $committeeAggregate = $committeeAggregate
+                    ?? $committeeAggregateRepository->getByCommitteeId($committeeId);
+                $receipt->setCommitteeAggregate($committeeAggregate);
+
                 // check if this receipt is indeed itemized
-                $hash = $receipt->getHash();
+                $hash = $receipt->getReceiptHash();
                 $receipt->itemized = isset($smallItemizedReceipts[$hash]);
 
                 if ($receipt->itemized) {

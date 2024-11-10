@@ -80,7 +80,12 @@ abstract class AggregateRepository implements AggregateRepositoryInterface
     {
         $filenames = FileIterator::getFilenames($this->getDirname(), 'json');
 
-        return array_map(static fn (string $filename) => basename($filename, '.json'), $filenames);
+        $slugs = array_map(static fn (string $filename) => basename($filename, '.json'), $filenames);
+
+        return array_values(array_filter(
+            $slugs,
+            static fn (string $slug) => !str_starts_with($slug, 'slugs-by-')
+        ));
     }
 
     protected function getDirname(): string
