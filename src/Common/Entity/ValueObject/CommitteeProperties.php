@@ -58,9 +58,11 @@ class CommitteeProperties extends Entity implements \Countable
         $trailingA = '';
         $trailingB = '';
 
-        unset($diffA[self::PART_OFFICE]);
-
         foreach ($diffA as $k => $valueA) {
+            if (self::PART_OFFICE === $k) {
+                break;
+            }
+
             $valueB = $diffB[$k] ?? '';
             $trailingA = "-$valueA";
             $trailingB = "-$valueB";
@@ -128,11 +130,22 @@ class CommitteeProperties extends Entity implements \Countable
             return StringUtilities::slugify($this->name);
         }
 
-        return $candidateSlug.'-'.$this->getOfficeSlug();
+        $officeSlug = $this->getOfficeSlug();
+        $trailing = '';
+
+        if ('' !== $officeSlug) {
+            $trailing = "-$officeSlug";
+        }
+
+        return $candidateSlug.$trailing;
     }
 
     public function getOfficeSlug(): string
     {
+        if ($this->isLeadership) {
+            return CommitteeDesignation::D->getSlug();
+        }
+
         return $this->candidateOffice?->getSlug() ?? 'unknown';
     }
 

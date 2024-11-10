@@ -113,4 +113,15 @@ enum TransactionType: string
     case _42Y = '42Y'; // Recount Account refund to an individual, partnership or limited liability company
     case _42T = '42T'; // Recount Account refund to Native American Tribe
     case _42Z = '42Z'; // Recount Account refund to registered filer
+
+    public function isContribution(): bool
+    {
+        return TransactionType::_10 === $this   // super PAC
+            || TransactionType::_11 === $this   // Native American tribe
+            || TransactionType::_15 === $this   // individual
+            || TransactionType::_15C === $this  // from candidate
+            || TransactionType::_15E === $this  // earmarked
+            || TransactionType::_24I === $this  // intermediary out
+            || TransactionType::_24T === $this; // treasury out
+    }
 }

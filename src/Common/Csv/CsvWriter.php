@@ -8,9 +8,14 @@ use Webmozart\Assert\Assert;
 
 final class CsvWriter extends AbstractResource
 {
-    public function __construct(string $filename)
+    public function __construct(string $filename, string $mode = 'w')
     {
-        parent::__construct($filename, 'w');
+        parent::__construct($filename, $mode);
+    }
+
+    public function toReader(): CsvReader
+    {
+        return new CsvReader($this->filename);
     }
 
     private static function makeScalar(mixed $val): bool|int|float|string|null

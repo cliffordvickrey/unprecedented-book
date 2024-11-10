@@ -11,6 +11,7 @@ class CommitteeTotals extends Entity
 {
     public float $itemizedReceipts = 0.0;
     public float $unItemizedReceipts = 0.0;
+    public float $receipts = 0.0;
 
     public function getTotalIndividualReceipts(): float
     {

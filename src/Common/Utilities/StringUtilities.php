@@ -8,6 +8,7 @@ use Webmozart\Assert\Assert;
 
 /**
  * @phpstan-type ParsedName array{first: ?string, last: string, nickname: ?string, prefix: ?string, suffix: ?string}
+ * @phpstan-type ZipCode array{zip5: string, zip4: non-empty-string|null}
  */
 class StringUtilities
 {
@@ -132,5 +133,19 @@ class StringUtilities
 
         // 4. Convert to lowercase
         return strtolower($slug);
+    }
+
+    /**
+     * @return ZipCode
+     */
+    public static function parseZip(string $zipCode): array
+    {
+        $zipCode = preg_replace('/[^0-9]/', '', $zipCode);
+        Assert::string($zipCode);
+
+        return [
+            'zip5' => substr($zipCode, 0, 5),
+            'zip4' => (\strlen($zipCode) > 5 ? substr($zipCode, 5) : null) ?: null,
+        ];
     }
 }

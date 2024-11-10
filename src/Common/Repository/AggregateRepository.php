@@ -76,10 +76,7 @@ abstract class AggregateRepository implements AggregateRepositoryInterface
         return $subDir;
     }
 
-    /**
-     * @return list<string>
-     */
-    protected function getAllSlugs(): array
+    public function getAllSlugs(): array
     {
         $filenames = FileIterator::getFilenames($this->getDirname(), 'json');
 

@@ -9,6 +9,7 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\CandidateCommitteeLinkage;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Committee;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
+use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
 
 final class ClassAliases
 {
@@ -18,6 +19,7 @@ final class ClassAliases
         'CandidateCommitteeLinkage' => CandidateCommitteeLinkage::class,
         'Committee' => Committee::class,
         'CommitteeTotals' => CommitteeTotals::class,
+        'ImputedCommitteeTotals' => ImputedCommitteeTotals::class,
         'LeadershipPacLinkage' => LeadershipPacLinkage::class,
     ];
 }

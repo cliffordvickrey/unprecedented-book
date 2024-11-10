@@ -113,6 +113,7 @@ call_user_func(function () {
         $totals = new CommitteeTotals();
         $totals->itemizedReceipts = (float) $committeeSummary->INDV_ITEM_CONTB;
         $totals->unItemizedReceipts = (float) $committeeSummary->INDV_UNITEM_CONTB;
+        $totals->receipts = (float) $committeeSummary->TTL_RECEIPTS;
 
         $committeeAggregate = $committeeAggregates[$committeeSummary->CMTE_ID] ?? null;
 
@@ -387,7 +388,7 @@ call_user_func(function () {
 
                     // functions and recursion are for WIMPS
                     do {
-                        $trulyUniqueSlug = sprintf('%s-%d', $disambiguatedSlug, ++$counter);
+                        $trulyUniqueSlug = sprintf('%s__%d', $disambiguatedSlug, ++$counter);
                     } while (isset($disambiguatedSlugs[$trulyUniqueSlug]));
 
                     $disambiguatedSlugs[$trulyUniqueSlug] = [$disambiguatedCommitteeId];

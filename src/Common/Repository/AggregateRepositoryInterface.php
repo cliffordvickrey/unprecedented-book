@@ -17,6 +17,11 @@ interface AggregateRepositoryInterface
     public function getAggregate(string $slug): Aggregate;
 
     /**
+     * @return list<string>
+     */
+    public function getAllSlugs(): array;
+
+    /**
      * @phpstan-param TAggregate $aggregate
      */
     public function saveAggregate(Aggregate $aggregate): void;

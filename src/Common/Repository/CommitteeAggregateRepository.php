@@ -16,6 +16,8 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
 {
     /** @var array<string, string>|null */
     private ?array $slugsByCommitteeId = null;
+    /** @var array<string, array<int, list<string>>>|null */
+    private ?array $slugsByCommitteeNameAndYear = null;
 
     public function hasCommitteeId(string $committeeId): bool
     {
@@ -42,6 +44,32 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
         return $this->getAggregate($slug);
     }
 
+    public function getByCommitteeName(
+        string $committeeName,
+        ?int $year = null,
+        bool $fallback = false,
+    ): ?CommitteeAggregate {
+        $slugsByCommitteeId = $this->getSlugsByCommitteeNameAndYear();
+
+        $slugsByYear = $slugsByCommitteeId[$committeeName] ?? null;
+
+        if (empty($slugsByYear)) {
+            return null;
+        }
+
+        $key = $year ?? array_key_last($slugsByYear);
+
+        $slugs = $slugsByYear[$key] ?? null;
+
+        if (empty($slugs) && $year && $fallback) {
+            return $this->getByCommitteeName($committeeName);
+        } elseif (empty($slugs)) {
+            return null;
+        }
+
+        return $this->getAggregate($slugs[array_key_first($slugs)]);
+    }
+
     /**
      * @return array<string, string>
      */
@@ -50,6 +78,16 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
         $this->slugsByCommitteeId ??= $this->resolveSlugsByCommitteeId();
 
         return $this->slugsByCommitteeId;
+    }
+
+    /**
+     * @return array<string, array<int, list<string>>>
+     */
+    private function getSlugsByCommitteeNameAndYear(): array
+    {
+        $this->slugsByCommitteeNameAndYear ??= $this->resolveSlugsByCommitteeNameAndYear();
+
+        return $this->slugsByCommitteeNameAndYear;
     }
 
     /**
@@ -70,6 +108,60 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
         FileUtilities::saveContents($filename, JsonUtilities::jsonEncode($map, true));
 
         return $map;
+    }
+
+    /**
+     * @return array<string, array<int, list<string>>>
+     */
+    private function resolveSlugsByCommitteeNameAndYear(): array
+    {
+        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-committee-name-and-year.csv';
+
+        if (is_file($filename)) {
+            $json = FileUtilities::getContents($filename);
+
+            return JsonUtilities::jsonDecode($json);
+        }
+
+        $map = $this->mapSlugsByCommitteeNameAndYear();
+
+        FileUtilities::saveContents($filename, JsonUtilities::jsonEncode($map, true));
+
+        return $map;
+    }
+
+    /**
+     * @return array<string, array<int, list<string>>>
+     */
+    private function mapSlugsByCommitteeNameAndYear(): array
+    {
+        return array_reduce(
+            $this->getAllSlugs(),
+            function (array $carry, string $slug): array {
+                $aggregate = $this->getAggregate($slug);
+
+                foreach ($aggregate->infoByYear as $year => $committee) {
+                    $name = (string) $committee->CMTE_NAME;
+
+                    if ('' === $name) {
+                        continue;
+                    }
+
+                    if (!isset($carry[$name])) {
+                        $carry[$name] = [];
+                    }
+
+                    if (!isset($carry[$name][$year])) {
+                        $carry[$name][$year] = [];
+                    }
+
+                    $carry[$name][$year][] = $slug;
+                }
+
+                return $carry;
+            },
+            []
+        );
     }
 
     /**
