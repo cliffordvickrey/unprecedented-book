@@ -6,6 +6,7 @@ namespace CliffordVickrey\Book2024\Common\Service;
 
 use CliffordVickrey\Book2024\Common\Csv\ChunkedCsvWriter;
 use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
+use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use Webmozart\Assert\Assert;
 
 class ReceiptWritingService implements ReceiptWritingServiceInterface
@@ -17,6 +18,13 @@ class ReceiptWritingService implements ReceiptWritingServiceInterface
     public function __construct(?ChunkedCsvWriter $writer = null)
     {
         $this->writer = $writer ?? new ChunkedCsvWriter();
+    }
+
+    public function deleteReceipts(bool $withDonorIds = false): void
+    {
+        $dir = $withDonorIds ? 'receipts' : '_receipts';
+
+        FileUtilities::unlink(__DIR__."/../../../data/$dir", recursive: true);
     }
 
     public function flush(): void
@@ -48,12 +56,12 @@ class ReceiptWritingService implements ReceiptWritingServiceInterface
 
     private static function getFilenameKey(Receipt $receipt): string
     {
-        return \sprintf('%d|%s', $receipt->donor_id ? 1 : 0, $receipt->fec_committee_id);
+        return \sprintf('%d|%s', $receipt->donor_id ? 1 : 0, $receipt->committee_slug);
     }
 
     private static function resolveFilename(Receipt $receipt): string
     {
-        $slug = preg_replace('/[^a-zA-Z0-9_-]/', '', $receipt->fec_committee_id);
+        $slug = preg_replace('/[^a-zA-Z0-9_-]/', '', $receipt->committee_slug);
         Assert::stringNotEmpty($slug);
 
         $leading = 'pac';

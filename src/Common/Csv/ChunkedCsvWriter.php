@@ -40,6 +40,8 @@ class ChunkedCsvWriter
 
     public function flush(): void
     {
+        printf('Writing %d CSVs (%d rows)%s', \count($this->records), $this->counter, \PHP_EOL);
+
         foreach ($this->records as $filename => $rows) {
             $mode = isset($this->openedFiles[$filename]) ? 'a' : 'w';
 

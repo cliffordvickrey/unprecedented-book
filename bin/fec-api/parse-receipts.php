@@ -9,6 +9,7 @@ use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Entity\FecApi\ScheduleAReceipt;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\ItemizedIndividualReceipt;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
+use CliffordVickrey\Book2024\Common\Enum\Fec\TransactionType;
 use CliffordVickrey\Book2024\Common\Enum\ReceiptSource;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
@@ -70,6 +71,9 @@ call_user_func(function () {
 
         return $carry;
     }, []);
+
+    // blank slate
+    $receiptWriter->deleteReceipts();
 
     $cycles = [2016];
 
@@ -142,7 +146,7 @@ call_user_func(function () {
         $itemizedHeaders = ItemizedIndividualReceipt::headers();
         array_shift($itemizedHeaders);
 
-        $smallItemizedReceiptWriter->write(['hash', 'ct', ...$itemizedHeaders]);
+        $smallItemizedReceiptWriter->write(['hash', 'ct', ...Receipt::headers()]);
 
         foreach ($reader as $row) {
             $itemizedReceipt = ItemizedIndividualReceipt::__set_state(array_combine($itemizedHeaders, $row));
@@ -177,7 +181,7 @@ call_user_func(function () {
             $receipt->setCommitteeAggregate($committeeAggregate);
 
             // defer writing if receipt is small (may need to be merged with ActBlue/WinRed data)
-            if ($receipt->isSmall()) {
+            if (TransactionType::_15E === $receipt->transaction_type && $receipt->isSmall()) {
                 $hash = $receipt->getHash();
 
                 if (!isset($smallItemizedReceipts[$hash])) {

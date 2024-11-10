@@ -118,12 +118,12 @@ class Receipt extends Entity
 
     public function getHash(): string
     {
-        return serialize([
+        return md5(serialize([
             $this->fec_committee_id,
             $this->transaction_date->format('Y-m-d'),
             $this->amount,
             $this->getSurname(),
             $this->getZip5(),
-        ]);
+        ]));
     }
 }
