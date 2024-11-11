@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Entity\FecBulk;
 
 use CliffordVickrey\Book2024\Common\Entity\PropOrder;
+use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateStatus;
 use CliffordVickrey\Book2024\Common\Enum\Fec\IncumbentChallengerStatus;
 use CliffordVickrey\Book2024\Common\Enum\Fec\PartyAffiliation;
+use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 
 final class Candidate extends FecBulkEntity
 {
@@ -42,4 +44,35 @@ final class Candidate extends FecBulkEntity
     public ?string $CAND_ST = null; // Mailing address - state
     #[PropOrder(15)]
     public ?string $CAND_ZIP = null; // Mailing address - ZIP code
+
+    public function getJurisdiction(): ?Jurisdiction
+    {
+        if (null === $this->CAND_OFFICE) {
+            return null;
+        }
+
+        if (CandidateOffice::P === $this->CAND_OFFICE) {
+            return new Jurisdiction('US');
+        }
+
+        if (null === $this->CAND_OFFICE_ST) {
+            return null;
+        }
+
+        $state = $this->CAND_OFFICE_ST;
+
+        if (CandidateOffice::S === $this->CAND_OFFICE) {
+            return new Jurisdiction($state);
+        }
+
+        $district = $this->CAND_OFFICE_DISTRICT;
+
+        if (!is_numeric($district)) {
+            $district = 0;
+        } else {
+            $district = CastingUtilities::toInt($district);
+        }
+
+        return new Jurisdiction($state, $district);
+    }
 }

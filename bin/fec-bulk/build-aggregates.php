@@ -13,6 +13,7 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\CommitteeSummary;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeProperties;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
+use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
@@ -432,6 +433,7 @@ call_user_func(function () {
     // trigger mapping of committee IDs to slugs
     $committeeAggregateRepository->hasCommitteeId('[null]');
     $committeeAggregateRepository->getByCommitteeName('[null]');
+    $candidateAggregateRepository->getByYearAndJurisdiction(2012, new Jurisdiction('US'));
 
     // endregion
 });

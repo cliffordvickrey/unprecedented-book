@@ -18,8 +18,12 @@ final class CsvWriter extends AbstractResource
         return new CsvReader($this->filename);
     }
 
-    private static function makeScalar(mixed $val): bool|int|float|string|null
+    private static function makeScalar(mixed $val): int|float|string|null
     {
+        if (\is_bool($val)) {
+            return $val ? 1 : 0;
+        }
+
         if (null === $val || \is_scalar($val)) {
             return $val;
         }

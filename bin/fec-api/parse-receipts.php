@@ -31,19 +31,6 @@ call_user_func(function () {
     $committeeAggregateRepository = new CommitteeAggregateRepository();
     $receiptWriter = new ReceiptWritingService();
 
-    // memo map
-    /** @var array<string, string|false> $memosToCommitteeId */
-    $memosToCommitteeId = [];
-
-    $memoReader = new CsvReader(__DIR__.'/../../data/etc/memos.csv');
-
-    foreach ($memoReader as $memoRow) {
-        [$memo, $committeeId] = $memoRow;
-        Assert::string($memo);
-        Assert::string($committeeId);
-        $memosToCommitteeId[$memo] = $committeeId;
-    }
-
     // donors
     $donorsWriter = new CsvWriter(__DIR__.'/../../data/csv/_unique-donors.csv');
     $donorsWriter->write(Donor::headers());
@@ -195,6 +182,41 @@ call_user_func(function () {
         $reader->close();
         $smallItemizedReceiptWriter->close();
 
+        // memo map
+        /** @var array<string, string|false> $memosToCommitteeId */
+        $memosToCommitteeId = [];
+
+        $memoFilename = sprintf('%s/../../data/etc/memos%d.csv', __DIR__, $cycle);
+
+        if (is_file($memoFilename)) {
+            $memoReader = new CsvReader($memoFilename);
+            $memoReader->next();
+
+            while ($memoReader->valid()) {
+                $row = $memoReader->current();
+
+                if (count($row) < 2) {
+                    $memoReader->next();
+                    continue;
+                }
+
+                [$memo, $committeeId] = $row;
+
+                if (
+                    !is_string($memo)
+                    || '' === $memo
+                    || !is_string($committeeId)
+                    || '' === $committeeId
+                ) {
+                    $memoReader->next();
+                    continue;
+                }
+
+                $memosToCommitteeId[$memo] = $committeeId;
+                $memoReader->next();
+            }
+        }
+
         // now, read the small donations we downloaded from the API
         foreach ($apiFilesByCycle[$cycle] as $inFile) {
             printf('Reading un-itemized receipts (%s)%s', $inFile, \PHP_EOL);
@@ -215,8 +237,10 @@ call_user_func(function () {
                 $receipt = Receipt::fromScheduleAReceipt($unItemizedReceipt);
                 $receipt->source = $source;
 
+                $memo = trim(strtoupper($unItemizedReceipt->memo_text));
+
                 // try, heroically, to resolve the committee ID with very limited/unorganized information
-                $committeeId = $memosToCommitteeId[$unItemizedReceipt->memo_text] ?? null;
+                $committeeId = $memosToCommitteeId[$memo] ?? null;
 
                 // irresolvable committee ID
                 if (false === $committeeId) {
@@ -237,13 +261,17 @@ call_user_func(function () {
                 }
 
                 // was a committee ID provided in the memo?
-                if (null === $committeeId && preg_match('/\((C\d{8})\)/i', $unItemizedReceipt->memo_text, $matches)) {
+                if (null === $committeeId && preg_match('/\((C\d{8})\)/i', $memo, $matches)) {
                     $committeeId = $matches[1];
+
+                    if (!$committeeAggregateRepository->hasCommitteeId($committeeId)) {
+                        $committeeId = null;
+                    }
                 }
 
                 // make a heroic attempt to resolve the irregular memo into an FEC committee ID
                 if (null === $committeeId) {
-                    $memoText = preg_replace('/^EARMARKED\sFOR/i', '', $unItemizedReceipt->memo_text);
+                    $memoText = preg_replace('/^EARMARKED\sFOR/i', '', $memo);
                     Assert::string($memoText);
                     $memoText = preg_replace('/\(\)$/', '', trim($memoText));
                     Assert::string($memoText);
@@ -263,12 +291,12 @@ call_user_func(function () {
                     $committeeId = null;
                 }
 
-                $memosToCommitteeId[$unItemizedReceipt->memo_text] = $committeeId ?? false;
+                $memosToCommitteeId[$memo] = $committeeId ?? false;
 
                 // irresolvable committee ID
                 if (null === $committeeId) {
-                    printf('[warning] Unprocessable receipt memo, "%s"%s', $unItemizedReceipt->memo_text, \PHP_EOL);
-                    $irregularMemosWriter->write([$unItemizedReceipt->memo_text]);
+                    printf('[warning] Unprocessable receipt memo, "%s"%s', $memo, \PHP_EOL);
+                    $irregularMemosWriter->write([$memo]);
                     continue;
                 }
 
@@ -282,6 +310,8 @@ call_user_func(function () {
                 $receipt->itemized = isset($smallItemizedReceipts[$hash]);
 
                 if ($receipt->itemized) {
+                    printf('Merging %s (%s)%s', $receipt->getReceiptHash(), $receipt->committee_slug, \PHP_EOL);
+
                     if (1 === $smallItemizedReceipts[$hash]) {
                         unset($smallItemizedReceipts[$hash]);
                     } else {

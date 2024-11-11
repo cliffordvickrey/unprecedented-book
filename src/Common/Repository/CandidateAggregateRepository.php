@@ -6,6 +6,7 @@ namespace CliffordVickrey\Book2024\Common\Repository;
 
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CandidateAggregate;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
+use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
 use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
@@ -17,6 +18,8 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
 {
     /** @var array<string, string>|null */
     private ?array $slugsByCandidateId = null;
+    /** @var array<int, array<string, list<string>>>|null */
+    private ?array $slugsByYearAndJurisdiction = null;
 
     public function hasCandidateId(string $candidateId): bool
     {
@@ -51,6 +54,16 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
         $this->slugsByCandidateId ??= $this->resolveSlugsByCandidateId();
 
         return $this->slugsByCandidateId;
+    }
+
+    /**
+     * @return array<int, array<string, list<string>>>
+     */
+    private function getSlugsByYearAndJurisdiction(): array
+    {
+        $this->slugsByYearAndJurisdiction ??= $this->resolveSlugsByYearAndJurisdiction();
+
+        return $this->slugsByYearAndJurisdiction;
     }
 
     /**
@@ -101,5 +114,86 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
     protected function getClassname(): string
     {
         return CandidateAggregate::class;
+    }
+
+    /**
+     * @return array<int, array<string, list<string>>>
+     */
+    private function resolveSlugsByYearAndJurisdiction(): array
+    {
+        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-year-and-jurisdiction.json';
+
+        if (is_file($filename)) {
+            $json = FileUtilities::getContents($filename);
+
+            return JsonUtilities::jsonDecode($json);
+        }
+
+        $map = $this->mapSlugsByYearAndJurisdiction();
+
+        FileUtilities::saveContents($filename, JsonUtilities::jsonEncode($map, true));
+
+        return $map;
+    }
+
+    /**
+     * @return array<int, array<string, list<string>>>
+     */
+    private function mapSlugsByYearAndJurisdiction(): array
+    {
+        $slugs = $this->getAllSlugs();
+
+        // (extremely nerds voice) my Lisp-like higher-order functions
+        $slugsByYearAndJurisdiction = array_reduce($slugs, function (array $carry, string $slug): array {
+            $aggregrate = $this->getAggregate($slug);
+
+            foreach ($aggregrate->info as $candidate) {
+                $jurisdiction = (string) $candidate->getJurisdiction();
+
+                if ('' === $jurisdiction) {
+                    continue;
+                }
+
+                $year = $candidate->CAND_ELECTION_YR;
+
+                if (null === $year) {
+                    continue;
+                }
+
+                if (!isset($carry[$year])) {
+                    $carry[$year] = [];
+                }
+
+                if (!isset($carry[$year][$jurisdiction])) {
+                    $carry[$year][$jurisdiction] = [];
+                }
+
+                if (\in_array($slug, $carry[$year][$jurisdiction])) {
+                    continue;
+                }
+
+                $carry[$year][$jurisdiction][] = $slug;
+            }
+
+            return $carry;
+        }, []);
+
+        ksort($slugsByYearAndJurisdiction);
+
+        array_walk(
+            $slugsByYearAndJurisdiction,
+            static fn (array &$slugsByJurisdiction) => ksort($slugsByJurisdiction)
+        );
+
+        return $slugsByYearAndJurisdiction;
+    }
+
+    public function getByYearAndJurisdiction(int $year, Jurisdiction $jurisdiction): array
+    {
+        $slugs = $this->getSlugsByYearAndJurisdiction();
+
+        $matchedSlugs = $slugs[$year][(string) $jurisdiction] ?? [];
+
+        return array_map(fn (string $slug) => $this->getAggregate($slug), $matchedSlugs);
     }
 }

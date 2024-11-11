@@ -101,4 +101,14 @@ enum PartyAffiliation: string
     case VET = 'VET'; // Veterans Party
     case WTP = 'WTP'; // We the People
     case W = 'W'; // Write-In
+
+    public function isRepublican(): bool
+    {
+        return self::REP === $this || self::CRV === $this;
+    }
+
+    public function isDemocratic(): bool
+    {
+        return self::DEM === $this || self::DNL === $this || self::DFL === $this;
+    }
 }
