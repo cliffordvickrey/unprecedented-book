@@ -274,7 +274,7 @@ call_user_func(function () {
                 if (null === $committeeId) {
                     $memoText = preg_replace('/^EARMARKED\sFOR/i', '', $memo);
                     Assert::string($memoText);
-                    $memoText = preg_replace('/\(\)$/', '', trim($memoText));
+                    $memoText = preg_replace('/\(.*\)$/', '', trim($memoText));
                     Assert::string($memoText);
 
                     $year = $receipt->transaction_date->format('Y');
