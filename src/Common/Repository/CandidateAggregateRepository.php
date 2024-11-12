@@ -196,4 +196,18 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
 
         return array_map(fn (string $slug) => $this->getAggregate($slug), $matchedSlugs);
     }
+
+    public function getNominee(int $year, Jurisdiction $jurisdiction, bool $isDemocratic = true): ?CandidateAggregate
+    {
+        $aggregates = array_filter(
+            $this->getByYearAndJurisdiction($year, $jurisdiction),
+            static fn (CandidateAggregate $aggregate) => $aggregate->isNominee($year, $jurisdiction, $isDemocratic)
+        );
+
+        if (0 === \count($aggregates)) {
+            return null;
+        }
+
+        return $aggregates[array_key_first($aggregates)];
+    }
 }

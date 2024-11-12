@@ -12,6 +12,8 @@ use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
  */
 interface CandidateAggregateRepositoryInterface extends AggregateRepositoryInterface
 {
+    public function getNominee(int $year, Jurisdiction $jurisdiction, bool $isDemocratic = true): ?CandidateAggregate;
+
     /**
      * @return list<CandidateAggregate>
      */

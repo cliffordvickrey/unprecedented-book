@@ -6,6 +6,7 @@ namespace CliffordVickrey\Book2024\Common\Entity\Aggregate;
 
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
 use CliffordVickrey\Book2024\Common\Entity\PropOrder;
+use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
 use Webmozart\Assert\Assert;
 
 /**
@@ -18,8 +19,30 @@ class CandidateAggregate extends Aggregate
     /** @var list<Candidate> */
     #[PropOrder(2)]
     public array $info = [];
+    /** @var array<string, bool> */
+    #[PropOrder(3)]
+    public array $democraticNominations = [];
+    /** @var array<string, bool> */
+    #[PropOrder(4)]
+    public array $republicanNominations = [];
     /** @var IndexedCandidateInfo|null */
     private ?array $indexedInfo = null;
+
+    public function getInfoByYearAndJurisdiction(int $year, Jurisdiction $jurisdiction): ?Candidate
+    {
+        $candidates = $this->getIndexedCandidateInfo()[$year] ?? [];
+
+        $candidatesInJurisdiction = array_filter(
+            $candidates,
+            static fn (Candidate $candidate) => (string) $jurisdiction === (string) $candidate->getJurisdiction()
+        );
+
+        if (0 === \count($candidatesInJurisdiction)) {
+            return null;
+        }
+
+        return $candidatesInJurisdiction[array_key_first($candidatesInJurisdiction)];
+    }
 
     public function getInfo(?int $year = null, ?string $candidateId = null, bool $fallback = true): ?Candidate
     {
@@ -98,5 +121,17 @@ class CandidateAggregate extends Aggregate
 
             return $carry;
         }, []);
+    }
+
+    public function isNominee(int $year, Jurisdiction $jurisdiction, ?bool $democrat = null): bool
+    {
+        $key = \sprintf('%d%s', $year, $jurisdiction);
+        $isNominee = $this->democraticNominations[$key] ?? false;
+
+        if (!$isNominee || false === $democrat) {
+            $isNominee = $this->republicanNominations[$key] ?? false;
+        }
+
+        return $isNominee;
     }
 }

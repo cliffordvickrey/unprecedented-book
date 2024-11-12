@@ -27,6 +27,41 @@ require_once __DIR__.'/../../vendor/autoload.php';
 chdir(__DIR__);
 
 call_user_func(function () {
+    // region nominees
+    $reader = new CsvReader(__DIR__.'/../../data/csv/nominees.csv');
+
+    $reader->next();
+
+    $democraticNominees = [];
+    $republicanNominees = [];
+
+    while ($reader->valid()) {
+        [$year, $jurisdiction, $democraticSlug, $republicanSlug] = $reader->current();
+
+        Assert::numeric($year);
+        Assert::string($jurisdiction);
+
+        $key = sprintf('%d%s', $year, $jurisdiction);
+
+        if (is_string($democraticSlug) && '' !== $democraticSlug) {
+            if (!isset($democraticNominees[$democraticSlug])) {
+                $democraticNominees[$democraticSlug] = [];
+            }
+
+            $democraticNominees[$democraticSlug][$key] = true;
+        }
+
+        if (is_string($republicanSlug) && '' !== $republicanSlug) {
+            if (!isset($republicanNominees[$republicanSlug])) {
+                $republicanNominees[$republicanSlug] = [];
+            }
+
+            $republicanNominees[$republicanSlug][$key] = true;
+        }
+
+        $reader->next();
+    }
+
     // region candidate aggregates
     $reader = new CsvReader(__DIR__.'/../../data/csv/cn.csv');
 
@@ -49,6 +84,8 @@ call_user_func(function () {
             $candidateAggregate = new CandidateAggregate();
             $candidateAggregate->slug = $slug;
             $candidateAggregate->name = $name;
+            $candidateAggregate->democraticNominations = $democraticNominees[$slug] ?? [];
+            $candidateAggregate->republicanNominations = $republicanNominees[$slug] ?? [];
             $candidateAggregates[$slug] = $candidateAggregate;
         }
 

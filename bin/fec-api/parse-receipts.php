@@ -10,6 +10,7 @@ use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Entity\FecApi\ScheduleAReceipt;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\ItemizedIndividualReceipt;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
+use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
 use CliffordVickrey\Book2024\Common\Enum\Fec\TransactionType;
 use CliffordVickrey\Book2024\Common\Enum\ReceiptSource;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
@@ -284,6 +285,26 @@ call_user_func(function () {
                         true
                     );
                     $committeeId = $committeeAggregate?->id;
+                }
+
+                // possible that this receipt was earmarked *before* the nominee was decided. Try to map this receipt
+                // held in escrow to the right principal campaign committee
+                if (null === $committeeId && ($jurisdiction = Jurisdiction::fromMemo($memo))) {
+                    $nominee = $candidateAggregateRepository->getNominee(
+                        year: $cycle,
+                        jurisdiction: $jurisdiction,
+                        isDemocratic: ReceiptSource::AB === $source
+                    );
+
+                    $candidate = $nominee?->getInfoByYearAndJurisdiction($cycle, $jurisdiction);
+                    $committeeId = $candidate?->CAND_PCC;
+
+                    printf(
+                        'Contribution in escrow for future %s nominee (%s)%s',
+                        $jurisdiction,
+                        $nominee?->slug,
+                        \PHP_EOL
+                    );
                 }
 
                 if (null !== $committeeId && !$committeeAggregateRepository->hasCommitteeId($committeeId)) {
