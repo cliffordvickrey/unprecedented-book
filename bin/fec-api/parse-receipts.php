@@ -56,6 +56,7 @@ call_user_func(function () {
             $cycle = $year + 1;
         }
 
+        /** @var array<int, list<string>> $carry */
         if (!isset($carry[$cycle])) {
             $carry[$cycle] = [$file];
         } else {
@@ -68,7 +69,7 @@ call_user_func(function () {
     // blank slate
     $receiptWriter->deleteReceipts();
 
-    $cycles = [2012];
+    $cycles = [2024];
 
     foreach ($cycles as $cycle) {
         Assert::notEmpty(
@@ -82,6 +83,7 @@ call_user_func(function () {
         /** @var array<string, ImputedCommitteeTotals> $totalsMemo */
         $totalsMemo = [];
         $write = function (Receipt $receipt) use (&$donorsMemo, $donorsWriter, $receiptWriter, &$totalsMemo): void {
+            /** @phpstan-var int $id */
             static $id = 0;
 
             // write receipt
@@ -187,7 +189,7 @@ call_user_func(function () {
         /** @var array<string, string|false> $memosToCommitteeId */
         $memosToCommitteeId = [];
 
-        $memoFilename = sprintf('%s/../../data/etc/memos%d.csv', __DIR__, $cycle);
+        $memoFilename = sprintf('%s/../../data/csv/memos%d.csv', __DIR__, $cycle);
 
         if (is_file($memoFilename)) {
             $memoReader = new CsvReader($memoFilename);
@@ -272,32 +274,64 @@ call_user_func(function () {
 
                 // make a heroic attempt to resolve the irregular memo into an FEC committee ID
                 if (null === $committeeId) {
-                    $memoText = preg_replace('/^EARMARKED\sFOR/i', '', $memo);
-                    Assert::string($memoText);
-                    $memoText = preg_replace('/\(.*\)$/', '', trim($memoText));
-                    Assert::string($memoText);
+                    $memoParsed = preg_replace('/^EARMARKED\sFOR/i', '', $memo);
+                    Assert::string($memoParsed);
+                    $memoParsed = preg_replace('/\(.*\)$/', '', trim($memoParsed));
+                    Assert::string($memoParsed);
+                    $memoParsed = trim($memoParsed);
 
-                    $year = $receipt->transaction_date->format('Y');
+                    $year = CastingUtilities::toString($receipt->transaction_date->format('Y'));
 
-                    $committeeAggregate = $committeeAggregateRepository->getByCommitteeName(
-                        $memoText,
-                        CastingUtilities::toInt($year),
-                        true
-                    );
-                    $committeeId = $committeeAggregate?->id;
+                    while (true) {
+                        $committeeAggregate = $committeeAggregateRepository->getByCommitteeName(
+                            $memoParsed,
+                            CastingUtilities::toInt($year),
+                            true
+                        );
+                        $committeeId = $committeeAggregate?->id;
+
+                        if (null !== $committeeId) {
+                            break;
+                        }
+
+                        $memoParts = array_map(trim(...), explode('.', $memoParsed, 2));
+
+                        if (count($memoParts) < 2) {
+                            break;
+                        }
+
+                        $memoParsed = preg_replace('/\(.*\)$/', '', trim($memoParts[0]));
+                        Assert::string($memoParsed);
+                    }
                 }
 
                 // possible that this receipt was earmarked *before* the nominee was decided. Try to map this receipt
                 // held in escrow to the right principal campaign committee
                 if (null === $committeeId && ($jurisdiction = Jurisdiction::fromMemo($memo))) {
-                    $nominee = $candidateAggregateRepository->getNominee(
-                        year: $cycle,
-                        jurisdiction: $jurisdiction,
-                        isDemocratic: ReceiptSource::AB === $source
-                    );
+                    $cycleToTest = $cycle;
+                    $yearToTest = $cycle;
 
-                    $candidate = $nominee?->getInfoByYearAndJurisdiction($cycle, $jurisdiction);
-                    $committeeId = $candidate?->CAND_PCC;
+                    do {
+                        // try to get the next nominee
+                        $nominee = $candidateAggregateRepository->getNominee(
+                            year: $yearToTest,
+                            jurisdiction: $jurisdiction,
+                            isDemocratic: ReceiptSource::AB === $source
+                        );
+
+                        $candidate = $nominee?->getInfoByYearAndJurisdiction($yearToTest, $jurisdiction);
+                        $committeeId = $candidate?->CAND_PCC;
+
+                        if (null !== $committeeId) {
+                            break;
+                        }
+
+                        ++$yearToTest;
+
+                        if (0 != $yearToTest % 2) {
+                            $cycleToTest += 2;
+                        }
+                    } while (in_array($cycleToTest, $cycles));
 
                     printf(
                         'Contribution in escrow for future %s nominee (%s)%s',

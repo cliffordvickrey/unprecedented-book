@@ -9,7 +9,7 @@ use CliffordVickrey\Book2024\Common\Entity\Entity;
 interface EntityHydratorInterface
 {
     /**
-     * @param array<string, mixed> $data
+     * @param array<array-key, mixed> $data
      */
     public function hydrate(Entity $entity, array $data): void;
 

@@ -141,6 +141,7 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
      */
     private function mapSlugsByCommitteeNameAndYear(): array
     {
+        // @phpstan-ignore-next-line
         return array_reduce(
             $this->getAllSlugs(),
             function (array $carry, string $slug): array {
@@ -155,6 +156,7 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
 
                     $name = strtoupper($name);
 
+                    /** @var array<string, array<int, list<string>>> $carry */
                     if (!isset($carry[$name])) {
                         $carry[$name] = [];
                     }
@@ -177,6 +179,7 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
      */
     private function mapSlugsByCommitteeId(): array
     {
+        // @phpstan-ignore-next-line
         return array_reduce(
             $this->getAllSlugs(),
             fn (array $carry, string $slug) => array_merge($carry, [$this->getAggregate($slug)->id => $slug]),

@@ -16,10 +16,6 @@ call_user_func(function () {
 
     preg_match_all('/<Key>([^<]+)<\/Key>/i', $str, $matches);
 
-    if (!is_array($matches)) {
-        $matches = [[]];
-    }
-
     $filenames = array_filter(
         $matches[1],
         fn ($match) => (bool) preg_match('/\/20(08|10|12|14|16|18|20|22|24)\//', $match)

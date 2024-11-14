@@ -94,6 +94,7 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
         $slugs = $this->getAllSlugs();
 
         // (extremely nerds voice) my Lisp-like higher-order functions
+        // @phpstan-ignore-next-line
         return array_reduce($slugs, function (array $carry, string $slug): array {
             $aggregate = $this->getAggregate($slug);
 
@@ -160,6 +161,7 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
                     continue;
                 }
 
+                /** @var array<int, array<string, list<string>>> $carry */
                 if (!isset($carry[$year])) {
                     $carry[$year] = [];
                 }
@@ -182,10 +184,10 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
 
         array_walk(
             $slugsByYearAndJurisdiction,
-            static fn (array &$slugsByJurisdiction) => ksort($slugsByJurisdiction)
+            static fn (array &$slugsByJurisdiction) => ksort($slugsByJurisdiction) // @phpstan-ignore-line
         );
 
-        return $slugsByYearAndJurisdiction;
+        return $slugsByYearAndJurisdiction; // @phpstan-ignore-line
     }
 
     public function getByYearAndJurisdiction(int $year, Jurisdiction $jurisdiction): array

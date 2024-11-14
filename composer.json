@@ -14,7 +14,7 @@
     "webmozart/assert": "^1.11"
   },
   "require-dev": {
-    "phpstan/phpstan": "^1.12",
+    "phpstan/phpstan": "^2.0",
     "friendsofphp/php-cs-fixer": "^3.64"
   },
   "license": "MIT",

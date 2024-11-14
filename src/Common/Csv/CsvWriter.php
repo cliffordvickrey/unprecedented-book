@@ -40,6 +40,7 @@ final class CsvWriter extends AbstractResource
      */
     public function write(array $data): void
     {
+        /** @var array<int|string, float|int|string|null> $filtered */
         $filtered = array_map(self::makeScalar(...), $data);
         $bytes = fputcsv($this->getResource(), $filtered);
         Assert::integer($bytes, 'Could not write to CSV file');

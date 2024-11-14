@@ -111,6 +111,7 @@ class CandidateAggregate extends Aggregate
 
         // @phpstan-ignore-next-line
         return array_reduce($this->info, static function (array $carry, Candidate $info): array {
+            /** @var array<int, array<string, Candidate>> $carry */
             if (!isset($carry[$info->file_id])) {
                 $carry[$info->file_id] = [$info->CAND_ID => $info];
 

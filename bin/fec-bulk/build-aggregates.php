@@ -321,9 +321,12 @@ call_user_func(function () {
     // endregion
 
     // region generate committee slugs
+
+    /** @var array<string, list<string>> $slugCandidates */
     $slugCandidates = array_reduce($parsedCommittees, static function (array $carry, CommitteeProperties $props) {
         $slug = $props->getSlug();
 
+        /** @var array<string, list<string>> $carry */
         if (!isset($carry[$slug])) {
             $carry[$slug] = [$props->id];
 

@@ -20,7 +20,13 @@ call_user_func(function () {
     /** @var array<int, array<string, list<string>>> $slugsByYearAndJurisdiction */
     $slugsByYearAndJurisdiction = JsonUtilities::jsonDecode($json);
 
-    $years = [2012, 2014, 2016, 2018, 2020, 2022];
+    $cycles = [2012, 2014, 2016, 2018, 2020, 2022];
+
+    $years = [];
+
+    for ($i = ($cycles[0] - 1); $i <= $cycles[array_key_last($cycles)]; ++$i) {
+        $years[] = $i;
+    }
 
     $repo = new CandidateAggregateRepository();
 
@@ -41,6 +47,7 @@ call_user_func(function () {
 
             $aggregates = $repo->getByYearAndJurisdiction($year, $jurisdiction);
 
+            /** @var list<Candidate> $candidates */
             $candidates = array_reduce(
                 $aggregates,
                 static fn (array $carry, CandidateAggregate $aggregate) => [
@@ -73,6 +80,7 @@ call_user_func(function () {
             }
 
             $sorter = function (Candidate $a, Candidate $b) use ($year): int {
+                /** @phpstan-var CommitteeAggregateRepository $committeeRepo */
                 static $committeeRepo = new CommitteeAggregateRepository();
 
                 try {

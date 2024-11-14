@@ -53,7 +53,7 @@ abstract class Entity implements \JsonSerializable
      */
     final public static function collectList(mixed $value): array
     {
-        return array_map(static::create(...), CastingUtilities::toArray($value));
+        return array_values(array_map(static::create(...), CastingUtilities::toArray($value)));
     }
 
     /**

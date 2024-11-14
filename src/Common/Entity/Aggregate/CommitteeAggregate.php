@@ -119,6 +119,7 @@ class CommitteeAggregate extends Aggregate
 
         $lpls = $this->leadershipPacLinkage;
 
+        /** @var array<int, string> $candIds */
         $candIds = array_reduce($lpls, static function (array $carry, LeadershipPacLinkage $lpl): array {
             $carry[$lpl->file_id] = $lpl->CAND_ID;
 
