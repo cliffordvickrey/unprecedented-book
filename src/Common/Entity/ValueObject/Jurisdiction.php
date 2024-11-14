@@ -31,6 +31,10 @@ final readonly class Jurisdiction implements \Stringable
 
     public static function fromFecJurisdiction(string $fecJurisdiction): ?self
     {
+        if ('-' === $fecJurisdiction) {
+            return new self('US');
+        }
+
         $parts = explode('-', $fecJurisdiction);
 
         if (2 !== \count($parts)) {
