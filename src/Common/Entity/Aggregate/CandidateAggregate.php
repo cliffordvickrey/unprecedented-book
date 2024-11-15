@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Entity\Aggregate;
 
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
-use CliffordVickrey\Book2024\Common\Entity\PropOrder;
+use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
 use Webmozart\Assert\Assert;
 
@@ -14,16 +14,16 @@ use Webmozart\Assert\Assert;
  */
 class CandidateAggregate extends Aggregate
 {
-    #[PropOrder(1)]
+    #[PropMeta(1)]
     public string $name = '';
     /** @var list<Candidate> */
-    #[PropOrder(2)]
+    #[PropMeta(2)]
     public array $info = [];
     /** @var array<string, bool> */
-    #[PropOrder(3)]
+    #[PropMeta(3)]
     public array $democraticNominations = [];
     /** @var array<string, bool> */
-    #[PropOrder(4)]
+    #[PropMeta(4)]
     public array $republicanNominations = [];
     /** @var IndexedCandidateInfo|null */
     private ?array $indexedInfo = null;

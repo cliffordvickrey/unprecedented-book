@@ -7,31 +7,31 @@ namespace CliffordVickrey\Book2024\Common\Entity\Aggregate;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\CandidateCommitteeLinkage;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Committee;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
-use CliffordVickrey\Book2024\Common\Entity\PropOrder;
+use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 
 class CommitteeAggregate extends Aggregate
 {
-    #[PropOrder(1)]
+    #[PropMeta(1)]
     public string $name = '';
-    #[PropOrder(2)]
+    #[PropMeta(2)]
     public string $id = '';
     /** @var array<int, CommitteeTotals> */
-    #[PropOrder(3)]
+    #[PropMeta(3)]
     public array $committeeTotalsByYear = [];
     /** @var array<int, ImputedCommitteeTotals> */
-    #[PropOrder(4)]
+    #[PropMeta(4)]
     public array $imputedCommitteeTotalsByYear = [];
     /** @var array<int, Committee> */
-    #[PropOrder(5)]
+    #[PropMeta(5)]
     public array $infoByYear = [];
     /** @var list<CandidateCommitteeLinkage> */
-    #[PropOrder(6)]
+    #[PropMeta(6)]
     public array $ccl = [];
     /** @var list<LeadershipPacLinkage> */
-    #[PropOrder(7)]
+    #[PropMeta(7)]
     public array $leadershipPacLinkage = [];
     /** @var array<int, string>|null */
     private ?array $candidateIdByYear = null;

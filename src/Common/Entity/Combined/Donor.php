@@ -5,26 +5,26 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Entity\Combined;
 
 use CliffordVickrey\Book2024\Common\Entity\Entity;
-use CliffordVickrey\Book2024\Common\Entity\PropOrder;
+use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
 class Donor extends Entity
 {
-    #[PropOrder(0)]
+    #[PropMeta(0)]
     public int $id = 0;
-    #[PropOrder(11)]
+    #[PropMeta(11)]
     public string $name = '';
-    #[PropOrder(12)]
+    #[PropMeta(12)]
     public string $address = '';
-    #[PropOrder(13)]
+    #[PropMeta(13)]
     public string $city = '';
-    #[PropOrder(14)]
+    #[PropMeta(14)]
     public string $state = '';
-    #[PropOrder(15)]
+    #[PropMeta(15)]
     public string $zip = '';
-    #[PropOrder(16)]
+    #[PropMeta(16)]
     public string $occupation = '';
-    #[PropOrder(17)]
+    #[PropMeta(17)]
     public string $employer = '';
 
     public function getDonorHash(): string

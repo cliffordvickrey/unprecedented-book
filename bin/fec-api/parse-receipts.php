@@ -281,12 +281,12 @@ call_user_func(function () {
                     Assert::string($memoParsed);
                     $memoParsed = trim($memoParsed);
 
-                    $year = CastingUtilities::toString($receipt->transaction_date->format('Y'));
+                    $year = CastingUtilities::toInt($receipt->transaction_date->format('Y'));
 
                     while (true) {
                         $committeeAggregate = $committeeAggregateRepository->getByCommitteeName(
                             $memoParsed,
-                            CastingUtilities::toInt($year),
+                            $year,
                             true
                         );
                         $committeeId = $committeeAggregate?->id;
@@ -309,13 +309,13 @@ call_user_func(function () {
                 // possible that this receipt was earmarked *before* the nominee was decided. Try to map this receipt
                 // held in escrow to the right principal campaign committee
                 if (null === $committeeId && ($jurisdiction = Jurisdiction::fromMemo($memo))) {
-                    $years = [$cycle];
+                    $year = (int) CastingUtilities::toInt($receipt->transaction_date->format('Y'));
 
-                    for ($i = $cycle; $i <= $cycles[array_key_last($cycles)]; ++$i) {
+                    $years = [];
+
+                    for ($i = $year; $i <= $cycles[array_key_last($cycles)]; ++$i) {
                         $years[] = $i;
                     }
-
-                    $years[] = $cycle - 1;
 
                     foreach ($years as $year) {
                         $nominee = $candidateAggregateRepository->getNominee(

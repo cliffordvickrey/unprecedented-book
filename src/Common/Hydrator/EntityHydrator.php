@@ -19,11 +19,17 @@ class EntityHydrator implements EntityHydratorInterface
         $props = self::getProps($entity);
 
         foreach ($props as $prop) {
-            if (!\array_key_exists($prop->name, $data)) {
+            $propName = $prop->name;
+
+            if (null !== $prop->fallback && empty($data[$propName])) {
+                $propName = $prop->fallback;
+            }
+
+            if (!\array_key_exists($propName, $data)) {
                 continue;
             }
 
-            self::set($entity, $prop, $data[$prop->name]);
+            self::set($entity, $prop, $data[$propName]);
         }
     }
 

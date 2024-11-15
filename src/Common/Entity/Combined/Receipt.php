@@ -7,32 +7,32 @@ namespace CliffordVickrey\Book2024\Common\Entity\Combined;
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CommitteeAggregate;
 use CliffordVickrey\Book2024\Common\Entity\FecApi\ScheduleAReceipt;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\ItemizedIndividualReceipt;
-use CliffordVickrey\Book2024\Common\Entity\PropOrder;
+use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Enum\Fec\TransactionType;
 use CliffordVickrey\Book2024\Common\Enum\ReceiptSource;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
 class Receipt extends Donor
 {
-    #[PropOrder(1)]
+    #[PropMeta(1)]
     public string $committee_slug = '';
-    #[PropOrder(2)]
+    #[PropMeta(2)]
     public ?string $candidate_slug = null;
-    #[PropOrder(3)]
+    #[PropMeta(3)]
     public string $fec_committee_id = '';
-    #[PropOrder(4)]
+    #[PropMeta(4)]
     public ?string $fec_candidate_id = null;
-    #[PropOrder(5)]
+    #[PropMeta(5)]
     public int $donor_id = 0;
-    #[PropOrder(6)]
+    #[PropMeta(6)]
     public TransactionType $transaction_type = TransactionType::_15E;
-    #[PropOrder(7)]
+    #[PropMeta(7)]
     public \DateTimeImmutable $transaction_date;
-    #[PropOrder(8)]
+    #[PropMeta(8)]
     public float $amount = 0.0;
-    #[PropOrder(9)]
+    #[PropMeta(9)]
     public bool $itemized = false;
-    #[PropOrder(10)]
+    #[PropMeta(10)]
     public ReceiptSource $source = ReceiptSource::AB;
 
     public function toDonor(): Donor
