@@ -34,8 +34,6 @@ class Receipt extends Donor
     public bool $itemized = false;
     #[PropOrder(10)]
     public ReceiptSource $source = ReceiptSource::AB;
-    #[PropOrder(11)]
-    public string $memo = '';
 
     public function toDonor(): Donor
     {
@@ -67,7 +65,6 @@ class Receipt extends Donor
         $self->zip = $receipt->contributor_zip;
         $self->occupation = $receipt->contributor_occupation;
         $self->employer = $receipt->contributor_employer;
-        $self->memo = $receipt->memo_text;
 
         return $self;
     }
@@ -95,7 +92,6 @@ class Receipt extends Donor
         $self->occupation = (string) $receipt->OCCUPATION;
         $self->employer = (string) $receipt->EMPLOYER;
         $self->itemized = true;
-        $self->memo = (string) $receipt->MEMO_TEXT;
 
         return $self;
     }

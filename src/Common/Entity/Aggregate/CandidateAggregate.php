@@ -129,7 +129,7 @@ class CandidateAggregate extends Aggregate
         $key = \sprintf('%d%s', $year, $jurisdiction);
         $isNominee = $this->democraticNominations[$key] ?? false;
 
-        if (!$isNominee || false === $democrat) {
+        if (false === $democrat || (!$isNominee && null === $democrat)) {
             $isNominee = $this->republicanNominations[$key] ?? false;
         }
 

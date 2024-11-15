@@ -19,6 +19,7 @@ use CliffordVickrey\Book2024\Common\Service\ReceiptWritingService;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\FileIterator;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
+use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 use Webmozart\Assert\Assert;
 
 ini_set('memory_limit', '-1');
@@ -69,7 +70,7 @@ call_user_func(function () {
     // blank slate
     $receiptWriter->deleteReceipts();
 
-    $cycles = [2024];
+    $cycles = [2022];
 
     foreach ($cycles as $cycle) {
         Assert::notEmpty(
@@ -109,7 +110,7 @@ call_user_func(function () {
         // memoize small itemized receipts
         $smallItemizedReceipts = [];
         $smallItemizedReceiptWriter = new CsvWriter(sprintf(
-            '%s/../../data/etc/small-unitemized-receipts%d.csv',
+            '%s/../../data/etc/small-itemized-receipts%d.csv',
             __DIR__,
             $cycle
         ));
@@ -252,6 +253,15 @@ call_user_func(function () {
 
                 $committeeAggregate = null;
 
+                // was a committee ID provided in the memo?
+                if (null === $committeeId && preg_match('/\((C\d{8})\)/i', $memo, $matches)) {
+                    $committeeId = $matches[1];
+
+                    if (!$committeeAggregateRepository->hasCommitteeId($committeeId)) {
+                        $committeeId = null;
+                    }
+                }
+
                 // was a candidate ID provided?
                 if (
                     null === $committeeId
@@ -261,15 +271,6 @@ call_user_func(function () {
                     $candidate = $candidateAggregateRepository->getByCandidateId($unItemizedReceipt->candidate_id);
                     $info = $candidate->getInfo($cycle, $unItemizedReceipt->candidate_id);
                     $committeeId = $info?->CAND_PCC;
-                }
-
-                // was a committee ID provided in the memo?
-                if (null === $committeeId && preg_match('/\((C\d{8})\)/i', $memo, $matches)) {
-                    $committeeId = $matches[1];
-
-                    if (!$committeeAggregateRepository->hasCommitteeId($committeeId)) {
-                        $committeeId = null;
-                    }
                 }
 
                 // make a heroic attempt to resolve the irregular memo into an FEC committee ID
@@ -308,30 +309,28 @@ call_user_func(function () {
                 // possible that this receipt was earmarked *before* the nominee was decided. Try to map this receipt
                 // held in escrow to the right principal campaign committee
                 if (null === $committeeId && ($jurisdiction = Jurisdiction::fromMemo($memo))) {
-                    $cycleToTest = $cycle;
-                    $yearToTest = $cycle;
+                    $years = [$cycle];
 
-                    do {
-                        // try to get the next nominee
+                    for ($i = $cycle; $i <= $cycles[array_key_last($cycles)]; ++$i) {
+                        $years[] = $i;
+                    }
+
+                    $years[] = $cycle - 1;
+
+                    foreach ($years as $year) {
                         $nominee = $candidateAggregateRepository->getNominee(
-                            year: $yearToTest,
+                            year: $year,
                             jurisdiction: $jurisdiction,
                             isDemocratic: ReceiptSource::AB === $source
                         );
 
-                        $candidate = $nominee?->getInfoByYearAndJurisdiction($yearToTest, $jurisdiction);
+                        $candidate = $nominee?->getInfoByYearAndJurisdiction($year, $jurisdiction);
                         $committeeId = $candidate?->CAND_PCC;
 
                         if (null !== $committeeId) {
                             break;
                         }
-
-                        ++$yearToTest;
-
-                        if (0 != $yearToTest % 2) {
-                            $cycleToTest += 2;
-                        }
-                    } while (in_array($cycleToTest, $cycles));
+                    }
 
                     printf(
                         'Contribution in escrow for future %s nominee (%s)%s',
@@ -382,7 +381,11 @@ call_user_func(function () {
         $irregularMemosWriter->close();
 
         // dump unmatched itemized receipts
-        printf('Saving %d unmatched small un-itemized receipts%s', array_sum($smallItemizedReceipts), \PHP_EOL);
+        printf(
+            'Saving %s unmatched small un-itemized receipts%s',
+            StringUtilities::numberFormat(array_sum($smallItemizedReceipts)),
+            \PHP_EOL
+        );
         $smallItemizedReceiptReader = $smallItemizedReceiptWriter->toReader();
         $smallItemizedReceiptReader->next();
 

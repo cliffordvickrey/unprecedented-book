@@ -39,9 +39,14 @@ call_user_func(function () {
         $writer = new CsvWriter($outputFilename);
 
         foreach ($reader as $inRow) {
-            $receipts = ScheduleAReceipt::collectList($inRow);
-
-            $outRows = array_map(static fn (ScheduleAReceipt $receipt) => $receipt->toArray(true), $receipts);
+            // look ma, no loops!
+            $outRows = array_map(
+                static fn (ScheduleAReceipt $receipt) => array_map(
+                    static fn (mixed $value) => is_string($value) ? str_replace('\\', '', $value) : $value,
+                    $receipt->toArray(true)
+                ),
+                ScheduleAReceipt::collectList($inRow)
+            );
 
             array_walk($outRows, static fn (array $outRow) => $writer->write($outRow));
         }

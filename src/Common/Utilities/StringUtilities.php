@@ -56,6 +56,14 @@ class StringUtilities
         return trim($name);
     }
 
+    /**
+     * @param int<0, max> $decimals
+     */
+    public static function numberFormat(mixed $val, int $decimals = 0): string
+    {
+        return number_format((float) CastingUtilities::toFloat($val), $decimals);
+    }
+
     public static function md5(mixed $val): string
     {
         return md5(serialize($val));

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Csv;
 
+use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
+
 class ChunkedCsvWriter
 {
-    public const int MAX_RECORDS = 100000;
+    public const int MAX_RECORDS = 99999;
 
     private int $counter = 0;
     /** @var array<string, list<array<array-key, mixed>>> */
@@ -40,7 +42,12 @@ class ChunkedCsvWriter
 
     public function flush(): void
     {
-        printf('Writing %d CSVs (%d rows)%s', \count($this->records), $this->counter, \PHP_EOL);
+        printf(
+            'Writing %s CSVs (%s rows)%s',
+            StringUtilities::numberFormat(\count($this->records)),
+            StringUtilities::numberFormat($this->counter),
+            \PHP_EOL
+        );
 
         foreach ($this->records as $filename => $rows) {
             $mode = isset($this->openedFiles[$filename]) ? 'a' : 'w';
