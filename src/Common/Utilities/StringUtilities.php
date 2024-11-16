@@ -127,25 +127,32 @@ class StringUtilities
         }, $parsed);
     }
 
-    public static function slugify(string $str): string
+    public static function slugify(string $str, ?int $maxLength = null): string
     {
-        // remove non-alphanumeric characters (except spaces)
+        // 1. remove non-alphanumeric characters (except spaces)
         $slug = preg_replace('/[^\p{L}\p{N}\s-]/u', '', $str);
         Assert::string($slug);
 
-        // normalize whitespace
+        // 2. normalize whitespace
         $slug = preg_replace('/\s+/', ' ', str_replace('-', ' ', $slug));
         Assert::string($slug);
 
-        // replace spaces with underscores
+        // 3. replace spaces with underscores
         $slug = str_replace(' ', '_', $slug);
 
-        // 3. Remove diacritics
+        // 4. Remove diacritics
         $slug = iconv('UTF-8', 'ASCII//TRANSLIT', $slug);
         Assert::string($slug);
 
-        // 4. Convert to lowercase
-        return strtolower($slug);
+        // 5. Convert to lowercase
+        $slug = strtolower($slug);
+
+        // 6. Enforce maximum length
+        if (null !== $maxLength) {
+            $slug = substr($slug, 0, $maxLength);
+        }
+
+        return $slug;
     }
 
     /**

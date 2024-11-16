@@ -117,7 +117,7 @@ class CommitteeProperties extends Entity implements \Countable
             $diff[self::PART_YEAR] = \sprintf('%d', $a->year);
         }
 
-        return $diff;
+        return array_map(\strtolower(...), $diff);
     }
 
     public function getSlug(): string
@@ -127,7 +127,7 @@ class CommitteeProperties extends Entity implements \Countable
             : null;
 
         if (null === $candidateSlug) {
-            return StringUtilities::slugify($this->name);
+            return StringUtilities::slugify($this->name, maxLength: 100);
         }
 
         $officeSlug = $this->getOfficeSlug();

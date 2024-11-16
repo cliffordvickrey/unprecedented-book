@@ -10,6 +10,7 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
 use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
+use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 
 class CommitteeAggregate extends Aggregate
@@ -77,9 +78,12 @@ class CommitteeAggregate extends Aggregate
 
     public function getCandidateSlug(): ?string
     {
+        /** @phpstan-var array<string, string> $officeSlugs */
+        static $officeSlugs = CandidateOffice::getSlugs();
+
         $parts = explode('-', $this->slug);
 
-        if (\count($parts) > 1) {
+        if (\count($parts) > 1 && isset($officeSlugs[$parts[1]])) {
             return array_shift($parts);
         }
 

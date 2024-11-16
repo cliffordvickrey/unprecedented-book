@@ -28,6 +28,9 @@ require_once __DIR__.'/../../vendor/autoload.php';
 chdir(__DIR__);
 
 call_user_func(function (bool $debug = false) {
+    // election cycles to use
+    $cycles = [2012, 2014, 2016, 2018, 2020, 2022];
+
     // a bunch of abstractions
     $candidateAggregateRepository = new CandidateAggregateRepository();
     $committeeAggregateRepository = new CommitteeAggregateRepository();
@@ -66,11 +69,36 @@ call_user_func(function (bool $debug = false) {
 
         return $carry;
     }, []);
+    //
+    // callback for writing receipts and auto-incrementing IDs
+    /** @var array<string, ImputedCommitteeTotals> $totalsMemo */
+    $totalsMemo = [];
+    $write = function (Receipt $receipt) use (&$donorsMemo, $donorsWriter, $receiptWriter, &$totalsMemo): void {
+        /** @phpstan-var int $id */
+        static $id = 0;
+
+        // write receipt
+        $receipt->id = ++$id;
+        $receiptWriter->write($receipt);
+
+        // parse totals
+        $totals = $totalsMemo[$receipt->committee_slug] ?? new ImputedCommitteeTotals();
+        $totals->addReceipt($receipt);
+        $totalsMemo[$receipt->committee_slug] = $totals;
+
+        // parse donors
+        $donorHash = $receipt->getDonorHash();
+
+        if (isset($donorsMemo[$donorHash])) {
+            return;
+        }
+
+        $donorsWriter->write($receipt->toDonor()->toArray(true));
+        $donorsMemo[$donorHash] = true;
+    };
 
     // blank slate
     $receiptWriter->deleteReceipts();
-
-    $cycles = [2012, 2014, 2016, 2018, 2020, 2022];
 
     foreach ($cycles as $cycle) {
         Assert::notEmpty(
@@ -79,33 +107,6 @@ call_user_func(function (bool $debug = false) {
         );
 
         printf('Parsing %d election cycle%s', $cycle, \PHP_EOL);
-
-        // memoize totals
-        /** @var array<string, ImputedCommitteeTotals> $totalsMemo */
-        $totalsMemo = [];
-        $write = function (Receipt $receipt) use (&$donorsMemo, $donorsWriter, $receiptWriter, &$totalsMemo): void {
-            /** @phpstan-var int $id */
-            static $id = 0;
-
-            // write receipt
-            $receipt->id = ++$id;
-            $receiptWriter->write($receipt);
-
-            // parse totals
-            $totals = $totalsMemo[$receipt->committee_slug] ?? new ImputedCommitteeTotals();
-            $totals->addReceipt($receipt);
-            $totalsMemo[$receipt->committee_slug] = $totals;
-
-            // parse donors
-            $donorHash = $receipt->getDonorHash();
-
-            if (isset($donorsMemo[$donorHash])) {
-                return;
-            }
-
-            $donorsWriter->write($receipt->toDonor()->toArray(true));
-            $donorsMemo[$donorHash] = true;
-        };
 
         // memoize small itemized receipts
         $smallItemizedReceipts = [];
