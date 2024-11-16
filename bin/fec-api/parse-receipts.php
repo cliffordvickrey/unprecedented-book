@@ -27,7 +27,7 @@ ini_set('memory_limit', '-1');
 require_once __DIR__.'/../../vendor/autoload.php';
 chdir(__DIR__);
 
-call_user_func(function () {
+call_user_func(function (bool $debug = false) {
     // a bunch of abstractions
     $candidateAggregateRepository = new CandidateAggregateRepository();
     $committeeAggregateRepository = new CommitteeAggregateRepository();
@@ -70,7 +70,7 @@ call_user_func(function () {
     // blank slate
     $receiptWriter->deleteReceipts();
 
-    $cycles = [2022];
+    $cycles = [2012, 2014, 2016, 2018, 2020, 2022];
 
     foreach ($cycles as $cycle) {
         Assert::notEmpty(
@@ -317,6 +317,8 @@ call_user_func(function () {
                         $years[] = $i;
                     }
 
+                    $nominee = null;
+
                     foreach ($years as $year) {
                         $nominee = $candidateAggregateRepository->getNominee(
                             year: $year,
@@ -364,7 +366,9 @@ call_user_func(function () {
                 $receipt->itemized = isset($smallItemizedReceipts[$hash]);
 
                 if ($receipt->itemized) {
-                    printf('Merging %s (%s)%s', $receipt->getReceiptHash(), $receipt->committee_slug, \PHP_EOL);
+                    if ($debug) {
+                        printf('Merging %s (%s)%s', $receipt->getReceiptHash(), $receipt->committee_slug, \PHP_EOL);
+                    }
 
                     if (1 === $smallItemizedReceipts[$hash]) {
                         unset($smallItemizedReceipts[$hash]);
@@ -382,7 +386,7 @@ call_user_func(function () {
 
         // dump unmatched itemized receipts
         printf(
-            'Saving %s unmatched small un-itemized receipts%s',
+            'Saving %s unmatched small itemized receipts%s',
             StringUtilities::numberFormat(array_sum($smallItemizedReceipts)),
             \PHP_EOL
         );

@@ -135,6 +135,11 @@ class FileUtilities
             \sprintf('Could not extract file ID from %s', $basenameSansExtension)
         );
 
-        return 2000 + CastingUtilities::toInt($matches[0] ?? null);
+        $year = CastingUtilities::toInt($matches[0] ?? null);
+
+        // FEC records start in 1977-78 election cycle, IIRC
+        $century = $year < 78 ? 2000 : 1900;
+
+        return $century + $year;
     }
 }
