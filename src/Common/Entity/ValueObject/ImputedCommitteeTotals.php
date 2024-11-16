@@ -18,6 +18,24 @@ class ImputedCommitteeTotals extends Entity
     public float $itemizedBulkUnder200 = 0.0;
     public float $itemizedBulkEqualToOrGreaterTo200 = 0.0;
 
+    public function sumItemized(): float
+    {
+        $fromApi = MathUtilities::add($this->itemizedActBlue, $this->itemizedWinRed);
+        $fromBulk = MathUtilities::add($this->itemizedBulkUnder200, $this->itemizedBulkEqualToOrGreaterTo200);
+
+        return MathUtilities::add($fromApi, $fromBulk);
+    }
+
+    public function sumUnItemized(): float
+    {
+        return MathUtilities::add($this->unItemizedActBlue, $this->unItemizedWinRed);
+    }
+
+    public function sumAll(): float
+    {
+        return MathUtilities::add($this->sumItemized(), $this->sumUnItemized());
+    }
+
     public function addReceipt(Receipt $receipt): void
     {
         $amt = $receipt->amount;

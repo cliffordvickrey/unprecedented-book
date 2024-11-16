@@ -46,6 +46,10 @@ class CandidateAggregate extends Aggregate
 
     public function getInfo(?int $year = null, ?string $candidateId = null, bool $fallback = true): ?Candidate
     {
+        if (0 === \count($this->info)) {
+            return null;
+        }
+
         $info = $this->doGetInfo($year, $candidateId);
 
         if ($info || !$fallback) {
@@ -60,7 +64,7 @@ class CandidateAggregate extends Aggregate
             return $this->getInfo($year);
         }
 
-        return null;
+        return $this->info[array_key_last($this->info)];
     }
 
     private function doGetInfo(?int $year, ?string $candidateId): ?Candidate

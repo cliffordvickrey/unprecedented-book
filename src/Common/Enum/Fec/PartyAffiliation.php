@@ -102,13 +102,22 @@ enum PartyAffiliation: string
     case WTP = 'WTP'; // We the People
     case W = 'W'; // Write-In
 
-    public function isRepublican(): bool
+    public function getPartySlug(): string
     {
-        return self::REP === $this || self::CRV === $this;
+        return match (true) {
+            $this->isDemocratic() => 'democratic',
+            $this->isRepublican() => 'republican',
+            default => 'other',
+        };
     }
 
     public function isDemocratic(): bool
     {
         return self::DEM === $this || self::DNL === $this || self::DFL === $this;
+    }
+
+    public function isRepublican(): bool
+    {
+        return self::REP === $this || self::CRV === $this;
     }
 }

@@ -23,6 +23,26 @@ class MathUtilities
     /**
      * @param int<0, max> $precision
      */
+    public static function divide(mixed $dividend, mixed $divisor, int $precision = 2): float
+    {
+        $fltDivisor = CastingUtilities::toFloat($divisor);
+
+        if (0.0 === $fltDivisor) {
+            return 0.0;
+        }
+
+        $sum = bcdiv(
+            CastingUtilities::toNumericString($dividend),
+            CastingUtilities::toNumericString($divisor),
+            $precision + 1
+        );
+
+        return self::round($sum, $precision);
+    }
+
+    /**
+     * @param int<0, max> $precision
+     */
     public static function round(mixed $value, int $precision = 2): float
     {
         return round((float) CastingUtilities::toFloat($value), $precision);
