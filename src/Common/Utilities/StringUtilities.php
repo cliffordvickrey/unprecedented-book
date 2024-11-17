@@ -26,6 +26,7 @@ class StringUtilities
     /** @var list<string> */
     private static array $suffixes = [
         'DDS',
+        'DVM',
         'ESQ',
         'GOVERNOR',
         'II',

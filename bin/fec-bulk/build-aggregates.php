@@ -161,6 +161,7 @@ call_user_func(function () {
         $totals = new CommitteeTotals();
         $totals->itemizedReceipts = (float) $committeeSummary->INDV_ITEM_CONTB;
         $totals->unItemizedReceipts = (float) $committeeSummary->INDV_UNITEM_CONTB;
+        $totals->individualReceipts = (float) $committeeSummary->INDV_CONTB;
         $totals->receipts = (float) $committeeSummary->TTL_RECEIPTS;
 
         $committeeAggregate = $committeeAggregates[$committeeSummary->CMTE_ID] ?? null;

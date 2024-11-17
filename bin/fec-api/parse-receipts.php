@@ -190,6 +190,7 @@ call_user_func(function (bool $debug = false) {
         // memo map
         /** @var array<string, string|false> $memosToCommitteeId */
         $memosToCommitteeId = [];
+        $memoCounts = [];
 
         $memoFilename = sprintf('%s/../../data/csv/memos%d.csv', __DIR__, $cycle);
 
@@ -243,6 +244,13 @@ call_user_func(function (bool $debug = false) {
                 $receipt->source = $source;
 
                 $memo = trim(strtoupper($unItemizedReceipt->memo_text));
+
+                // keep track of memos we are parsing
+                if (!isset($memoCounts[$memo])) {
+                    $memoCounts[$memo] = 1;
+                } else {
+                    ++$memoCounts[$memo];
+                }
 
                 // try, heroically, to resolve the committee ID with very limited/unorganized information
                 $committeeId = $memosToCommitteeId[$memo] ?? null;
@@ -428,6 +436,22 @@ call_user_func(function (bool $debug = false) {
 
         // flush all enqueued receipts
         $receiptWriter->flush();
+
+        // dump memo counts
+        $memosWriter = new CsvWriter(sprintf('%s/../../data/etc/memo-counts%d.csv', __DIR__, $cycle));
+        $memosWriter->write(['memo', 'committee_id', 'ct']);
+
+        foreach ($memoCounts as $memo => $memoCount) {
+            $committeeId = $memosToCommitteeId[$memo] ?? null;
+
+            if (!is_string($committeeId)) {
+                $committeeId = null;
+            }
+
+            $memosWriter->write([$memo, $committeeId, $memoCount]);
+        }
+
+        $memosWriter->close();
 
         // save imputed totals
         $slugs = $committeeAggregateRepository->getAllSlugs();

@@ -36,11 +36,7 @@ call_user_func(function () {
         $candidateSlug = $committee->getCandidateSlug();
 
         if (null !== $candidateSlug) {
-            try {
-                $candidate = $candidateRepo->getAggregate($candidateSlug);
-            } catch (Webmozart\Assert\InvalidArgumentException) {
-                $candidateSlug = null;
-            }
+            $candidate = $candidateRepo->getAggregate($candidateSlug);
         }
 
         printf(sprintf('Parsing %s...%s', $committee->slug, \PHP_EOL));
@@ -86,10 +82,7 @@ call_user_func(function () {
             // canonical
             $report->itemized_receipts = $totals->itemizedReceipts;
             $report->un_itemized_receipts = $totals->unItemizedReceipts;
-            $report->total_indiv_receipts = MathUtilities::add(
-                $report->itemized_receipts,
-                $report->un_itemized_receipts
-            );
+            $report->total_indiv_receipts = $totals->individualReceipts;
 
             // imputed
             $report->imputed_itemized_receipts = $imputedTotals->sumItemized();
@@ -134,7 +127,7 @@ call_user_func(function () {
             return $cmp;
         }
 
-        return $b->un_itemized_receipts <=> $a->un_itemized_receipts;
+        return $b->total_indiv_receipts <=> $a->total_indiv_receipts;
     });
 
     $writer = new CsvWriter(__DIR__.'/../../data/report/cm-totals.csv');
