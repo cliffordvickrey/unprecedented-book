@@ -182,9 +182,28 @@ final class CandidateAggregateRepository extends AggregateRepository implements 
 
         ksort($slugsByYearAndJurisdiction);
 
+        $sorter = static function (string $a, string $b): int {
+            // Senate jurisdictions first
+            $matchA = (int) preg_match('/\d/', $a);
+            $matchB = (int) preg_match('/\d/', $b);
+
+            $cmp = $matchA <=> $matchB;
+
+            if ($cmp) {
+                return $cmp;
+            }
+
+            // then state names
+            $jurisdictionA = Jurisdiction::fromString($a);
+            $jurisdictionB = Jurisdiction::fromString($b);
+
+            // then congressional district numbers
+            return strnatcmp($jurisdictionA->getStateName(), $jurisdictionB->getStateName()) ?: strcmp($a, $b);
+        };
+
         array_walk(
             $slugsByYearAndJurisdiction,
-            static fn (array &$slugsByJurisdiction) => ksort($slugsByJurisdiction) // @phpstan-ignore-line
+            static fn (array &$slugsByJurisdiction) => uksort($slugsByJurisdiction, $sorter) // @phpstan-ignore-line
         );
 
         return $slugsByYearAndJurisdiction; // @phpstan-ignore-line

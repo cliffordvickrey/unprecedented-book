@@ -237,6 +237,8 @@ call_user_func(function (bool $debug = false) {
 
             $unItemizedHeaders = ScheduleAReceipt::headers();
 
+            $mergeCount = 0;
+
             foreach ($reader as $row) {
                 $unItemizedReceipt = ScheduleAReceipt::__set_state(array_combine($unItemizedHeaders, $row));
 
@@ -375,6 +377,8 @@ call_user_func(function (bool $debug = false) {
                 $receipt->itemized = isset($smallItemizedReceipts[$hash]);
 
                 if ($receipt->itemized) {
+                    ++$mergeCount;
+
                     if ($debug) {
                         printf('Merging %s (%s)%s', $receipt->getReceiptHash(), $receipt->committee_slug, \PHP_EOL);
                     }
@@ -387,6 +391,15 @@ call_user_func(function (bool $debug = false) {
                 }
 
                 $write($receipt);
+            }
+
+            if ($mergeCount > 0) {
+                printf(
+                    '%s receipt%s matched itemized individual receipts in the bulk file%s',
+                    StringUtilities::numberFormat($mergeCount),
+                    $mergeCount > 1 ? 's' : '',
+                    \PHP_EOL
+                );
             }
         }
 
@@ -439,16 +452,23 @@ call_user_func(function (bool $debug = false) {
 
         // dump memo counts
         $memosWriter = new CsvWriter(sprintf('%s/../../data/etc/memo-counts%d.csv', __DIR__, $cycle));
-        $memosWriter->write(['memo', 'committee_id', 'ct']);
+        $memosWriter->write(['memo', 'committee_id', 'committee_slug', 'ct']);
+
+        arsort($memoCounts, \SORT_NUMERIC);
 
         foreach ($memoCounts as $memo => $memoCount) {
             $committeeId = $memosToCommitteeId[$memo] ?? null;
+            $committeeSlug = null;
 
             if (!is_string($committeeId)) {
                 $committeeId = null;
             }
 
-            $memosWriter->write([$memo, $committeeId, $memoCount]);
+            if (null !== $committeeId && $committeeAggregateRepository->hasCommitteeId($committeeId)) {
+                $committeeSlug = $committeeAggregateRepository->getByCommitteeId($committeeId)->slug;
+            }
+
+            $memosWriter->write([$memo, $committeeId, $committeeSlug, $memoCount]);
         }
 
         $memosWriter->close();
