@@ -6,11 +6,13 @@ namespace CliffordVickrey\Book2024\Common\Entity\ValueObject;
 
 use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Entity\Entity;
+use CliffordVickrey\Book2024\Common\Enum\Fec\TransactionType;
 use CliffordVickrey\Book2024\Common\Enum\ReceiptSource;
 use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
 
 class ImputedCommitteeTotals extends Entity
 {
+    public float $candidateContributions = 0.0;
     public float $itemizedActBlue = 0.0;
     public float $unItemizedActBlue = 0.0;
     public float $itemizedWinRed = 0.0;
@@ -41,6 +43,11 @@ class ImputedCommitteeTotals extends Entity
         $amt = $receipt->amount;
 
         switch (true) {
+            case TransactionType::_15C === $receipt->transaction_type:
+                // candidate contribution
+                $this->candidateContributions = MathUtilities::add($this->candidateContributions, $amt);
+
+                return;
             case ReceiptSource::AB === $receipt->source && $receipt->itemized:
                 // ActBlue itemized
                 $this->itemizedActBlue = MathUtilities::add($this->itemizedActBlue, $amt);

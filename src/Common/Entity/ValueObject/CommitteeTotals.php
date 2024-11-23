@@ -8,6 +8,7 @@ use CliffordVickrey\Book2024\Common\Entity\Entity;
 
 class CommitteeTotals extends Entity
 {
+    public float $candidateContributions = 0.0;
     public float $itemizedReceipts = 0.0;
     public float $unItemizedReceipts = 0.0;
     public float $individualReceipts = 0.0;

@@ -159,6 +159,7 @@ call_user_func(function () {
         $committeeSummary = CommitteeSummary::__set_state($rowWithHeaders);
 
         $totals = new CommitteeTotals();
+        $totals->candidateContributions = (float) $committeeSummary->CAND_CNTB;
         $totals->itemizedReceipts = (float) $committeeSummary->INDV_ITEM_CONTB;
         $totals->unItemizedReceipts = (float) $committeeSummary->INDV_UNITEM_CONTB;
         $totals->individualReceipts = (float) $committeeSummary->INDV_CONTB;
@@ -243,9 +244,7 @@ call_user_func(function () {
     $parsedCommittees = [];
 
     foreach ($committeeAggregates as $committeeAggregate) {
-        Assert::notEmpty($committeeAggregate->infoByYear);
-
-        $lastInfo = $committeeAggregate->infoByYear[array_key_last($committeeAggregate->infoByYear)];
+        $lastInfo = $committeeAggregate->getLastCommittee();
 
         $candidateIds = $committeeAggregate->getCandidateIds();
 

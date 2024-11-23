@@ -1,6 +1,7 @@
 #!/usr/bin/php
 <?php
 
+use CliffordVickrey\Book2024\Common\Csv\CsvReader;
 use CliffordVickrey\Book2024\Common\Csv\CsvWriter;
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CandidateAggregate;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
@@ -11,6 +12,7 @@ use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
+use Webmozart\Assert\Assert;
 
 require_once __DIR__.'/../../vendor/autoload.php';
 
@@ -32,6 +34,45 @@ call_user_func(function () {
 
     /** @var array<int, array<string, array{democrat: ?string, republican: ?string}>> $likelyPrimaryWinners */
     $likelyPrimaryWinners = [];
+
+    $memos = [];
+
+    foreach ($cycles as $cycle) {
+        $memos[$cycle - 1] = [];
+        $memos[$cycle] = [];
+
+        $filename = __DIR__.sprintf('/../../data/etc/memo-counts%d.csv', $cycle);
+
+        if (!is_file($filename)) {
+            continue;
+        }
+
+        $reader = new CsvReader($filename);
+
+        $reader->next();
+
+        while ($reader->valid()) {
+            [$memo] = $reader->current();
+
+            Assert::scalar($memo);
+
+            $memo = (string) $memo;
+
+            $jurisdiction = Jurisdiction::fromMemo($memo);
+
+            if (null === $jurisdiction) {
+                $reader->next();
+                continue;
+            }
+
+            $strJurisdiction = (string) $jurisdiction;
+
+            $memos[$cycle - 1][] = $strJurisdiction;
+            $memos[$cycle][] = $strJurisdiction;
+
+            $reader->next();
+        }
+    }
 
     foreach ($years as $year) {
         $slugsByJurisdiction = $slugsByYearAndJurisdiction[$year] ?? [];
@@ -132,15 +173,18 @@ call_user_func(function () {
 
     $writer = new CsvWriter(__DIR__.'/../../data/csv/_nominees.csv');
 
-    $writer->write(['year', 'jurisdiction', 'democratic_nominee', 'republican_nominee']);
+    $writer->write(['year', 'jurisdiction', 'democratic_nominee', 'republican_nominee', 'in_api_files']);
 
     foreach ($likelyPrimaryWinners as $year => $jurisdictions) {
         foreach ($jurisdictions as $jurisdiction => $winners) {
+            $inApiFile = isset($memos[$year]) && in_array($jurisdiction, $memos[$year]);
+
             $writer->write([
                 $year,
                 $jurisdiction,
                 $winners['democrat'],
                 $winners['republican'],
+                $inApiFile,
             ]);
         }
     }

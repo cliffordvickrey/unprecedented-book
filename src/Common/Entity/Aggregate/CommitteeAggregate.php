@@ -12,6 +12,7 @@ use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
+use Webmozart\Assert\Assert;
 
 class CommitteeAggregate extends Aggregate
 {
@@ -36,6 +37,22 @@ class CommitteeAggregate extends Aggregate
     public array $leadershipPacLinkage = [];
     /** @var array<int, string>|null */
     private ?array $candidateIdByYear = null;
+
+    public function getLastCommittee(): Committee
+    {
+        Assert::notEmpty($this->infoByYear);
+
+        $infoByYearPrimary = array_filter(
+            $this->infoByYear,
+            static fn (Committee $committee) => CommitteeDesignation::P === $committee->CMTE_DSGN
+        );
+
+        if (0 !== \count($infoByYearPrimary)) {
+            return $infoByYearPrimary[array_key_last($infoByYearPrimary)];
+        }
+
+        return $this->infoByYear[array_key_last($this->infoByYear)];
+    }
 
     public function getMostActiveYear(): ?int
     {
