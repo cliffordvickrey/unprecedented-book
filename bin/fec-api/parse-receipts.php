@@ -69,7 +69,7 @@ call_user_func(function (bool $debug = false) {
 
         return $carry;
     }, []);
-    //
+
     // callback for writing receipts and auto-incrementing IDs
     /** @var array<string, ImputedCommitteeTotals> $totalsMemo */
     $totalsMemo = [];
@@ -322,10 +322,20 @@ call_user_func(function (bool $debug = false) {
                 if (null === $committeeId && ($jurisdiction = Jurisdiction::fromMemo($memo))) {
                     $year = (int) CastingUtilities::toInt($receipt->transaction_date->format('Y'));
 
-                    $years = [];
+                    if (null === $jurisdiction->district) {
+                        // Senate/presidential races: look ahead to next election cycle(s)
+                        $years = [];
 
-                    for ($i = $year; $i <= $cycles[array_key_last($cycles)]; ++$i) {
-                        $years[] = $i;
+                        for ($i = $cycle; $i <= $cycles[array_key_last($cycles)]; $i += 2) {
+                            $years[] = $i;
+
+                            if ($i === $cycle && $year < $cycle) {
+                                $years[] = $year; // check for special Senate elections in odd-numbered years
+                            }
+                        }
+                    } else {
+                        // House races: just look at current election cycle
+                        $years = [$cycle];
                     }
 
                     $nominee = null;
