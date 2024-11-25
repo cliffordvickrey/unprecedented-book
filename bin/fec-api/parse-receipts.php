@@ -71,20 +71,13 @@ call_user_func(function (bool $debug = false) {
     }, []);
 
     // callback for writing receipts and auto-incrementing IDs
-    /** @var array<string, ImputedCommitteeTotals> $totalsMemo */
-    $totalsMemo = [];
-    $write = function (Receipt $receipt) use (&$donorsMemo, $donorsWriter, $receiptWriter, &$totalsMemo): void {
+    $doWrite = function (Receipt $receipt) use (&$donorsMemo, $donorsWriter, $receiptWriter): void {
         /** @phpstan-var int $id */
         static $id = 0;
 
         // write receipt
         $receipt->id = ++$id;
         $receiptWriter->write($receipt);
-
-        // parse totals
-        $totals = $totalsMemo[$receipt->committee_slug] ?? new ImputedCommitteeTotals();
-        $totals->addReceipt($receipt);
-        $totalsMemo[$receipt->committee_slug] = $totals;
 
         // parse donors
         $donorHash = $receipt->getDonorHash();
@@ -101,6 +94,21 @@ call_user_func(function (bool $debug = false) {
     $receiptWriter->deleteReceipts();
 
     foreach ($cycles as $cycle) {
+        /** @var array<string, ImputedCommitteeTotals> $totalsMemo */
+        $totalsMemo = [];
+
+        $write = function (Receipt $receipt) use ($doWrite, &$totalsMemo) {
+            $doWrite($receipt);
+
+            // parse totals
+            $totals = $totalsMemo[$receipt->committee_slug] ?? new ImputedCommitteeTotals();
+            $totals->addReceipt($receipt);
+            $totalsMemo[$receipt->committee_slug] = $totals;
+        };
+
+        /** @var array<string, ImputedCommitteeTotals> $totalsMemo */
+        $totalsMemo = [];
+
         Assert::notEmpty(
             $apiFilesByCycle[$cycle],
             sprintf('No ActBlue or WinRed data for the %d election cycle', $cycle)

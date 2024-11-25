@@ -7,6 +7,7 @@ namespace CliffordVickrey\Book2024\Common\Entity\Aggregate;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
 use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
+use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use Webmozart\Assert\Assert;
 
 /**
@@ -27,6 +28,31 @@ class CandidateAggregate extends Aggregate
     public array $republicanNominations = [];
     /** @var IndexedCandidateInfo|null */
     private ?array $indexedInfo = null;
+
+    public function ranForPresident(?int $startYear = null, ?int $endYear = null): bool
+    {
+        $presidentialRuns = array_filter(
+            $this->info,
+            static function (Candidate $candidate) use ($startYear, $endYear): bool {
+                if (CandidateOffice::P !== $candidate->CAND_OFFICE) {
+                    return false;
+                }
+
+                $electionYear = (int) $candidate->CAND_ELECTION_YR;
+
+                if (null !== $startYear && $electionYear < $startYear) {
+                    return false;
+                }
+
+                if (null !== $endYear && $electionYear > $endYear) {
+                    return false;
+                }
+
+                return true;
+            });
+
+        return \count($presidentialRuns) > 0;
+    }
 
     public function getInfoByYearAndJurisdiction(int $year, Jurisdiction $jurisdiction): ?Candidate
     {
