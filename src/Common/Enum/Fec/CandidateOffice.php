@@ -20,7 +20,7 @@ enum CandidateOffice: string
         /** @var array<string, string> $slugs */
         $slugs = array_reduce($cases, static fn (array $carry, CandidateOffice $office) => array_merge(
             $carry,
-            [$office->getSlug(), $office->value]
+            [$office->getSlug() => $office->value]
         ), []);
 
         $slugs['leadership'] = 'L';

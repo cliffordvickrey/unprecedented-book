@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Repository;
 
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CommitteeAggregate;
+use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
@@ -199,11 +200,18 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
 
     protected function getSubDir(string $slug): string
     {
+        /** @phpstan-var array<string, string> $officeSlugs */
+        static $officeSlugs = CandidateOffice::getSlugs();
+
         $trailing = parent::getSubDir($slug);
 
         $leading = 'pac';
 
-        if (str_contains($slug, '-')) {
+        $parts = explode('-', $slug);
+
+        $officeParts = explode('_', $parts[1] ?? '');
+
+        if (isset($officeSlugs[$officeParts[0]])) {
             $leading = 'cand';
         }
 

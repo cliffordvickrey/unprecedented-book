@@ -21,7 +21,7 @@ call_user_func(function () {
     ];
 
     array_walk($filenames, static function (string $filename) use ($replacements): void {
-        echo sprintf('Parsing %s... ', $filename);
+        printf('Parsing %s... ', $filename);
 
         $outputFilename = str_replace(
             array_keys($replacements),
@@ -30,7 +30,7 @@ call_user_func(function () {
         );
 
         if (is_file($outputFilename)) {
-            echo sprintf('%s%s already exists. Skipping%s', \PHP_EOL, $filename, \PHP_EOL);
+            printf('%s%s already exists. Skipping%s', \PHP_EOL, $filename, \PHP_EOL);
 
             return;
         }

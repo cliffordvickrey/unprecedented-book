@@ -11,7 +11,7 @@ use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use Webmozart\Assert\Assert;
 
 /**
- * @phpstan-type IndexedCandidateInfo non-empty-array<int, non-empty-array<string, Candidate>>
+ * @phpstan-type IndexedCandidateInfo array<int, non-empty-array<string, Candidate>>
  */
 class CandidateAggregate extends Aggregate
 {
@@ -70,32 +70,91 @@ class CandidateAggregate extends Aggregate
         return $candidatesInJurisdiction[array_key_first($candidatesInJurisdiction)];
     }
 
-    public function getInfo(?int $year = null, ?string $candidateId = null, bool $fallback = true): ?Candidate
+    /**
+     * @return IndexedCandidateInfo
+     */
+    private function getIndexedCandidateInfo(?CandidateOffice $office = null): array
     {
+        $this->indexedInfo ??= $this->buildIndexedCandidateInfo();
+
+        $info = $this->indexedInfo;
+
+        if (null === $office) {
+            return $info;
+        }
+
+        $filteredInfo = [];
+
+        foreach ($info as $cycle => $candidates) {
+            $candidates = array_filter(
+                $candidates,
+                static fn (Candidate $candidate) => $candidate->CAND_OFFICE === $office
+            );
+
+            if (0 !== \count($candidates)) {
+                $filteredInfo[$cycle] = $candidates;
+            }
+        }
+
+        return $filteredInfo;
+    }
+
+    /**
+     * @return IndexedCandidateInfo
+     */
+    private function buildIndexedCandidateInfo(): array
+    {
+        Assert::notEmpty($this->info, \sprintf('Candidate (%s) has no FEC info associated with them', $this->slug));
+
+        // @phpstan-ignore-next-line
+        return array_reduce($this->info, static function (array $carry, Candidate $info): array {
+            /** @var array<int, array<string, Candidate>> $carry */
+            if (!isset($carry[$info->file_id])) {
+                $carry[$info->file_id] = [$info->CAND_ID => $info];
+
+                return $carry;
+            }
+
+            $carry[$info->file_id][$info->CAND_ID] = $info;
+
+            return $carry;
+        }, []);
+    }
+
+    public function getInfo(
+        ?int $year = null,
+        ?string $candidateId = null,
+        ?CandidateOffice $office = null,
+        bool $fallback = true,
+    ): ?Candidate {
         if (0 === \count($this->info)) {
             return null;
         }
 
-        $info = $this->doGetInfo($year, $candidateId);
+        $info = $this->doGetInfo($year, $candidateId, $office);
 
         if ($info || !$fallback) {
             return $info;
         }
 
         if (null !== $year) {
-            return $this->getInfo(candidateId: $candidateId);
+            return $this->getInfo(candidateId: $candidateId, office: $office);
         }
 
         if (null !== $candidateId) {
-            return $this->getInfo($year);
+            return $this->getInfo($year, office: $office);
+        }
+
+        if (null !== $office) {
+            return $this->getInfo($candidateId, $year);
         }
 
         return $this->info[array_key_last($this->info)];
     }
 
-    private function doGetInfo(?int $year, ?string $candidateId): ?Candidate
+    private function doGetInfo(?int $year, ?string $candidateId, ?CandidateOffice $office): ?Candidate
     {
-        $indexed = $this->getIndexedCandidateInfo();
+        $indexed = $this->getIndexedCandidateInfo($office);
 
         if (null === $year && null === $candidateId) {
             $candidateId = array_key_first($indexed[array_key_last($indexed)]);
@@ -120,38 +179,6 @@ class CandidateAggregate extends Aggregate
         }
 
         return $infos[$candidateId] ?? null;
-    }
-
-    /**
-     * @return IndexedCandidateInfo
-     */
-    private function getIndexedCandidateInfo(): array
-    {
-        $this->indexedInfo ??= $this->buildIndexedCandidateInfo();
-
-        return $this->indexedInfo;
-    }
-
-    /**
-     * @return IndexedCandidateInfo
-     */
-    private function buildIndexedCandidateInfo(): array
-    {
-        Assert::notEmpty($this->info, \sprintf('Candidate (%s) has no FEC info associated with them', $this->slug));
-
-        // @phpstan-ignore-next-line
-        return array_reduce($this->info, static function (array $carry, Candidate $info): array {
-            /** @var array<int, array<string, Candidate>> $carry */
-            if (!isset($carry[$info->file_id])) {
-                $carry[$info->file_id] = [$info->CAND_ID => $info];
-
-                return $carry;
-            }
-
-            $carry[$info->file_id][$info->CAND_ID] = $info;
-
-            return $carry;
-        }, []);
     }
 
     public function isNominee(int $year, Jurisdiction $jurisdiction, ?bool $democrat = null): bool

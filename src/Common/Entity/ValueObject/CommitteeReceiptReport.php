@@ -20,9 +20,11 @@ class CommitteeReceiptReport extends Entity
     public ?string $candidate_party = null;
     public ?string $candidate_office = null;
     public ?string $candidate_jurisdiction = null;
+    public float $self_receipts = 0.0;
     public float $itemized_receipts = 0.0;
     public float $un_itemized_receipts = 0.0;
     public float $total_indiv_receipts = 0.0;
+    public float $imputed_self_receipts = 0.0;
     public float $imputed_itemized_receipts = 0.0;
     public float $imputed_un_itemized_receipts = 0.0;
     public float $imputed_total_indiv_receipts = 0.0;

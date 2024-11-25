@@ -100,7 +100,9 @@ class CommitteeAggregate extends Aggregate
 
         $parts = explode('-', $this->slug);
 
-        if (\count($parts) > 1 && isset($officeSlugs[$parts[1]])) {
+        $officeParts = explode('_', $parts[1] ?? '');
+
+        if (\count($parts) > 1 && isset($officeSlugs[$officeParts[0]])) {
             return array_shift($parts);
         }
 
