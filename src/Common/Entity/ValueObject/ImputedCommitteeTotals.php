@@ -67,7 +67,7 @@ class ImputedCommitteeTotals extends Entity
         }
 
         if ('' === $memo) {
-            $memo = 'uncategorized';
+            $memo = '[none]';
         }
 
         if ($api && null !== $memo) {
