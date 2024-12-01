@@ -415,8 +415,10 @@ call_user_func(function (bool $debug = false) {
                         --$smallItemizedReceipts[$hash];
                     }
                 } elseif (!$receipt->isSmall()) {
-                    ++$dropCount;
                     // or, because the receipt >= $200: drop it altogether (but report what we're doing)
+                    $receipt->itemized = true;
+
+                    ++$dropCount;
                     $highRollersWriter->write($receipt->toArray(true));
                     continue;
                 }
