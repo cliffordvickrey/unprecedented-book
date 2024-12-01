@@ -94,7 +94,10 @@ class EntityHydrator implements EntityHydratorInterface
     {
         $props = self::getProps($entity);
 
-        return array_values(array_filter($props, static fn (EntityProp $prop) => $prop->classStr && !$prop->nullable));
+        return array_values(array_filter(
+            $props,
+            static fn (EntityProp $prop) => $prop->classStr && !$prop->initalized
+        ));
     }
 
     private static function parseValue(mixed $value, EntityProp $prop): mixed

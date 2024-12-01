@@ -30,6 +30,7 @@ final readonly class EntityProp
         public ?string $classStr = null,
         public ?EntityArrayKeyType $keyType = null,
         public ?string $fallback = null,
+        public bool $initalized = false,
     ) {
     }
 
@@ -45,14 +46,17 @@ final readonly class EntityProp
 
         $meta = self::getPropMeta($reflectionProp);
 
+        $name = $reflectionProp->getName();
+
         return new self(
-            $reflectionProp->getName(),
-            $parsed['type'],
-            $meta->order,
-            $reflectionType->allowsNull(),
-            $parsed['classStr'],
-            $parsed['keyType'],
-            $meta->fallback
+            name: $reflectionProp->getName(),
+            type: $parsed['type'],
+            order: $meta->order,
+            nullable: $reflectionType->allowsNull(),
+            classStr: $parsed['classStr'],
+            keyType: $parsed['keyType'],
+            fallback: $meta->fallback,
+            initalized: \array_key_exists($name, $reflectionProp->getDeclaringClass()->getDefaultProperties())
         );
     }
 
@@ -151,6 +155,14 @@ final readonly class EntityProp
 
     public function sansKeyType(): self
     {
-        return new self($this->name, $this->type, $this->order, $this->nullable, $this->classStr);
+        return new self(
+            name: $this->name,
+            type: $this->type,
+            order: $this->order,
+            nullable: $this->nullable,
+            classStr: $this->classStr,
+            fallback: $this->fallback,
+            initalized: $this->initalized
+        );
     }
 }
