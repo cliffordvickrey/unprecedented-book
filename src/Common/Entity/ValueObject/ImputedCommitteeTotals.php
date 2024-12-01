@@ -6,6 +6,8 @@ namespace CliffordVickrey\Book2024\Common\Entity\ValueObject;
 
 use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Entity\Entity;
+use CliffordVickrey\Book2024\Common\Entity\FecApi\ScheduleAReceipt;
+use CliffordVickrey\Book2024\Common\Entity\FecBulk\ItemizedIndividualReceipt;
 use CliffordVickrey\Book2024\Common\Enum\Fec\TransactionType;
 use CliffordVickrey\Book2024\Common\Enum\ReceiptSource;
 use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
@@ -19,6 +21,19 @@ class ImputedCommitteeTotals extends Entity
     public float $unItemizedWinRed = 0.0;
     public float $itemizedBulkUnder200 = 0.0;
     public float $itemizedBulkEqualToOrGreaterTo200 = 0.0;
+    /** @var array<string, float> */
+    public array $apiTotalsByMemo = [];
+    /** @var array<string, float> */
+    public array $bulkTotalsByMemo = [];
+    /** @var array<string, float> */
+    public array $apiTotalsByReceiptType = [];
+    /** @var array<string, float> */
+    public array $bulkTotalsByReceiptType = [];
+
+    public function sumAll(): float
+    {
+        return MathUtilities::add($this->sumItemized(), $this->sumUnItemized());
+    }
 
     public function sumItemized(): float
     {
@@ -33,14 +48,61 @@ class ImputedCommitteeTotals extends Entity
         return MathUtilities::add($this->unItemizedActBlue, $this->unItemizedWinRed);
     }
 
-    public function sumAll(): float
-    {
-        return MathUtilities::add($this->sumItemized(), $this->sumUnItemized());
-    }
-
     public function addReceipt(Receipt $receipt): void
     {
         $amt = $receipt->amount;
+        $originalReceipt = $receipt->getOriginalReceipt();
+
+        $api = false;
+        $memo = null;
+        $receiptType = null;
+
+        if ($originalReceipt instanceof ScheduleAReceipt) {
+            $api = true;
+            $memo = $originalReceipt->memo_text;
+            $receiptType = $originalReceipt->receipt_type->name ?? 'uncategorized';
+        } elseif ($originalReceipt instanceof ItemizedIndividualReceipt) {
+            $memo = (string) $originalReceipt->MEMO_TEXT;
+            $receiptType = $originalReceipt->TRANSACTION_TP->name ?? 'uncategorized';
+        }
+
+        if ('' === $memo) {
+            $memo = 'uncategorized';
+        }
+
+        if ($api && null !== $memo) {
+            if (!isset($this->apiTotalsByMemo[$memo])) {
+                $this->apiTotalsByMemo[$memo] = 0.0;
+            }
+
+            $this->apiTotalsByMemo[$memo] = MathUtilities::add($this->apiTotalsByMemo[$memo], $amt);
+        } elseif (null !== $memo) {
+            if (!isset($this->bulkTotalsByMemo[$memo])) {
+                $this->bulkTotalsByMemo[$memo] = 0.0;
+            }
+
+            $this->bulkTotalsByMemo[$memo] = MathUtilities::add($this->bulkTotalsByMemo[$memo], $amt);
+        }
+
+        if ($api && null !== $receiptType) {
+            if (!isset($this->apiTotalsByReceiptType[$receiptType])) {
+                $this->apiTotalsByReceiptType[$receiptType] = 0.0;
+            }
+
+            $this->apiTotalsByReceiptType[$receiptType] = MathUtilities::add(
+                $this->apiTotalsByReceiptType[$receiptType],
+                $amt
+            );
+        } elseif (null !== $receiptType) {
+            if (!isset($this->bulkTotalsByReceiptType[$receiptType])) {
+                $this->bulkTotalsByReceiptType[$receiptType] = 0.0;
+            }
+
+            $this->bulkTotalsByReceiptType[$receiptType] = MathUtilities::add(
+                $this->bulkTotalsByReceiptType[$receiptType],
+                $amt
+            );
+        }
 
         switch (true) {
             case TransactionType::_15C === $receipt->transaction_type:

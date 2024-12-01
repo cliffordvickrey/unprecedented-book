@@ -34,6 +34,12 @@ class Receipt extends Donor
     public bool $itemized = false;
     #[PropMeta(10)]
     public ReceiptSource $source = ReceiptSource::AB;
+    private ScheduleAReceipt|ItemizedIndividualReceipt|null $originalReceipt = null;
+
+    public function getOriginalReceipt(): ScheduleAReceipt|ItemizedIndividualReceipt|null
+    {
+        return $this->originalReceipt;
+    }
 
     public function toDonor(): Donor
     {
@@ -52,6 +58,7 @@ class Receipt extends Donor
     public static function fromScheduleAReceipt(ScheduleAReceipt $receipt): self
     {
         $self = new self();
+        $self->originalReceipt = $receipt;
 
         if (null !== $receipt->receipt_type) {
             $self->transaction_type = $receipt->receipt_type;
@@ -72,6 +79,7 @@ class Receipt extends Donor
     public static function fromItemizedReceipt(ItemizedIndividualReceipt $receipt): self
     {
         $self = new self();
+        $self->originalReceipt = $receipt;
         $self->fec_committee_id = $receipt->CMTE_ID;
 
         if (null !== $receipt->TRANSACTION_TP) {
