@@ -127,6 +127,10 @@ call_user_func(function (bool $debug = false) {
         // weird memos writer
         $irregularMemosWriter = new CsvWriter(sprintf('%s/../../data/etc/irregular-memos%d.csv', __DIR__, $cycle));
 
+        // high rollers (API-derived receipts that were dropped) writer
+        $highRollersWriter = new CsvWriter(sprintf('%s/../../data/etc/high-rollers%d.csv', __DIR__, $cycle));
+        $highRollersWriter->write(Receipt::headers());
+
         // read itemized receipts
         $inFile = FileUtilities::getAbsoluteCanonicalPath(sprintf(
             '%s/../../fec/bulk/itcont%d.txt',
@@ -245,6 +249,7 @@ call_user_func(function (bool $debug = false) {
 
             $unItemizedHeaders = ScheduleAReceipt::headers();
 
+            $dropCount = 0;
             $mergeCount = 0;
 
             foreach ($reader as $row) {
@@ -392,9 +397,12 @@ call_user_func(function (bool $debug = false) {
 
                 // check if this receipt is indeed itemized
                 $hash = $receipt->getReceiptHash();
-                $receipt->itemized = isset($smallItemizedReceipts[$hash]);
 
-                if ($receipt->itemized) {
+                // they can be itemized for two reasons
+                if (isset($smallItemizedReceipts[$hash])) {
+                    // first, they could be itemized because they're present in the bulk file
+                    $receipt->itemized = true;
+
                     ++$mergeCount;
 
                     if ($debug) {
@@ -406,9 +414,23 @@ call_user_func(function (bool $debug = false) {
                     } else {
                         --$smallItemizedReceipts[$hash];
                     }
+                } elseif (!$receipt->isSmall()) {
+                    ++$dropCount;
+                    // or, because the receipt >= $200: drop it altogether (but report what we're doing)
+                    $highRollersWriter->write($receipt->toArray(true));
+                    continue;
                 }
 
                 $write($receipt);
+            }
+
+            if ($dropCount > 0) {
+                printf(
+                    '%s large earmarked receipt%s were dropped (because probably itemized elsewhere)%s',
+                    StringUtilities::numberFormat($dropCount),
+                    $dropCount > 1 ? 's' : '',
+                    \PHP_EOL
+                );
             }
 
             if ($mergeCount > 0) {
@@ -423,6 +445,7 @@ call_user_func(function (bool $debug = false) {
 
         $reader->close();
         $irregularMemosWriter->close();
+        $highRollersWriter->close();
 
         // dump unmatched itemized receipts
         printf(

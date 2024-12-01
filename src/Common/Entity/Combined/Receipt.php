@@ -69,6 +69,7 @@ class Receipt extends Donor
         $self->name = $receipt->contributor_name;
         $self->address = $receipt->contributor_street_1;
         $self->city = $receipt->contributor_city;
+        $self->state = $receipt->contributor_state;
         $self->zip = $receipt->contributor_zip;
         $self->occupation = $receipt->contributor_occupation;
         $self->employer = $receipt->contributor_employer;
