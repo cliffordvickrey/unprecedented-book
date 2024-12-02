@@ -27,6 +27,15 @@ require_once __DIR__.'/../../vendor/autoload.php';
 chdir(__DIR__);
 
 call_user_func(function () {
+    // region hard-coded stuff: a lot of relationships are simply not represented in the FEC bulk files
+
+    $hardCodedCommitteeToCandidateLinkages = [
+        'C00618371' => 'P80001571', // TRUMP MAKE AMERICA GREAT AGAIN COMMITTEE (joint fundraising committee)
+        'C00618389' => 'P80001571', // TRUMP VICTORY (join fundraising committee)
+    ];
+
+    // endregion
+
     // region nominees
     $reader = new CsvReader(__DIR__.'/../../data/csv/nominees.csv');
 
@@ -237,6 +246,39 @@ call_user_func(function () {
     }
 
     $reader->close();
+
+    // endregion
+
+    // region hard-coded mapping
+    $counter = 0;
+
+    foreach ($hardCodedCommitteeToCandidateLinkages as $committeeId => $candidateId) {
+        $aggregate = $committeeAggregates[$committeeId] ?? null;
+        Assert::isInstanceOf($aggregate, CommitteeAggregate::class);
+
+        $candidateAggregate = $candidateAggregateRepository->getByCandidateId($candidateId);
+
+        $cclPrototype = new CandidateCommitteeLinkage();
+        $cclPrototype->CMTE_ID = $committeeId;
+        $cclPrototype->CAND_ID = $candidateId;
+
+        foreach ($aggregate->infoByYear as $year => $committee) {
+            $candidate = $candidateAggregate->getInfo($year, $candidateId);
+            Assert::isInstanceOf($candidate, Candidate::class);
+
+            $ccl = clone $cclPrototype;
+            $ccl->file_id = $year;
+            $ccl->CAND_ELECTION_YR = $candidate->CAND_ELECTION_YR ?? $year;
+            $ccl->FEC_ELECTION_YR = $year;
+            $ccl->CMTE_TP = $committee->CMTE_TP;
+            $ccl->CMTE_DSGN = $committee->CMTE_DSGN;
+            $ccl->LINKAGE_ID = --$counter;
+
+            $aggregate->ccl[] = $ccl;
+        }
+    }
+
+    unset($counter);
 
     // endregion
 
