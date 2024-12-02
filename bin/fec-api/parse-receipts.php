@@ -397,9 +397,9 @@ call_user_func(function (bool $debug = false) {
                 // check if this receipt is indeed itemized
                 $hash = $receipt->getReceiptHash();
 
-                // they can be itemized for two reasons
+                // this receipt can be itemized for two reasons
                 if (isset($smallItemizedReceipts[$hash])) {
-                    // first, they could be itemized because they're present in the bulk file
+                    // first, it could be itemized because present in the bulk file
                     $receipt->itemized = true;
 
                     ++$mergeCount;
@@ -414,7 +414,7 @@ call_user_func(function (bool $debug = false) {
                         --$smallItemizedReceipts[$hash];
                     }
                 } elseif (!$receipt->isSmall()) {
-                    // or, because the receipt >= $200: drop it altogether (but report what we're doing)
+                    // or, because the receipt >= $200. In that case, drop it altogether (but report what we're doing)
                     $receipt->itemized = true;
 
                     ++$dropCount;
@@ -427,7 +427,7 @@ call_user_func(function (bool $debug = false) {
 
             if ($dropCount > 0) {
                 printf(
-                    '%s large earmarked receipt%s %s dropped (because probably itemized elsewhere)%s',
+                    '%s large earmarked receipt%s %s dropped to avoid double-counting%s',
                     StringUtilities::numberFormat($dropCount),
                     $dropCount > 1 ? 's' : '',
                     $dropCount > 1 ? 'were' : 'was',
@@ -437,9 +437,11 @@ call_user_func(function (bool $debug = false) {
 
             if ($mergeCount > 0) {
                 printf(
-                    '%s receipt%s matched itemized individual receipts in the bulk file%s',
+                    '%s small earmarked receipt%s matched itemized receipt%s and %s merged%s',
                     StringUtilities::numberFormat($mergeCount),
                     $mergeCount > 1 ? 's' : '',
+                    $mergeCount > 1 ? 's' : '',
+                    $mergeCount > 1 ? 'were' : 'was',
                     \PHP_EOL
                 );
             }

@@ -14,6 +14,7 @@ use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
 class Receipt extends Donor
 {
+    private const float MAX_UN_ITEMIZED_EXPENDITURE = 200.0;
     private const string ACT_BLUE = 'C00401224';
     private const string WIN_RED = 'C00694323';
 
@@ -106,7 +107,7 @@ class Receipt extends Donor
 
     public function isSmall(): bool
     {
-        return $this->amount < 200.0;
+        return $this->amount <= self::MAX_UN_ITEMIZED_EXPENDITURE;
     }
 
     public function getOriginalReceipt(): ScheduleAReceipt|ItemizedIndividualReceipt|null
