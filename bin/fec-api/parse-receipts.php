@@ -11,7 +11,6 @@ use CliffordVickrey\Book2024\Common\Entity\FecApi\ScheduleAReceipt;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\ItemizedIndividualReceipt;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
-use CliffordVickrey\Book2024\Common\Enum\Fec\TransactionType;
 use CliffordVickrey\Book2024\Common\Enum\ReceiptSource;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
@@ -179,7 +178,7 @@ call_user_func(function (bool $debug = false) {
             $receipt->setCommitteeAggregate($committeeAggregate);
 
             // defer writing if receipt is small (may need to be merged with ActBlue/WinRed data)
-            if (TransactionType::_15E === $receipt->transaction_type && $receipt->isSmall()) {
+            if ($receipt->couldHaveBeenDisbursedThroughConduit()) {
                 $hash = $receipt->getReceiptHash();
 
                 if (!isset($smallItemizedReceipts[$hash])) {

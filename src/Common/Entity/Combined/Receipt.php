@@ -14,6 +14,9 @@ use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
 class Receipt extends Donor
 {
+    private const string ACT_BLUE = 'C00401224';
+    private const string WIN_RED = 'C00694323';
+
     #[PropMeta(1)]
     public string $committee_slug = '';
     #[PropMeta(2)]
@@ -35,25 +38,6 @@ class Receipt extends Donor
     #[PropMeta(10)]
     public ReceiptSource $source = ReceiptSource::AB;
     private ScheduleAReceipt|ItemizedIndividualReceipt|null $originalReceipt = null;
-
-    public function getOriginalReceipt(): ScheduleAReceipt|ItemizedIndividualReceipt|null
-    {
-        return $this->originalReceipt;
-    }
-
-    public function toDonor(): Donor
-    {
-        $donor = new Donor();
-        $donor->name = $this->name;
-        $donor->address = $this->address;
-        $donor->city = $this->city;
-        $donor->state = $this->state;
-        $donor->zip = $this->zip;
-        $donor->occupation = $this->occupation;
-        $donor->employer = $this->employer;
-
-        return $donor;
-    }
 
     public static function fromScheduleAReceipt(ScheduleAReceipt $receipt): self
     {
@@ -105,6 +89,45 @@ class Receipt extends Donor
         return $self;
     }
 
+    public function couldHaveBeenDisbursedThroughConduit(): bool
+    {
+        return (
+            ReceiptSource::BK !== $this->source
+            || TransactionType::_15E === $this->transaction_type
+            || (
+                TransactionType::_15 === $this->transaction_type
+                && (
+                    self::ACT_BLUE === $this->fec_committee_id
+                    || self::WIN_RED === $this->fec_committee_id
+                )
+            )
+        ) && $this->isSmall();
+    }
+
+    public function isSmall(): bool
+    {
+        return $this->amount < 200.0;
+    }
+
+    public function getOriginalReceipt(): ScheduleAReceipt|ItemizedIndividualReceipt|null
+    {
+        return $this->originalReceipt;
+    }
+
+    public function toDonor(): Donor
+    {
+        $donor = new Donor();
+        $donor->name = $this->name;
+        $donor->address = $this->address;
+        $donor->city = $this->city;
+        $donor->state = $this->state;
+        $donor->zip = $this->zip;
+        $donor->occupation = $this->occupation;
+        $donor->employer = $this->employer;
+
+        return $donor;
+    }
+
     public function setCommitteeAggregate(CommitteeAggregate $committeeAggregate): void
     {
         $this->committee_slug = $committeeAggregate->slug;
@@ -124,11 +147,6 @@ class Receipt extends Donor
         }
 
         return $year + 1;
-    }
-
-    public function isSmall(): bool
-    {
-        return $this->amount < 200.0;
     }
 
     public function getReceiptHash(): string
