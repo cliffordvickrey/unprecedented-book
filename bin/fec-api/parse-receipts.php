@@ -431,7 +431,7 @@ call_user_func(function (bool $debug = false) {
                     '%s large earmarked receipt%s %s dropped (because probably itemized elsewhere)%s',
                     StringUtilities::numberFormat($dropCount),
                     $dropCount > 1 ? 's' : '',
-                    $dropCount > 1 ? 'was' : 'were',
+                    $dropCount > 1 ? 'were' : 'was',
                     \PHP_EOL
                 );
             }
