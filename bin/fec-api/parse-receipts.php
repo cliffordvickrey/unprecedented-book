@@ -428,9 +428,10 @@ call_user_func(function (bool $debug = false) {
 
             if ($dropCount > 0) {
                 printf(
-                    '%s large earmarked receipt%s were dropped (because probably itemized elsewhere)%s',
+                    '%s large earmarked receipt%s %s dropped (because probably itemized elsewhere)%s',
                     StringUtilities::numberFormat($dropCount),
                     $dropCount > 1 ? 's' : '',
+                    $dropCount > 1 ? 'was' : 'were',
                     \PHP_EOL
                 );
             }
