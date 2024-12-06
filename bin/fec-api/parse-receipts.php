@@ -28,7 +28,7 @@ chdir(__DIR__);
 
 call_user_func(function (bool $debug = false) {
     // election cycles to use
-    $cycles = [2012, 2014, 2016, 2018, 2020, 2022];
+    $cycles = [2024];
 
     // a bunch of abstractions
     $candidateAggregateRepository = new CandidateAggregateRepository();
@@ -176,6 +176,15 @@ call_user_func(function (bool $debug = false) {
             // build the receipt object
             $receipt = Receipt::fromItemizedReceipt($itemizedReceipt);
             $receipt->setCommitteeAggregate($committeeAggregate);
+
+            // handle the change of Democratic nominee
+            if (
+                'C00703975' === $receipt->fec_committee_id
+                && $receipt->transaction_date->format('Y-m-d') > '2024-07-20'
+            ) {
+                $receipt->candidate_slug = 'kamala_harris';
+                $receipt->fec_candidate_id = 'P00009423';
+            }
 
             // defer writing if receipt is small (may need to be merged with ActBlue/WinRed data)
             if ($receipt->couldHaveBeenDisbursedThroughConduit()) {
@@ -380,7 +389,9 @@ call_user_func(function (bool $debug = false) {
                     $committeeId = null;
                 }
 
-                $memosToCommitteeId[$memo] = $committeeId ?? false;
+                if (!isset($memosToCommitteeId[$memo])) {
+                    $memosToCommitteeId[$memo] = $committeeId ?? false;
+                }
 
                 // irresolvable committee ID
                 if (null === $committeeId) {
@@ -393,6 +404,12 @@ call_user_func(function (bool $debug = false) {
                 $committeeAggregate = $committeeAggregate
                     ?? $committeeAggregateRepository->getByCommitteeId($committeeId);
                 $receipt->setCommitteeAggregate($committeeAggregate);
+
+                // handle the change of Democratic nominee
+                if ('EARMARKED FOR HARRIS FOR PRESIDENT (C00703975)' === $memo) {
+                    $receipt->candidate_slug = 'kamala_harris';
+                    $receipt->fec_candidate_id = 'P00009423';
+                }
 
                 // check if this receipt is indeed itemized
                 $hash = $receipt->getReceiptHash();

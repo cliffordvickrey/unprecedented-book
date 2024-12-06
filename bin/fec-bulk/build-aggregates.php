@@ -30,8 +30,14 @@ call_user_func(function () {
     // region hard-coded stuff: a lot of relationships are simply not represented in the FEC bulk files
 
     $hardCodedCommitteeToCandidateLinkages = [
-        'C00618371' => 'P80001571', // TRUMP MAKE AMERICA GREAT AGAIN COMMITTEE (joint fundraising committee)
-        'C00618389' => 'P80001571', // TRUMP VICTORY (join fundraising committee)
+        'C00618371' => 'P80001571', // TRUMP MAKE AMERICA GREAT AGAIN COMMITTEE
+        'C00618389' => 'P80001571', // TRUMP VICTORY
+        'C00873893' => 'P80001571', // TRUMP NATIONAL COMMITTEE JFC, INC.
+        'C00770941' => 'P80001571', // TRUMP SAVE AMERICA JOINT FUNDRAISING COMMITTEE
+        'C00867937' => 'P80001571', // TRUMP 47 COMMITTEE, INC.
+        'C00580100' => 'P80001571', // MAKE AMERICA GREAT AGAIN PAC,
+        'C00744946' => 'P00009423', // HARRIS VICTORY FUND
+        'C00838912' => 'P00009423', // HARRIS ACTION FUND
     ];
 
     // endregion

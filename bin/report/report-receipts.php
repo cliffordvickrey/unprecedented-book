@@ -41,7 +41,11 @@ call_user_func(function (bool $presidentialCandidatesOnly = true) {
             $candidateSlug = $committee->getCandidateSlug();
 
             if (null !== $candidateSlug) {
-                $candidate = $candidateRepo->getAggregate($candidateSlug);
+                try {
+                    $candidate = $candidateRepo->getAggregate($candidateSlug);
+                } catch (Throwable) {
+                    printf('[warning] could not fetch candidate %s%s', $candidateSlug, \PHP_EOL);
+                }
             }
 
             if ($presidentialCandidatesOnly && !$candidate?->ranForPresident(startYear: 2012)) {
@@ -55,6 +59,10 @@ call_user_func(function (bool $presidentialCandidatesOnly = true) {
                     !isset($committee->committeeTotalsByYear[$cycle])
                     && !isset($committee->imputedCommitteeTotalsByYear[$cycle])
                 ) {
+                    continue;
+                }
+
+                if ($presidentialCandidatesOnly && 0 !== $cycle % 4) {
                     continue;
                 }
 
@@ -96,8 +104,13 @@ call_user_func(function (bool $presidentialCandidatesOnly = true) {
                         $presidentialCandidatesOnly
                         && (
                             $candidateInfo->CAND_ELECTION_YR !== $cycle
-                            || CommitteeDesignation::P !== $committeeInfo->CMTE_DSGN
-                            || CommitteeType::P !== $committeeInfo->CMTE_TP
+                            || (
+                                (
+                                    CommitteeDesignation::P !== $committeeInfo->CMTE_DSGN
+                                    || CommitteeType::P !== $committeeInfo->CMTE_TP
+                                )
+                                && !in_array($committee->id, ['C00618371', 'C00618389'])
+                            )
                         )
                     ) {
                         continue;

@@ -37,6 +37,8 @@ class Receipt extends Donor
     #[PropMeta(9)]
     public bool $itemized = false;
     #[PropMeta(10)]
+    public bool $escrow = false;
+    #[PropMeta(11)]
     public ReceiptSource $source = ReceiptSource::AB;
     private ScheduleAReceipt|ItemizedIndividualReceipt|null $originalReceipt = null;
 
@@ -58,6 +60,7 @@ class Receipt extends Donor
         $self->zip = $receipt->contributor_zip;
         $self->occupation = $receipt->contributor_occupation;
         $self->employer = $receipt->contributor_employer;
+        $self->escrow = str_starts_with($receipt->memo_text, 'EARMARKED FOR DEMOCRATIC NOMINEE FOR');
 
         return $self;
     }

@@ -12,19 +12,19 @@ class Donor extends Entity
 {
     #[PropMeta(0)]
     public int $id = 0;
-    #[PropMeta(11)]
-    public string $name = '';
     #[PropMeta(12)]
-    public string $address = '';
+    public string $name = '';
     #[PropMeta(13)]
-    public string $city = '';
+    public string $address = '';
     #[PropMeta(14)]
-    public string $state = '';
+    public string $city = '';
     #[PropMeta(15)]
-    public string $zip = '';
+    public string $state = '';
     #[PropMeta(16)]
-    public string $occupation = '';
+    public string $zip = '';
     #[PropMeta(17)]
+    public string $occupation = '';
+    #[PropMeta(18)]
     public string $employer = '';
 
     public function getDonorHash(): string

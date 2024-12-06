@@ -8,7 +8,7 @@ use GuzzleHttp\Psr7\Stream;
 
 require_once __DIR__.'/../../vendor/autoload.php';
 
-call_user_func(function () {
+call_user_func(function (int ...$yearsToUpdate) {
     $chunkSize = 1024 * 1024;
 
     $downloader = new Downloader();
@@ -26,11 +26,19 @@ call_user_func(function () {
     foreach ($urls as $url) {
         echo "Downloading from $url ... ";
 
-        $destination = __DIR__.'/../../data/bulk-data/'.basename($url);
+        $destination = __DIR__.'/../../fec/_bulk/'.basename($url);
 
         if (is_file($destination)) {
-            echo 'already saved'.\PHP_EOL;
-            continue;
+            $valid = array_reduce(
+                $yearsToUpdate,
+                static fn (bool $carry, int $year): bool => $carry || str_contains($url, (string) $year),
+                false
+            );
+
+            if (!$valid) {
+                echo 'already saved'.\PHP_EOL;
+                continue;
+            }
         }
 
         $stream = $downloader->download($url);
@@ -48,4 +56,4 @@ call_user_func(function () {
         $stream->close();
         $output->close();
     }
-});
+}, 2024);

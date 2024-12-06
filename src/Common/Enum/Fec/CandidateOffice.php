@@ -23,7 +23,7 @@ enum CandidateOffice: string
             [$office->getSlug() => $office->value]
         ), []);
 
-        $slugs['leadership'] = 'L';
+        $slugs['leader'] = 'L';
 
         return $slugs;
     }

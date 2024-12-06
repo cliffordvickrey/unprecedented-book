@@ -143,7 +143,7 @@ class CommitteeProperties extends Entity implements \Countable
     public function getOfficeSlug(): string
     {
         if ($this->isLeadership) {
-            return CommitteeDesignation::D->getSlug();
+            return 'leader';
         }
 
         return $this->candidateOffice?->getSlug() ?? 'unknown';

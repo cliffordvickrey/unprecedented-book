@@ -22,7 +22,7 @@ call_user_func(function () {
     /** @var array<int, array<string, list<string>>> $slugsByYearAndJurisdiction */
     $slugsByYearAndJurisdiction = JsonUtilities::jsonDecode($json);
 
-    $cycles = [2012, 2014, 2016, 2018, 2020, 2022];
+    $cycles = [2012, 2014, 2016, 2018, 2020, 2022, 2024];
 
     $years = [];
 
