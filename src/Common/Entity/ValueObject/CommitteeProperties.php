@@ -27,6 +27,23 @@ class CommitteeProperties extends Entity implements \Countable
     public const string PART_DISTRICT = 'district';
     public const string PART_YEAR = 'year';
 
+    /**
+     * Committees with hardcoded slugs (for ease of analysis).
+     *
+     * @var array<string, string>
+     */
+    private static array $hardCodedSlugs = [
+        'C00867937' => 'donald_trump-47_committee',
+        'C00580100' => 'donald_trump-make_america_great_again_pac',
+        'C00618371' => 'donald_trump-trump_make_america_great_again_committee',
+        'C00873893' => 'donald_trump-trump_national_committee',
+        'C00770941' => 'donald_trump-trump_save_america',
+        'C00618389' => 'donald_trump-trump_victory',
+        'C00703975' => 'kamala_harris-pres-2024',
+        'C00838912' => 'kamala_harris-harris_action_fund',
+        'C00744946' => 'kamala_harris-harris_victory_fund',
+    ];
+
     public string $id = '';
     public string $name = '';
     public ?CommitteeDesignation $committeeDesignation = null;
@@ -122,6 +139,10 @@ class CommitteeProperties extends Entity implements \Countable
 
     public function getSlug(): string
     {
+        if (isset(self::$hardCodedSlugs[$this->id])) {
+            return self::$hardCodedSlugs[$this->id];
+        }
+
         $candidateSlug = (CommitteeDesignation::J !== $this->committeeDesignation || \count($this) < 2)
             ? $this->candidateSlug
             : null;

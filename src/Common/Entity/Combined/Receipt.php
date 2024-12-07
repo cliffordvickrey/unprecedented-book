@@ -134,9 +134,31 @@ class Receipt extends Donor
 
     public function setCommitteeAggregate(CommitteeAggregate $committeeAggregate): void
     {
+        /** @phpstan-var array<string, true> $committeesSharedByBidenAndHarris */
+        static $committeesSharedByBidenAndHarris = [
+            'C00703975' => true, // (HARRIS|BIDEN) FOR PRESIDENT
+            'C00744946' => true, // (HARRIS|BIDEN) VICTORY FUND
+            'C00838912' => true, // (HARRIS|BIDEN) ACTION FUND
+        ];
+
         $this->committee_slug = $committeeAggregate->slug;
-        $this->candidate_slug = $committeeAggregate->getCandidateSlug();
         $this->fec_committee_id = $committeeAggregate->id;
+
+        $committeeIsSharedByBidenAndHarris = isset($committeesSharedByBidenAndHarris[$this->fec_committee_id]);
+
+        if ($committeeIsSharedByBidenAndHarris && $this->transaction_date->format('Y-m-d') > '2024-07-20') {
+            $this->candidate_slug = 'kamala_harris';
+            $this->fec_candidate_id = 'P00009423';
+
+            return;
+        } elseif ($committeeIsSharedByBidenAndHarris) {
+            $this->candidate_slug = 'joe_biden';
+            $this->fec_candidate_id = 'P80000722';
+
+            return;
+        }
+
+        $this->candidate_slug = $committeeAggregate->getCandidateSlug();
         $this->fec_candidate_id = $committeeAggregate->getCandidateIdByYear($this->getElectionCycle());
     }
 

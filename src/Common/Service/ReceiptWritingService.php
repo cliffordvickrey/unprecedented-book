@@ -7,9 +7,8 @@ namespace CliffordVickrey\Book2024\Common\Service;
 use CliffordVickrey\Book2024\Common\Csv\ChunkedCsvWriter;
 use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
-use Webmozart\Assert\Assert;
 
-class ReceiptWritingService implements ReceiptWritingServiceInterface
+class ReceiptWritingService extends AbstractReceiptService implements ReceiptWritingServiceInterface
 {
     private readonly ChunkedCsvWriter $writer;
     /** @var array<string, string> */
@@ -34,10 +33,10 @@ class ReceiptWritingService implements ReceiptWritingServiceInterface
 
     public function write(Receipt $receipt): void
     {
-        $this->writer->push($this->getFilename($receipt), $receipt->toArray(true));
+        $this->writer->push($this->filename($receipt), $receipt->toArray(true));
     }
 
-    private function getFilename(Receipt $receipt): string
+    private function filename(Receipt $receipt): string
     {
         $filenameKey = self::getFilenameKey($receipt);
 
@@ -47,7 +46,7 @@ class ReceiptWritingService implements ReceiptWritingServiceInterface
             return $filename;
         }
 
-        $filename = self::resolveFilename($receipt);
+        $filename = $this->getFilename($receipt->committee_slug, (bool) $receipt->donor_id);
         $this->filenames[$filenameKey] = $filename;
         $this->writer->push($filename, Receipt::headers());
 
@@ -57,22 +56,5 @@ class ReceiptWritingService implements ReceiptWritingServiceInterface
     private static function getFilenameKey(Receipt $receipt): string
     {
         return \sprintf('%d|%s', $receipt->donor_id ? 1 : 0, $receipt->committee_slug);
-    }
-
-    private static function resolveFilename(Receipt $receipt): string
-    {
-        $slug = preg_replace('/[^a-zA-Z0-9_-]/', '', $receipt->committee_slug);
-        Assert::stringNotEmpty($slug);
-
-        $leading = 'pac';
-
-        if (str_contains($slug, '-')) {
-            $leading = 'cand';
-        }
-
-        $dir = $receipt->donor_id ? 'receipts' : '_receipts';
-        $subDir = "$leading-".substr($slug, 0, 1);
-
-        return __DIR__."/../../../data/$dir/$subDir/$slug.csv";
     }
 }

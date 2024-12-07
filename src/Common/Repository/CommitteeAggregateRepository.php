@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Repository;
 
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CommitteeAggregate;
-use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
+use CliffordVickrey\Book2024\Common\Enum\CommitteeGenre;
 use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
@@ -45,6 +45,49 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
         return $this->getAggregate($slug);
     }
 
+    /**
+     * @return array<string, string>
+     */
+    private function getSlugsByCommitteeId(): array
+    {
+        $this->slugsByCommitteeId ??= $this->resolveSlugsByCommitteeId();
+
+        return $this->slugsByCommitteeId;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function resolveSlugsByCommitteeId(): array
+    {
+        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-committee-id.json';
+
+        if (is_file($filename)) {
+            $json = FileUtilities::getContents($filename);
+
+            return JsonUtilities::jsonDecode($json);
+        }
+
+        $map = $this->mapSlugsByCommitteeId();
+
+        FileUtilities::saveContents($filename, JsonUtilities::jsonEncode($map, true));
+
+        return $map;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function mapSlugsByCommitteeId(): array
+    {
+        // @phpstan-ignore-next-line
+        return array_reduce(
+            $this->getAllSlugs(),
+            fn (array $carry, string $slug) => array_merge($carry, [$this->getAggregate($slug)->id => $slug]),
+            []
+        );
+    }
+
     public function getByCommitteeName(
         string $committeeName,
         ?int $year = null,
@@ -78,16 +121,6 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
     }
 
     /**
-     * @return array<string, string>
-     */
-    private function getSlugsByCommitteeId(): array
-    {
-        $this->slugsByCommitteeId ??= $this->resolveSlugsByCommitteeId();
-
-        return $this->slugsByCommitteeId;
-    }
-
-    /**
      * @return array<string, array<int, list<string>>>
      */
     private function getSlugsByCommitteeNameAndYear(): array
@@ -95,26 +128,6 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
         $this->slugsByCommitteeNameAndYear ??= $this->resolveSlugsByCommitteeNameAndYear();
 
         return $this->slugsByCommitteeNameAndYear;
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private function resolveSlugsByCommitteeId(): array
-    {
-        $filename = $this->getDirname().\DIRECTORY_SEPARATOR.'slugs-by-committee-id.json';
-
-        if (is_file($filename)) {
-            $json = FileUtilities::getContents($filename);
-
-            return JsonUtilities::jsonDecode($json);
-        }
-
-        $map = $this->mapSlugsByCommitteeId();
-
-        FileUtilities::saveContents($filename, JsonUtilities::jsonEncode($map, true));
-
-        return $map;
     }
 
     /**
@@ -175,19 +188,6 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
         );
     }
 
-    /**
-     * @return array<string, string>
-     */
-    private function mapSlugsByCommitteeId(): array
-    {
-        // @phpstan-ignore-next-line
-        return array_reduce(
-            $this->getAllSlugs(),
-            fn (array $carry, string $slug) => array_merge($carry, [$this->getAggregate($slug)->id => $slug]),
-            []
-        );
-    }
-
     protected function getDirectory(): string
     {
         return 'cm';
@@ -200,21 +200,6 @@ final class CommitteeAggregateRepository extends AggregateRepository implements 
 
     protected function getSubDir(string $slug): string
     {
-        /** @phpstan-var array<string, string> $officeSlugs */
-        static $officeSlugs = CandidateOffice::getSlugs();
-
-        $trailing = parent::getSubDir($slug);
-
-        $leading = 'pac';
-
-        $parts = explode('-', $slug);
-
-        $officeParts = explode('_', $parts[1] ?? '');
-
-        if (isset($officeSlugs[$officeParts[0]])) {
-            $leading = 'cand';
-        }
-
-        return \sprintf('%s-%s', $leading, $trailing);
+        return \sprintf('%s-%s', CommitteeGenre::fromSlug($slug)->value, parent::getSubDir($slug));
     }
 }

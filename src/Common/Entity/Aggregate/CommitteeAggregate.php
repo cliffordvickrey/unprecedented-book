@@ -106,6 +106,11 @@ class CommitteeAggregate extends Aggregate
             return array_shift($parts);
         }
 
+        // we have special joint fundraising committees that don't comport with the regular slug pattern; handle them
+        if ('donald_trump' === $officeParts[0] || 'kamala_harris' === $officeParts[0]) {
+            return array_shift($parts);
+        }
+
         return null;
     }
 
