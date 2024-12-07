@@ -10,7 +10,7 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
 use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
-use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
+use CliffordVickrey\Book2024\Common\Enum\CommitteeGenre;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use Webmozart\Assert\Assert;
 
@@ -93,25 +93,20 @@ class CommitteeAggregate extends Aggregate
         )));
     }
 
+    public function getGenre(): CommitteeGenre
+    {
+        return CommitteeGenre::fromSlug($this->slug);
+    }
+
     public function getCandidateSlug(): ?string
     {
-        /** @phpstan-var array<string, string> $officeSlugs */
-        static $officeSlugs = CandidateOffice::getSlugs();
+        if (CommitteeGenre::cand !== $this->getGenre()) {
+            return null;
+        }
 
         $parts = explode('-', $this->slug);
 
-        $officeParts = explode('_', $parts[1] ?? '');
-
-        if (\count($parts) > 1 && isset($officeSlugs[$officeParts[0]])) {
-            return array_shift($parts);
-        }
-
-        // we have special joint fundraising committees that don't comport with the regular slug pattern; handle them
-        if ('donald_trump' === $officeParts[0] || 'kamala_harris' === $officeParts[0]) {
-            return array_shift($parts);
-        }
-
-        return null;
+        return $parts[0];
     }
 
     public function getCandidateIdByYear(int $year): ?string
