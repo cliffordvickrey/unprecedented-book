@@ -9,6 +9,7 @@ use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepositoryInterface;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
+use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 
 class ReceiptReadingService extends AbstractReceiptService implements ReceiptReadingServiceInterface
 {
@@ -20,7 +21,7 @@ class ReceiptReadingService extends AbstractReceiptService implements ReceiptRea
     {
         $slug = $this->getRepository()->getByCommitteeId($committeeId)->slug;
 
-        return $this->readByCommitteeSlug($slug);
+        return $this->readByCommitteeSlug($slug, $withDonorIds);
     }
 
     private function getRepository(): CommitteeAggregateRepositoryInterface
@@ -32,7 +33,9 @@ class ReceiptReadingService extends AbstractReceiptService implements ReceiptRea
 
     public function readByCommitteeSlug(string $committeeSlug, bool $withDonorIds = true): \Generator
     {
-        $filename = $this->getFilename($committeeSlug, $withDonorIds);
+        $filename = FileUtilities::getAbsoluteCanonicalPath($this->getFilename($committeeSlug, $withDonorIds));
+
+        printf('Reading %s%s', $filename, \PHP_EOL);
 
         $reader = new CsvReader($filename);
         $headers = array_map(\strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
@@ -40,6 +43,7 @@ class ReceiptReadingService extends AbstractReceiptService implements ReceiptRea
 
         while ($reader->valid()) {
             yield Receipt::__set_state(array_combine($headers, $reader->current()));
+            $reader->next();
         }
 
         $reader->close();
