@@ -27,6 +27,42 @@ class Donor extends Entity
     #[PropMeta(18)]
     public string $employer = '';
 
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+
+        if ('' === $this->name) {
+            $this->name = StringUtilities::md5($this->id); // ensure uniqueness
+        }
+    }
+
+    public function getSlug(): string
+    {
+        return $this->state.'_'.$this->getSurname();
+    }
+
+    public function getSurname(): string
+    {
+        $nameParts = explode(',', $this->name, 2);
+
+        return array_shift($nameParts);
+    }
+
+    public function normalize(): void
+    {
+        // ensure state is two digits
+        if (2 !== \strlen($this->state)) {
+            $this->state = 'ZZ';
+        }
+
+        // ensure ZIP is zero-padded
+        if ('' !== $this->zip && \strlen($this->zip) < 6) {
+            $this->zip = str_pad($this->zip, 5, '0');
+        } elseif (\strlen($this->zip) > 5) {
+            $this->zip = str_pad($this->zip, 9, '0');
+        }
+    }
+
     public function getDonorHash(): string
     {
         return StringUtilities::md5([
@@ -38,13 +74,6 @@ class Donor extends Entity
             'occupation' => $this->occupation,
             'employer' => $this->employer,
         ]);
-    }
-
-    public function getSurname(): string
-    {
-        $nameParts = explode(',', $this->name, 2);
-
-        return array_shift($nameParts);
     }
 
     public function getZip5(): string

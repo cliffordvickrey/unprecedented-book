@@ -53,14 +53,16 @@ class Receipt extends Donor
 
         $self->transaction_date = $receipt->contribution_receipt_date;
         $self->amount = $receipt->contribution_receipt_amount;
-        $self->name = $receipt->contributor_name;
-        $self->address = $receipt->contributor_street_1;
-        $self->city = $receipt->contributor_city;
-        $self->state = $receipt->contributor_state;
-        $self->zip = $receipt->contributor_zip;
-        $self->occupation = $receipt->contributor_occupation;
-        $self->employer = $receipt->contributor_employer;
-        $self->escrow = str_starts_with($receipt->memo_text, 'EARMARKED FOR DEMOCRATIC NOMINEE FOR');
+        $self->name = strtoupper(trim($receipt->contributor_name));
+        $self->address = strtoupper(trim($receipt->contributor_street_1));
+        $self->city = strtoupper(trim($receipt->contributor_city));
+        $self->state = strtoupper(trim($receipt->contributor_state));
+        $self->zip = strtoupper(trim($receipt->contributor_zip));
+        $self->occupation = strtoupper(trim($receipt->contributor_occupation));
+        $self->employer = strtoupper(trim($receipt->contributor_employer));
+        $self->escrow = str_starts_with(trim($receipt->memo_text), 'EARMARKED FOR DEMOCRATIC NOMINEE FOR');
+
+        $self->normalize();
 
         return $self;
     }
@@ -82,13 +84,15 @@ class Receipt extends Donor
         $self->amount = (float) $receipt->TRANSACTION_AMT;
         $self->source = ReceiptSource::BK;
 
-        $self->name = (string) $receipt->NAME;
-        $self->city = (string) $receipt->CITY;
-        $self->state = (string) $receipt->STATE;
-        $self->zip = (string) $receipt->ZIP_CODE;
-        $self->occupation = (string) $receipt->OCCUPATION;
-        $self->employer = (string) $receipt->EMPLOYER;
+        $self->name = strtoupper(trim((string) $receipt->NAME));
+        $self->city = strtoupper(trim((string) $receipt->CITY));
+        $self->state = strtoupper(trim((string) $receipt->STATE));
+        $self->zip = strtoupper(trim((string) $receipt->ZIP_CODE));
+        $self->occupation = strtoupper(trim((string) $receipt->OCCUPATION));
+        $self->employer = strtoupper(trim((string) $receipt->EMPLOYER));
         $self->itemized = true;
+
+        $self->normalize();
 
         return $self;
     }

@@ -28,7 +28,7 @@ chdir(__DIR__);
 
 call_user_func(function (bool $debug = false) {
     // election cycles to use
-    $cycles = [2022, 2024];
+    $cycles = [2012, 2014, 2016, 2018, 2020, 2022, 2024];
 
     // a bunch of abstractions
     $candidateAggregateRepository = new CandidateAggregateRepository();
@@ -75,7 +75,7 @@ call_user_func(function (bool $debug = false) {
         static $id = 0;
 
         // write receipt
-        $receipt->id = ++$id;
+        $receipt->setId(++$id);
         $receiptWriter->write($receipt);
 
         // parse donors
