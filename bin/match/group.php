@@ -60,6 +60,7 @@ call_user_func(function () {
         $state = (string) CastingUtilities::toString($state);
 
         $surnames = array_keys($surnamesMap);
+        unset($surnamesByState[$state]);
         sort($surnames);
 
         foreach ($surnames as $i => $surname) {

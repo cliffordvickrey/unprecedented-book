@@ -50,7 +50,13 @@ class Donor extends Entity
     {
         $nameParts = explode(',', $this->name, 2);
 
-        return array_shift($nameParts);
+        $surname = array_shift($nameParts);
+
+        if (is_numeric($surname)) {
+            return "_$surname";
+        }
+
+        return $surname;
     }
 
     public function normalize(): void
