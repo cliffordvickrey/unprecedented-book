@@ -39,7 +39,7 @@ call_user_func(function () {
             $surnamesByState[$donor->state] = [];
         }
 
-        $surname = $donor->getSurname();
+        $surname = $donor->getNormalizedSurname();
 
         if (!isset($surnamesByState[$donor->state][$surname])) {
             $surnamesByState[$donor->state][$surname] = true;
@@ -57,8 +57,6 @@ call_user_func(function () {
     $writer = new CsvWriter(__DIR__.'/../../data/csv/donor-groups.csv');
 
     foreach ($surnamesByState as $state => $surnamesMap) {
-        $state = (string) CastingUtilities::toString($state);
-
         $surnames = array_keys($surnamesMap);
         unset($surnamesByState[$state]);
         sort($surnames);

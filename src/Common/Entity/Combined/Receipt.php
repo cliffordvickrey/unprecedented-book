@@ -185,7 +185,7 @@ class Receipt extends Donor
             $this->fec_committee_id,
             $this->transaction_date->format('Y-m-d'),
             $this->amount,
-            $this->getSurname(),
+            $this->getNormalizedSurname(),
             $this->getZip5(),
         ]);
     }

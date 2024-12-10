@@ -7,6 +7,7 @@ namespace CliffordVickrey\Book2024\Common\Entity\Combined;
 use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
+use Webmozart\Assert\Assert;
 
 class Donor extends Entity
 {
@@ -43,17 +44,25 @@ class Donor extends Entity
 
     public function getGroupSlug(): string
     {
-        return self::groupSlugify($this->state, $this->getSurname());
+        return self::groupSlugify($this->state, $this->getNormalizedSurname());
     }
 
     public function getSurname(): string
     {
         $nameParts = explode(',', $this->name, 2);
 
-        $surname = array_shift($nameParts);
+        return array_shift($nameParts);
+    }
 
-        if (is_numeric($surname)) {
-            return "_$surname";
+    public function getNormalizedSurname(): string
+    {
+        $surname = preg_replace('/[\'’`]/', '', $this->getSurname());
+        Assert::string($surname);
+        $surname = preg_replace('/[^A-Z]/', '_', $surname);
+        Assert::string($surname);
+
+        if ('' === $surname) {
+            return '_';
         }
 
         return $surname;
@@ -62,7 +71,7 @@ class Donor extends Entity
     public function normalize(): void
     {
         // ensure state is two digits
-        if (2 !== \strlen($this->state)) {
+        if (!preg_match('/^[A-Z]{2}$/', $this->state)) {
             $this->state = 'ZZ';
         }
 
