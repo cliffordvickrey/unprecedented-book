@@ -66,7 +66,7 @@ call_user_func(function () {
             printf('%s%s', str_repeat('-', 80), \PHP_EOL);
             printf('ID %d: %s - %s%s', ++$counter, $state, $surname, \PHP_EOL);
             $matchedSurnames = [$surname];
-            unset($matchedSurnames[$i]);
+            unset($surnames[$i]);
 
             foreach ($surnames as $ii => $surnameToMatch) {
                 if (!$matchService->areSurnamesSimilar($surname, $surnameToMatch)) {
@@ -75,7 +75,7 @@ call_user_func(function () {
 
                 printf('ID %d: %s - %s%s', $counter, $state, $surnameToMatch, \PHP_EOL);
                 $matchedSurnames[] = $surnameToMatch;
-                unset($matchedSurnames[$ii]);
+                unset($surnames[$ii]);
             }
 
             array_walk($matchedSurnames, fn ($matchedSurname) => $writer->write([
