@@ -3,22 +3,87 @@
 declare(strict_types=1);
 
 use CliffordVickrey\Book2024\Common\Csv\CsvReader;
+use CliffordVickrey\Book2024\Common\Csv\CsvWriter;
 use CliffordVickrey\Book2024\Common\Entity\Combined\Donor;
+use CliffordVickrey\Book2024\Common\Service\MatchService;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
+use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+ini_set('memory_limit', '-1');
+
+require_once __DIR__.'/../../vendor/autoload.php';
+chdir(__DIR__);
 
 call_user_func(function () {
-    $reader = new CsvReader(__DIR__ . '/../../data/csv/_unique-donors.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/_unique-donors.csv');
     $headers = array_map(strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
     $reader->next();
 
+    $matchService = new MatchService();
+
+    /** @var array<string, array<string, bool>> $surnamesByState */
+    $surnamesByState = [];
+
+    $counter = 0;
+
     while ($reader->valid()) {
         $donor = Donor::__set_state(array_combine($headers, $reader->current()));
-        printf('%s%s', $donor->getSlug(), PHP_EOL);
+
+        ++$counter;
+
+        if (0 === $counter % 1000000) {
+            printf('Loaded %s donors%s', StringUtilities::numberFormat($counter), \PHP_EOL);
+        }
+
+        if (!isset($surnamesByState[$donor->state])) {
+            $surnamesByState[$donor->state] = [];
+        }
+
+        $surname = $donor->getSurname();
+
+        if (!isset($surnamesByState[$donor->state][$surname])) {
+            $surnamesByState[$donor->state][$surname] = true;
+        }
+
         $reader->next();
     }
 
+    ksort($surnamesByState);
+
     $reader->close();
 
+    $counter = 0;
+
+    $writer = new CsvWriter(__DIR__.'/../../data/csv/donor-groups.csv');
+
+    foreach ($surnamesByState as $state => $surnamesMap) {
+        $state = (string) CastingUtilities::toString($state);
+
+        $surnames = array_keys($surnamesMap);
+        sort($surnames);
+
+        foreach ($surnames as $i => $surname) {
+            printf('%s%s', str_repeat('-', 80), \PHP_EOL);
+            printf('ID %d: %s - %s%s', ++$counter, $state, $surname, \PHP_EOL);
+            $matchedSurnames = [$surname];
+            unset($matchedSurnames[$i]);
+
+            foreach ($surnames as $ii => $surnameToMatch) {
+                if (!$matchService->areSurnamesSimilar($surname, $surnameToMatch)) {
+                    continue;
+                }
+
+                printf('ID %d: %s - %s%s', $counter, $state, $surnameToMatch, \PHP_EOL);
+                $matchedSurnames[] = $surnameToMatch;
+                unset($matchedSurnames[$ii]);
+            }
+
+            array_walk($matchedSurnames, fn ($matchedSurname) => $writer->write([
+                Donor::groupSlugify($state, $matchedSurname),
+                $counter,
+            ]));
+        }
+    }
+
+    $writer->close();
 });

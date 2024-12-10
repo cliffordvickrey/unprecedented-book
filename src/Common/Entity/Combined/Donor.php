@@ -36,9 +36,14 @@ class Donor extends Entity
         }
     }
 
-    public function getSlug(): string
+    public static function groupSlugify(string $state, string $surname): string
     {
-        return $this->state.'_'.$this->getSurname();
+        return "{$state}_$surname";
+    }
+
+    public function getGroupSlug(): string
+    {
+        return self::groupSlugify($this->state, $this->getSurname());
     }
 
     public function getSurname(): string

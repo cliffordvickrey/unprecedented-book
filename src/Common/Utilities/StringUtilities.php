@@ -169,4 +169,11 @@ class StringUtilities
             'zip4' => (\strlen($zipCode) > 5 ? substr($zipCode, 5) : null) ?: null,
         ];
     }
+
+    public static function similarText(string $a, string $b): float
+    {
+        similar_text($a, $b, $percentMatch);
+
+        return $percentMatch;
+    }
 }
