@@ -33,18 +33,8 @@ class Donor extends Entity
         $this->id = $id;
 
         if ('' === $this->name) {
-            $this->name = StringUtilities::md5($this->id); // ensure uniqueness
+            $this->name = StringUtilities::nonce($this->id); // ensure uniqueness
         }
-    }
-
-    public static function groupSlugify(string $state, string $surname): string
-    {
-        return "{$state}_$surname";
-    }
-
-    public function getGroupSlug(): string
-    {
-        return self::groupSlugify($this->state, $this->getNormalizedSurname());
     }
 
     public function getSurname(): string

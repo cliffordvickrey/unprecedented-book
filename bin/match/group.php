@@ -78,7 +78,8 @@ call_user_func(function () {
             }
 
             array_walk($matchedSurnames, fn ($matchedSurname) => $writer->write([
-                Donor::groupSlugify($state, $matchedSurname),
+                $state,
+                $surname,
                 $counter,
             ]));
         }

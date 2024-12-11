@@ -58,19 +58,6 @@ class StringUtilities
     }
 
     /**
-     * @param int<0, max> $decimals
-     */
-    public static function numberFormat(mixed $val, int $decimals = 0): string
-    {
-        return number_format((float) CastingUtilities::toFloat($val), $decimals);
-    }
-
-    public static function md5(mixed $val): string
-    {
-        return md5(serialize($val));
-    }
-
-    /**
      * @return ParsedName
      */
     private static function parseCandidateName(string $name): array
@@ -128,6 +115,19 @@ class StringUtilities
         }, $parsed);
     }
 
+    /**
+     * @param int<0, max> $decimals
+     */
+    public static function numberFormat(mixed $val, int $decimals = 0): string
+    {
+        return number_format((float) CastingUtilities::toFloat($val), $decimals);
+    }
+
+    public static function md5(mixed $val): string
+    {
+        return md5(serialize($val));
+    }
+
     public static function slugify(string $str, ?int $maxLength = null): string
     {
         // 1. remove non-alphanumeric characters (except spaces)
@@ -175,5 +175,20 @@ class StringUtilities
         similar_text($a, $b, $percentMatch);
 
         return $percentMatch;
+    }
+
+    public static function nonce(int $seed, int $length = 32): string
+    {
+        /** @phpstan-var string $characters */
+        static $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $nonce = '';
+
+        srand($seed);
+
+        for ($i = 0; $i < $length; ++$i) {
+            $nonce .= $characters[rand(0, 25)];
+        }
+
+        return $nonce;
     }
 }
