@@ -79,7 +79,7 @@ call_user_func(function () {
 
             array_walk($matchedSurnames, fn ($matchedSurname) => $writer->write([
                 $state,
-                $surname,
+                $matchedSurname,
                 $counter,
             ]));
         }
