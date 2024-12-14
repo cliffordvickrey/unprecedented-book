@@ -153,13 +153,6 @@ call_user_func(function (bool $debug = false) {
                 continue;
             }
 
-            // no amount: skip
-            $amount = (float) $itemizedReceipt->TRANSACTION_AMT;
-
-            if ($amount <= 0.0) {
-                continue;
-            }
-
             // ensure contribution (so exclude refunds, loans, and other shenanigans)
             if (!$itemizedReceipt->TRANSACTION_TP?->isContribution()) {
                 continue;

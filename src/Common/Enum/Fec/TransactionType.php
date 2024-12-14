@@ -117,11 +117,14 @@ enum TransactionType: string
     public function isContribution(): bool
     {
         return TransactionType::_10 === $this   // super PAC
-            || TransactionType::_11 === $this   // Native American tribe
             || TransactionType::_15 === $this   // individual
             || TransactionType::_15C === $this  // from candidate
             || TransactionType::_15E === $this  // earmarked
-            || TransactionType::_24I === $this  // intermediary out
-            || TransactionType::_24T === $this; // treasury out
+            || TransactionType::_30 === $this   // convention account
+            || TransactionType::_30E === $this  // convention account (earmarked)
+            || TransactionType::_31 === $this   // headquarters account
+            || TransactionType::_31E === $this  // headquarters account (earmarked)
+            || TransactionType::_32 === $this   // recount account
+            || TransactionType::_32E === $this; // recount account (earmarked)
     }
 }
