@@ -179,12 +179,17 @@ class Receipt extends Donor
         return $year + 1;
     }
 
+    public function getAmountFloor(): int
+    {
+        return (int) floor($this->amount);
+    }
+
     public function getReceiptHash(): string
     {
         return StringUtilities::md5([
             $this->fec_committee_id,
             $this->transaction_date->format('Y-m-d'),
-            $this->amount,
+            $this->getAmountFloor(),
             $this->getNormalizedSurname(),
             $this->getZip5(),
         ]);

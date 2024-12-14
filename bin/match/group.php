@@ -11,8 +11,8 @@ use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
 ini_set('memory_limit', '-1');
 
-require_once __DIR__.'/../../vendor/autoload.php';
 chdir(__DIR__);
+require_once __DIR__.'/../../vendor/autoload.php';
 
 call_user_func(function () {
     $reader = new CsvReader(__DIR__.'/../../data/csv/_unique-donors.csv');

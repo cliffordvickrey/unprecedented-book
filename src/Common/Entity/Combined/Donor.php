@@ -41,7 +41,7 @@ class Donor extends Entity
     {
         $nameParts = explode(',', $this->name, 2);
 
-        return array_shift($nameParts);
+        return trim(array_shift($nameParts));
     }
 
     public function getNormalizedSurname(): string
