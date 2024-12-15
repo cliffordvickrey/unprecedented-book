@@ -126,6 +126,13 @@ call_user_func(function (bool $debug = false) {
         /** @var array<string, list<TransactionType>> $smallItemizedReceiptTypes */
         $smallItemizedReceiptTypes = [];
 
+        // keep track of transaction types
+        /** @var array<string, array<string, int>> $transactionTypesBySource */
+        $transactionTypesBySource = [
+            ReceiptSource::AB->value => [],
+            ReceiptSource::WR->value => [],
+        ];
+
         // weird memos writer
         $irregularMemosWriter = new CsvWriter(sprintf('%s/../../data/etc/irregular-memos%d.csv', __DIR__, $cycle));
 
@@ -253,6 +260,15 @@ call_user_func(function (bool $debug = false) {
                 $unItemizedReceipt = ScheduleAReceipt::__set_state(array_combine($unItemizedHeaders, $row));
 
                 $receipt = Receipt::fromScheduleAReceipt($unItemizedReceipt);
+
+                $transactionTypeStr = $unItemizedReceipt->receipt_type->value ?? 'none';
+
+                if (!isset($transactionTypesBySource[$source->value][$transactionTypeStr])) {
+                    $transactionTypesBySource[$source->value][$transactionTypeStr] = 0;
+                } else {
+                    ++$transactionTypesBySource[$source->value][$transactionTypeStr];
+                }
+
                 $receipt->source = $source;
 
                 $memo = trim(strtoupper($unItemizedReceipt->memo_text));
@@ -521,6 +537,18 @@ call_user_func(function (bool $debug = false) {
         }
 
         $memosWriter->close();
+
+        // dump transaction types
+        $transactionTypesWriter = new CsvWriter(sprintf('%s/../../data/etc/transaction-types%d.csv', __DIR__, $cycle));
+        $transactionTypesWriter->write(['source', 'type', 'ct']);
+
+        foreach ($transactionTypesBySource as $source => $transactionTypes) {
+            foreach ($transactionTypes as $transactionType => $ct) {
+                $transactionTypesWriter->write([$source, $transactionType, $ct]);
+            }
+        }
+
+        $transactionTypesWriter->close();
 
         // save imputed totals
         $slugs = $committeeAggregateRepository->getAllSlugs();

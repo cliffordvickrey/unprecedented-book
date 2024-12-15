@@ -46,11 +46,6 @@ class Receipt extends Donor
     {
         $self = new self();
         $self->originalReceipt = $receipt;
-
-        if (null !== $receipt->receipt_type) {
-            $self->transaction_type = $receipt->receipt_type;
-        }
-
         $self->transaction_date = $receipt->contribution_receipt_date;
         $self->amount = $receipt->contribution_receipt_amount;
         $self->name = strtoupper(trim($receipt->contributor_name));
@@ -179,11 +174,6 @@ class Receipt extends Donor
         return $year + 1;
     }
 
-    public function getAmountFloor(): int
-    {
-        return (int) floor($this->amount);
-    }
-
     public function getReceiptHash(): string
     {
         return StringUtilities::md5([
@@ -193,5 +183,10 @@ class Receipt extends Donor
             $this->getNormalizedSurname(),
             $this->getZip5(),
         ]);
+    }
+
+    public function getAmountFloor(): int
+    {
+        return (int) floor($this->amount);
     }
 }
