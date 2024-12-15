@@ -182,7 +182,7 @@ call_user_func(function (bool $debug = false) {
                     $smallItemizedReceiptTypes[$hash] = [$receipt->transaction_type];
                 } else {
                     ++$smallItemizedReceipts[$hash];
-                    $smallItemizedReceiptTypes[$hash][] = [$receipt->transaction_type];
+                    $smallItemizedReceiptTypes[$hash][] = $receipt->transaction_type;
                 }
 
                 $smallItemizedReceiptWriter->write([$hash, $smallItemizedReceipts[$hash], ...$receipt->toArray(true)]);
