@@ -11,6 +11,7 @@ use CliffordVickrey\Book2024\Common\Entity\FecApi\ScheduleAReceipt;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\ItemizedIndividualReceipt;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\Jurisdiction;
+use CliffordVickrey\Book2024\Common\Enum\Fec\TransactionType;
 use CliffordVickrey\Book2024\Common\Enum\ReceiptSource;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
@@ -122,6 +123,8 @@ call_user_func(function (bool $debug = false) {
             __DIR__,
             $cycle
         ));
+        /** @var array<string, list<TransactionType>> $smallItemizedReceiptTypes */
+        $smallItemizedReceiptTypes = [];
 
         // weird memos writer
         $irregularMemosWriter = new CsvWriter(sprintf('%s/../../data/etc/irregular-memos%d.csv', __DIR__, $cycle));
@@ -176,8 +179,10 @@ call_user_func(function (bool $debug = false) {
 
                 if (!isset($smallItemizedReceipts[$hash])) {
                     $smallItemizedReceipts[$hash] = 1;
+                    $smallItemizedReceiptTypes[$hash] = [$receipt->transaction_type];
                 } else {
                     ++$smallItemizedReceipts[$hash];
+                    $smallItemizedReceiptTypes[$hash][] = [$receipt->transaction_type];
                 }
 
                 $smallItemizedReceiptWriter->write([$hash, $smallItemizedReceipts[$hash], ...$receipt->toArray(true)]);
@@ -403,8 +408,12 @@ call_user_func(function (bool $debug = false) {
                         printf('Merging %s (%s)%s', $receipt->getReceiptHash(), $receipt->committee_slug, \PHP_EOL);
                     }
 
+                    $transactionType = array_shift($smallItemizedReceiptTypes[$hash]);
+                    Assert::isInstanceOf($transactionType, TransactionType::class);
+                    $receipt->transaction_type = $transactionType;
+
                     if (1 === $smallItemizedReceipts[$hash]) {
-                        unset($smallItemizedReceipts[$hash]);
+                        unset($smallItemizedReceipts[$hash], $smallItemizedReceiptTypes[$hash]);
                     } else {
                         --$smallItemizedReceipts[$hash];
                     }
