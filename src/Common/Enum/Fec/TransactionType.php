@@ -114,17 +114,53 @@ enum TransactionType: string
     case _42T = '42T'; // Recount Account refund to Native American Tribe
     case _42Z = '42Z'; // Recount Account refund to registered filer
 
-    public function isContribution(): bool
+    public function isLine11A(): bool
     {
-        return TransactionType::_10 === $this   // super PAC
-            || TransactionType::_15 === $this   // individual
-            || TransactionType::_15C === $this  // from candidate
-            || TransactionType::_15E === $this  // earmarked
-            || TransactionType::_30 === $this   // convention account
-            || TransactionType::_30E === $this  // convention account (earmarked)
-            || TransactionType::_31 === $this   // headquarters account
-            || TransactionType::_31E === $this  // headquarters account (earmarked)
-            || TransactionType::_32 === $this   // recount account
-            || TransactionType::_32E === $this; // recount account (earmarked)
+        return self::_10 === $this
+            || self::_11 === $this
+            || self::_15 === $this
+            || self::_15E === $this;
+    }
+
+    /**
+     * Includes:
+     * 1. Individual receipts (form 3X, line 11A). Note: Native American tribes are deemed individuals in these filings
+     * 2. Other federal receipts from individuals (form 3X, line 17).
+     * 3. Candidate contributions (form 3X, line 11D)
+     *
+     * What gets excluded are:
+     *
+     * 1. Refunds
+     * 2. Memos (describe other line items rather than represent the receipts themselves)
+     * 3. Treasury/intermediate out (these are expenditures, not receipts)
+     * 4. Loans
+     * 5. Receipts from those other than individuals, naturally!
+     *
+     * @see https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/
+     */
+    public function isIndividualContribution(): bool
+    {
+        return self::_10 === $this   // contribution *to* super PAC
+            || self::_11 === $this   // from Native American Tribe
+            || self::_15 === $this   // from individual
+            || self::_15C === $this  // from candidate
+            || self::_15E === $this  // individual earmarked
+            || self::_30 === $this   // convention account
+            || self::_30E === $this  // convention account (earmarked)
+            || self::_30T === $this  // convention account (Native American tribe)
+            || self::_31 === $this   // headquarters account
+            || self::_31E === $this  // headquarters account (earmarked)
+            || self::_31T === $this  // headquarters account (Native American tribe)
+            || self::_32 === $this   // recount account
+            || self::_32E === $this  // recount account (earmarked)
+            || self::_32T === $this; // recount account (Native American tribe)
+    }
+
+    public function isEarmarkedIndividualContribution(): bool
+    {
+        return self::_15E === $this  // individual earmarked
+            || self::_30E === $this  // convention account (earmarked)
+            || self::_31E === $this  // headquarters account (earmarked)
+            || self::_32E === $this; // recount account (earmarked)
     }
 }

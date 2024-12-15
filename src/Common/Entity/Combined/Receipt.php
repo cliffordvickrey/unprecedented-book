@@ -101,7 +101,7 @@ class Receipt extends Donor
     {
         return (
             ReceiptSource::BK !== $this->source
-            || TransactionType::_15E === $this->transaction_type
+            || $this->transaction_type->isEarmarkedIndividualContribution()
             || (
                 TransactionType::_15 === $this->transaction_type
                 && (

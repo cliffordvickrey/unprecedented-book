@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
 declare(strict_types=1);
@@ -137,7 +138,7 @@ call_user_func(function () {
             /** @var Receipt $receipt */
             $period = $dates[$receipt->transaction_date->format('Y-m-d')] ?? null;
 
-            if (null === $period) {
+            if (null === $period || !$receipt->transaction_type->isLine11A()) {
                 continue;
             }
 

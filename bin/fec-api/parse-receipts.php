@@ -154,7 +154,7 @@ call_user_func(function (bool $debug = false) {
             }
 
             // ensure contribution (so exclude refunds, loans, and other shenanigans)
-            if (!$itemizedReceipt->TRANSACTION_TP?->isContribution()) {
+            if (!$itemizedReceipt->TRANSACTION_TP?->isIndividualContribution()) {
                 continue;
             }
 
