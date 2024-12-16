@@ -114,14 +114,6 @@ enum TransactionType: string
     case _42T = '42T'; // Recount Account refund to Native American Tribe
     case _42Z = '42Z'; // Recount Account refund to registered filer
 
-    public function isLine11A(): bool
-    {
-        return self::_10 === $this
-            || self::_11 === $this
-            || self::_15 === $this
-            || self::_15E === $this;
-    }
-
     /**
      * Includes:
      * 1. Individual receipts (form 3X, line 11A). Note: Native American tribes are deemed individuals in these filings
@@ -140,12 +132,22 @@ enum TransactionType: string
      */
     public function isIndividualContribution(): bool
     {
-        return self::_10 === $this   // contribution *to* super PAC
-            || self::_11 === $this   // from Native American Tribe
-            || self::_15 === $this   // from individual
-            || self::_15C === $this  // from candidate
-            || self::_15E === $this  // individual earmarked
-            || self::_30 === $this   // convention account
+        return $this->isLine11A()   // individual contribution
+            || self::_15C === $this // from the candidate
+            || $this->isLine7();    // to a special federal account
+    }
+
+    public function isLine11A(): bool
+    {
+        return self::_10 === $this   // to Super PAC
+            || self::_11 === $this   // from Native American tribe
+            || self::_15 === $this   // individual contribution to candidate/PAC
+            || self::_15E === $this; // earmarked individual receipt
+    }
+
+    public function isLine7(): bool
+    {
+        return self::_30 === $this   // convention account
             || self::_30E === $this  // convention account (earmarked)
             || self::_30T === $this  // convention account (Native American tribe)
             || self::_31 === $this   // headquarters account

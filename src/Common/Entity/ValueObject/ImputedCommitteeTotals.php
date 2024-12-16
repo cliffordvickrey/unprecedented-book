@@ -21,6 +21,9 @@ class ImputedCommitteeTotals extends Entity
     public float $unItemizedWinRed = 0.0;
     public float $itemizedBulkUnder200 = 0.0;
     public float $itemizedBulkEqualToOrGreaterTo200 = 0.0;
+    public float $otherFederalReceiptsActBlue = 0.0;
+    public float $otherFederalReceiptsWinRed = 0.0;
+    public float $otherFederalReceiptsBulk = 0.0;
     /** @var array<string, float> */
     public array $apiTotalsByMemo = [];
     /** @var array<string, float> */
@@ -104,10 +107,27 @@ class ImputedCommitteeTotals extends Entity
             );
         }
 
+        $otherFederalAccount = $receipt->transaction_type->isLine7();
+
         switch (true) {
             case TransactionType::_15C === $receipt->transaction_type:
                 // candidate contribution
                 $this->candidateContributions = MathUtilities::add($this->candidateContributions, $amt);
+
+                return;
+            case ReceiptSource::AB === $receipt->source && $otherFederalAccount:
+                // ActBlue other federal account
+                $this->otherFederalReceiptsActBlue = MathUtilities::add($this->itemizedActBlue, $amt);
+
+                return;
+            case ReceiptSource::WR === $receipt->source && $otherFederalAccount:
+                // WinRed other federal account
+                $this->otherFederalReceiptsWinRed = MathUtilities::add($this->otherFederalReceiptsWinRed, $amt);
+
+                return;
+            case $otherFederalAccount:
+                // bulk other federal account
+                $this->otherFederalReceiptsBulk = MathUtilities::add($this->otherFederalReceiptsBulk, $amt);
 
                 return;
             case ReceiptSource::AB === $receipt->source && $receipt->itemized:
