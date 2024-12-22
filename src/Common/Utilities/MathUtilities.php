@@ -61,4 +61,9 @@ class MathUtilities
 
         return true;
     }
+
+    public static function chunkId(int $n, int $size): int
+    {
+        return (int) ceil($n / $size);
+    }
 }

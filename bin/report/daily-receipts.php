@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 use CliffordVickrey\Book2024\Common\Csv\CsvWriter;
+use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Service\ReceiptReadingService;
 use CliffordVickrey\Book2024\Common\Utilities\DateUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
@@ -33,7 +34,7 @@ call_user_func(function () {
     ];
 
     $startDate = '2022-11-15';
-    $endDate = '2024-09-30';
+    $endDate = '2024-10-16';
 
     $report = [];
 
@@ -46,9 +47,10 @@ call_user_func(function () {
                 $receipts = $service->readByCommitteeId($committeeId, withDonorIds: false);
 
                 foreach ($receipts as $receipt) {
+                    /** @var Receipt $receipt */
                     $dt = $receipt->transaction_date->format('Y-m-d');
 
-                    if ($dt < $startDate || $dt > $endDate) {
+                    if ($dt < $startDate || $dt > $endDate || !$receipt->transaction_type->isLine11A()) {
                         continue;
                     }
 

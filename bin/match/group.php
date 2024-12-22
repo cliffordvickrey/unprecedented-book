@@ -62,20 +62,26 @@ call_user_func(function () {
         unset($surnamesByState[$state]);
         sort($surnames);
 
-        foreach ($surnames as $i => $surname) {
+        $surnamesIndexed = array_combine($surnames, $surnames);
+
+        foreach ($surnames as $surname) {
+            if (!isset($surnamesIndexed[$surname])) {
+                continue;
+            }
+
             printf('%s%s', str_repeat('-', 80), \PHP_EOL);
             printf('ID %d: %s - %s%s', ++$counter, $state, $surname, \PHP_EOL);
             $matchedSurnames = [$surname];
-            unset($surnames[$i]);
+            unset($surnamesIndexed[$surname]);
 
-            foreach ($surnames as $ii => $surnameToMatch) {
+            foreach ($surnamesIndexed as $surnameToMatch) {
                 if (!$matchService->areSurnamesSimilar($surname, $surnameToMatch)) {
                     continue;
                 }
 
                 printf('ID %d: %s - %s%s', $counter, $state, $surnameToMatch, \PHP_EOL);
                 $matchedSurnames[] = $surnameToMatch;
-                unset($surnames[$ii]);
+                unset($surnamesIndexed[$surnameToMatch]);
             }
 
             array_walk($matchedSurnames, fn ($matchedSurname) => $writer->write([
