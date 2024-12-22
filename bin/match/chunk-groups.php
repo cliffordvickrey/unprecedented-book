@@ -14,11 +14,11 @@ use Webmozart\Assert\Assert;
 ini_set('memory_limit', '-1');
 
 chdir(__DIR__);
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__.'/../../vendor/autoload.php';
 
 call_user_func(function (int $chunkSize = 500) {
     // load groups into memory
-    $groupReader = new CsvReader(__DIR__ . '/../../data/csv/donor-groups.csv');
+    $groupReader = new CsvReader(__DIR__.'/../../data/csv/donor-groups.csv');
 
     /** @var array<string, array<string, int>> $groupIds */
     $groupIds = [];
@@ -52,7 +52,7 @@ call_user_func(function (int $chunkSize = 500) {
     }
 
     // split donors into chunks
-    $donorReader = new CsvReader(__DIR__ . '/../../data/csv/_unique-donors.csv');
+    $donorReader = new CsvReader(__DIR__.'/../../data/csv/_unique-donors.csv');
     $donorHeaders = array_map(strval(...), array_map(CastingUtilities::toString(...), $donorReader->current()));
     $donorReader->next();
 
@@ -70,7 +70,7 @@ call_user_func(function (int $chunkSize = 500) {
         $groupId = $groupIds[$state][$surname] ?? null;
         Assert::integer($groupId, sprintf('Missing group for %s / %s', $state, $surname));
 
-        $chunkId = MathUtilities::chunkId($groupId - $minGroupIdByState[$state] - 1, $chunkSize);
+        $chunkId = MathUtilities::chunkId($groupId - ($minGroupIdByState[$state] - 1), $chunkSize);
 
         $filename = sprintf('/../../data/_donors/%s/chunk%05d.csv', $state, $chunkId);
 
