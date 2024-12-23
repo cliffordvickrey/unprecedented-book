@@ -16,7 +16,7 @@ ini_set('memory_limit', '-1');
 chdir(__DIR__);
 require_once __DIR__.'/../../vendor/autoload.php';
 
-call_user_func(function (int $chunkSize = 500) {
+call_user_func(function (int $chunkSize = 250) {
     // load groups into memory
     $groupReader = new CsvReader(__DIR__.'/../../data/csv/donor-groups.csv');
 
@@ -39,7 +39,7 @@ call_user_func(function (int $chunkSize = 500) {
 
         $groupIds[$state][$surname] = $groupId;
 
-        $minGroupIdByState[$state] = min($minGroupIdByState[$state] ?? 0, $groupId);
+        $minGroupIdByState[$state] = min($minGroupIdByState[$state] ?? $groupId, $groupId);
     }
 
     $groupReader->close();
@@ -48,7 +48,7 @@ call_user_func(function (int $chunkSize = 500) {
     $path = __DIR__.'/../../data/_donors';
 
     if (is_dir($path)) {
-        FileUtilities::unlink($path);
+        FileUtilities::unlink($path, recursive: true);
     }
 
     // split donors into chunks
@@ -72,7 +72,7 @@ call_user_func(function (int $chunkSize = 500) {
 
         $chunkId = MathUtilities::chunkId($groupId - ($minGroupIdByState[$state] - 1), $chunkSize);
 
-        $filename = sprintf('/../../data/_donors/%s/chunk%05d.csv', $state, $chunkId);
+        $filename = sprintf('%s/%s/chunk%05d.csv', $path, $state, $chunkId);
 
         if (!isset($filenames[$filename])) {
             $filenames[$filename] = true;

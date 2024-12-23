@@ -1,2 +1,5 @@
 *
 !.gitignore
+!csv/
+!csv/memos*.csv
+!csv/nominees.csv

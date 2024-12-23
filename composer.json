@@ -30,7 +30,7 @@
     }
   ],
   "scripts": {
-    "analyse": "vendor/bin/phpstan analyse",
+    "analyse": "vendor/bin/phpstan analyse --memory-limit 2147483648",
     "check": "vendor/bin/php-cs-fixer fix check",
     "fix": "vendor/bin/php-cs-fixer fix"
   }
