@@ -51,11 +51,11 @@ class MatchServiceTest extends TestCase
         $donor->id = (int) $id;
         $donor->name = 'VANDELAY, ART';
         $donor->address = '2880 BROADWAY';
-        $donor->employer = 'VANDELAY ENTERPRISES';
-        $donor->occupation = 'IMPORTER';
         $donor->city = 'NEW YORK';
         $donor->state = 'NY';
         $donor->zip = '10025-1000';
+        $donor->employer = 'VANDELAY ENTERPRISES';
+        $donor->occupation = 'IMPORTER';
 
         return $donor;
     }
