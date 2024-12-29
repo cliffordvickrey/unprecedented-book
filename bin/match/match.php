@@ -19,7 +19,7 @@ chdir(__DIR__);
 require_once __DIR__.'/../../vendor/autoload.php';
 
 call_user_func(function () {
-    $matchWriter = new CsvWriter(__DIR__.'/../../data/matches.csv');
+    $matchWriter = new CsvWriter(__DIR__.'/../../data/csv/matches.csv');
     $matchWriter->write(['id', 'similarity_score', 'donor_a', 'donor_b']);
 
     /**
@@ -34,7 +34,6 @@ call_user_func(function () {
         /** @phpstan-var MatchService $matchService */
         static $matchService = new MatchService();
 
-        printf('%s%s', str_repeat('-', 80), \PHP_EOL);
         printf(
             'Matching %s possible donors in group%s',
             StringUtilities::numberFormat(count($donorsByHash)),
@@ -78,12 +77,15 @@ call_user_func(function () {
     $sorter = static fn (Donor $a, Donor $b) => strcmp($a->address ? '0' : '1', $b->address ? '0' : '1')
         ?: strnatcmp($a->name, $b->name);
 
-    $donorChunks = FileIterator::getFilenames(__DIR__.'/../../data/csv/_unique-donors.csv');
+    $donorChunks = FileIterator::getFilenames(__DIR__.'/../../data/_donors');
 
     $uniqueDonorWriter = new CsvWriter(__DIR__.'/../../data/csv/donor-ids.csv');
     $uniqueDonorWriter->write(['hash', ...Donor::headers()]);
 
     array_walk($donorChunks, function (string $filename) use ($uniqueDonorWriter, $reducer, $sorter) {
+        printf('%s%s', str_repeat('-', 80), \PHP_EOL);
+        printf('Parsing %s...%s', $filename, \PHP_EOL);
+
         $donorReader = new CsvReader($filename);
         $donorHeaders = array_map(strval(...), array_map(CastingUtilities::toString(...), $donorReader->current()));
         $donorReader->next();

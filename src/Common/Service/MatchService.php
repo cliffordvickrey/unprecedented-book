@@ -48,9 +48,9 @@ class MatchService implements MatchServiceInterface
             $percent *= (1 / (1 - $this->options->employerFactor));
         }
 
-        $id = $percent >= $this->options->minimumNameSimilarity ? $a->id : null;
+        $id = $percent >= $this->options->threshold ? $a->id : null;
 
-        return new MatchResult($a, $b, $percent, $id);
+        return new MatchResult($a, $b, round($percent, 4), $id);
     }
 
     private static function compareLocales(Donor $a, Donor $b): float
