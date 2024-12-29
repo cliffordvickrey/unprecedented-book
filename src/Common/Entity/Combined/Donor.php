@@ -28,6 +28,11 @@ class Donor extends Entity implements \Stringable
     #[PropMeta(18)]
     public string $employer = '';
 
+    private static function isNotEmptyString(string $str): bool
+    {
+        return '' !== $str;
+    }
+
     public function setId(int $id): void
     {
         $this->id = $id;
@@ -91,6 +96,57 @@ class Donor extends Entity implements \Stringable
         return StringUtilities::parseZip($this->zip)['zip5'];
     }
 
+    public function __toString(): string
+    {
+        $employment = $this->getFullEmployment();
+
+        if ('' !== $employment) {
+            $employment = "($employment)";
+        }
+
+        return self::concatenate([
+            $this->name,
+            '-',
+            $this->getFullAddress(),
+            $employment,
+        ]);
+    }
+
+    public function getFullEmployment(): string
+    {
+        $employment = $this->occupation;
+
+        if ('' !== $employment && '' !== $this->employer) {
+            $employment .= ' AT';
+        }
+
+        return self::concatenate([$employment, $this->employer]);
+    }
+
+    /**
+     * @param list<string> $strings
+     */
+    private static function concatenate(array $strings): string
+    {
+        return implode(' ', array_filter($strings, self::isNotEmptyString(...)));
+    }
+
+    public function getFullAddress(): string
+    {
+        $address = $this->address;
+
+        if ('' !== $this->address && '' !== $this->city) {
+            $address .= ',';
+        }
+
+        return self::concatenate([
+            $address,
+            $this->city,
+            $this->state,
+            $this->getZip(),
+        ]);
+    }
+
     public function getZip(): string
     {
         $zipParts = StringUtilities::parseZip($this->zip);
@@ -102,55 +158,5 @@ class Donor extends Entity implements \Stringable
         }
 
         return $zip;
-    }
-
-    public function getFullAddress(): string
-    {
-        $address = $this->address;
-
-        if ('' !== $this->address && '' !== $this->city) {
-            $address .= ', ';
-        }
-
-        return implode(' ', array_filter([
-            $address,
-            $this->city,
-            $this->state,
-            $this->getZip(),
-        ], self::isNotEmptyString(...)));
-    }
-
-    public function getFullEmployment(): string
-    {
-        $employment = $this->occupation;
-
-        if ('' !== $employment && '' !== $this->employer) {
-            $employment .= ' AT';
-        }
-
-        return implode(' ', array_filter([$employment, $this->employer], self::isNotEmptyString(...)));
-    }
-
-    private static function isNotEmptyString(string $str): bool
-    {
-        return '' !== $str;
-    }
-
-    public function __toString(): string
-    {
-        $employment = $this->getFullEmployment();
-
-        if ('' !== $employment) {
-            $employment = "($employment)";
-        }
-
-        $parts = array_values(array_filter([
-            $this->name,
-            '-',
-            $this->getFullAddress(),
-            $employment,
-        ], self::isNotEmptyString(...)));
-
-        return implode(' ', $parts);
     }
 }
