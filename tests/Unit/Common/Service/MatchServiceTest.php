@@ -54,7 +54,7 @@ class MatchServiceTest extends TestCase
         $donor->city = 'NEW YORK';
         $donor->state = 'NY';
         $donor->zip = '10025-1000';
-        $donor->employer = 'VANDELAY ENTERPRISES';
+        $donor->employer = 'VANDELAY INDUSTRIES';
         $donor->occupation = 'IMPORTER';
 
         return $donor;
