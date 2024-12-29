@@ -48,15 +48,15 @@ class MatchServiceTest extends TestCase
     private static function mockDonor(?int $id = null): Donor
     {
         $donor = new Donor();
-        $donor->id = (int)$id;
+        $donor->id = (int) $id;
         $donor->name = 'VANDELAY, ART';
-        $donor->address = "2880 BROADWAY";
+        $donor->address = '2880 BROADWAY';
         $donor->employer = 'VANDELAY ENTERPRISES';
         $donor->occupation = 'IMPORTER';
         $donor->city = 'NEW YORK';
         $donor->state = 'NY';
         $donor->zip = '10025-1000';
+
         return $donor;
     }
-
 }

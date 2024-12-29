@@ -16,6 +16,7 @@ return (new PhpCsFixer\Config())
         (new PhpCsFixer\Finder())
             ->in(__DIR__.'/src')
             ->in(__DIR__.'/bin')
+            ->in(__DIR__.'/tests')
             ->append([__FILE__])
     )
     ->setCacheFile('.php-cs-fixer.cache');
