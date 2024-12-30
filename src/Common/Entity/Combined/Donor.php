@@ -7,8 +7,12 @@ namespace CliffordVickrey\Book2024\Common\Entity\Combined;
 use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
-use Webmozart\Assert\Assert;
 
+/**
+ * @phpstan-type NameParts array{first: string, last: string}
+ *
+ * @phpstan-import-type ZipCode from StringUtilities
+ */
 class Donor extends Entity implements \Stringable
 {
     #[PropMeta(0)]
@@ -27,6 +31,15 @@ class Donor extends Entity implements \Stringable
     public string $occupation = '';
     #[PropMeta(18)]
     public string $employer = '';
+    /** @var NameParts|null */
+    private ?array $normalizedNameParts = null;
+    /** @phpstan-var ZipCode|null */
+    private ?array $parsedZip = null;
+
+    private static function normalizeName(string $name): string
+    {
+        return StringUtilities::slugify($name, uppercase: true);
+    }
 
     private static function isNotEmptyString(string $str): bool
     {
@@ -44,23 +57,30 @@ class Donor extends Entity implements \Stringable
 
     public function getNormalizedSurname(): string
     {
-        $surname = preg_replace('/[\'’`]/', '', $this->getSurname());
-        Assert::string($surname);
-        $surname = preg_replace('/[^A-Z]/', '_', $surname);
-        Assert::string($surname);
-
-        if ('' === $surname) {
-            return '_';
-        }
-
-        return $surname;
+        return $this->getNormalizedNameParts()['last'];
     }
 
-    public function getSurname(): string
+    /**
+     * @return NameParts
+     */
+    public function getNormalizedNameParts(): array
+    {
+        $this->normalizedNameParts ??= array_map(self::normalizeName(...), $this->getNameParts());
+
+        return $this->normalizedNameParts;
+    }
+
+    /**
+     * @return NameParts
+     */
+    public function getNameParts(): array
     {
         $nameParts = explode(',', $this->name, 2);
 
-        return trim(array_shift($nameParts));
+        $last = trim($nameParts[0]);
+        $first = trim($nameParts[1] ?? '');
+
+        return ['first' => $first, 'last' => $last];
     }
 
     public function normalize(): void
@@ -147,9 +167,19 @@ class Donor extends Entity implements \Stringable
         ]);
     }
 
+    /**
+     * @return ZipCode
+     */
+    public function getParsedZip(): array
+    {
+        $this->parsedZip ??= StringUtilities::parseZip($this->zip);
+
+        return $this->parsedZip;
+    }
+
     public function getZip(): string
     {
-        $zipParts = StringUtilities::parseZip($this->zip);
+        $zipParts = $this->getParsedZip();
 
         $zip = $zipParts['zip5'];
 

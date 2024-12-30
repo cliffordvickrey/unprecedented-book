@@ -23,6 +23,34 @@ class MathUtilities
     /**
      * @param int<0, max> $precision
      */
+    public static function subtract(mixed $minuend, mixed $subtrahend, int $precision = 2): float
+    {
+        $sum = bcsub(
+            CastingUtilities::toNumericString($minuend),
+            CastingUtilities::toNumericString($subtrahend),
+            $precision + 1
+        );
+
+        return self::round($sum, $precision);
+    }
+
+    /**
+     * @param int<0, max> $precision
+     */
+    public static function multiply(mixed $multiplicand, mixed $multiplier, int $precision = 2): float
+    {
+        $sum = bcmul(
+            CastingUtilities::toNumericString($multiplicand),
+            CastingUtilities::toNumericString($multiplier),
+            $precision + 1
+        );
+
+        return self::round($sum, $precision);
+    }
+
+    /**
+     * @param int<0, max> $precision
+     */
     public static function divide(mixed $dividend, mixed $divisor, int $precision = 2): float
     {
         $fltDivisor = CastingUtilities::toFloat($divisor);

@@ -25,20 +25,22 @@ class MatchServiceTest extends TestCase
         self::assertEquals(0.9611, $result->similarityScore);
         self::assertEquals(100, $result->id);
 
+        $b = self::mockDonor();
         $b->name = 'COSTANZA, GEORGE';
         $result = $matchService->compare($a, $b);
 
-        self::assertEquals(0.668, $result->similarityScore);
+        self::assertEquals(0.6111, $result->similarityScore);
         self::assertNull($result->id);
 
-        $b = clone $a;
-        $b->zip = '10025-2000';
+        $b = self::mockDonor();
+        $b->zip = '100252000';
         $result = $matchService->compare($a, $b);
 
         self::assertEquals(0.92, $result->similarityScore);
         self::assertEquals(100, $result->id);
 
-        $b->zip = '99999-2000';
+        $b = self::mockDonor();
+        $b->zip = '999992000';
         $result = $matchService->compare($a, $b);
 
         self::assertEquals(0.84, $result->similarityScore);

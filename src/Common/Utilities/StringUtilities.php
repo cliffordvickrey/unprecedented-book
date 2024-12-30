@@ -128,9 +128,9 @@ class StringUtilities
         return md5(serialize($val));
     }
 
-    public static function slugify(string $str, ?int $maxLength = null): string
+    public static function slugify(string $str, ?int $maxLength = null, bool $uppercase = false): string
     {
-        // 1. remove non-alphanumeric characters (except spaces)
+        // 1. remove non-alphanumeric characters (except spaces and hyphens)
         $slug = preg_replace('/[^\p{L}\p{N}\s-]/u', '', $str);
         Assert::string($slug);
 
@@ -145,10 +145,13 @@ class StringUtilities
         $slug = iconv('UTF-8', 'ASCII//TRANSLIT', $slug);
         Assert::string($slug);
 
-        // 5. Convert to lowercase
-        $slug = strtolower($slug);
+        // 5. Convert to lowercase or uppercase
+        $slug = $uppercase ? strtoupper($slug) : strtolower($slug);
 
-        // 6. Enforce maximum length
+        // 6. Trim underscores
+        $slug = trim($slug, '_');
+
+        // 7. Enforce maximum length
         if (null !== $maxLength) {
             $slug = substr($slug, 0, $maxLength);
         }
@@ -172,9 +175,13 @@ class StringUtilities
 
     public static function similarText(string $a, string $b): float
     {
+        if ($a === $b) {
+            return 1.0;
+        }
+
         similar_text($a, $b, $percentMatch);
 
-        return $percentMatch;
+        return $percentMatch / 100.0;
     }
 
     public static function nonce(int $seed, int $length = 32): string
