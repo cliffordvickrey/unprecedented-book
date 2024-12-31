@@ -10,8 +10,6 @@ use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
 /**
  * @phpstan-type NameParts array{first: string, last: string}
- *
- * @phpstan-import-type ZipCode from StringUtilities
  */
 class Donor extends Entity implements \Stringable
 {
@@ -31,10 +29,6 @@ class Donor extends Entity implements \Stringable
     public string $occupation = '';
     #[PropMeta(18)]
     public string $employer = '';
-    /** @var NameParts|null */
-    private ?array $normalizedNameParts = null;
-    /** @phpstan-var ZipCode|null */
-    private ?array $parsedZip = null;
 
     private static function normalizeName(string $name): string
     {
@@ -65,9 +59,7 @@ class Donor extends Entity implements \Stringable
      */
     public function getNormalizedNameParts(): array
     {
-        $this->normalizedNameParts ??= array_map(self::normalizeName(...), $this->getNameParts());
-
-        return $this->normalizedNameParts;
+        return array_map(self::normalizeName(...), $this->getNameParts());
     }
 
     /**
@@ -167,19 +159,9 @@ class Donor extends Entity implements \Stringable
         ]);
     }
 
-    /**
-     * @return ZipCode
-     */
-    public function getParsedZip(): array
-    {
-        $this->parsedZip ??= StringUtilities::parseZip($this->zip);
-
-        return $this->parsedZip;
-    }
-
     public function getZip(): string
     {
-        $zipParts = $this->getParsedZip();
+        $zipParts = StringUtilities::parseZip($this->zip);
 
         $zip = $zipParts['zip5'];
 

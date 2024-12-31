@@ -9,37 +9,83 @@ use CliffordVickrey\Book2024\Common\Entity\Combined\Donor;
 use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
+/**
+ * @phpstan-type NameParts array{0: string, 1: string}
+ *
+ * @phpstan-import-type ZipCode from StringUtilities
+ */
 class MatchService implements MatchServiceInterface
 {
-    private MatchOptions $options;
+    public const int GC_COUNT = 100000000;
 
-    public function __construct(?MatchOptions $options = null)
-    {
+    private MatchOptions $options;
+    /** @var array<string, float> */
+    private array $similarTextMemo = [];
+    /** @var \WeakMap<Donor, NameParts> */
+    private \WeakMap $nameParts;
+    /** @var \WeakMap<Donor, ZipCode> */
+    private \WeakMap $zipCodes;
+    private int $gcCounter = 0;
+
+    public function __construct(
+        ?MatchOptions $options = null,
+        private readonly int $gcCount = self::GC_COUNT,
+    ) {
         $this->options = $options ?? new MatchOptions();
+        $this->nameParts = new \WeakMap();
+        $this->zipCodes = new \WeakMap();
     }
 
     public function areSurnamesSimilar(string $a, string $b): bool
     {
-        $similar = StringUtilities::similarText($a, $b);
+        ++$this->gcCounter;
+
+        if ($this->gcCounter > $this->gcCount) {
+            $this->similarTextMemo = [];
+        }
+
+        $similar = $this->similarText($a, $b);
 
         return $similar >= $this->options->minimumSurnameSimilarity;
     }
 
+    private function similarText(string $a, string $b): float
+    {
+        $key = "$a|$b";
+
+        if (isset($this->similarTextMemo[$key])) {
+            return $this->similarTextMemo[$key];
+        }
+
+        $similarText = StringUtilities::similarText($a, $b);
+
+        $this->similarTextMemo[$key] = $similarText;
+        $this->similarTextMemo["$b|$a"] = $similarText;
+
+        return $similarText;
+    }
+
     public function compare(Donor $a, Donor $b): MatchResult
     {
-        $namePercent = self::compareNames($a, $b);
+        ++$this->gcCounter;
+
+        if ($this->gcCounter > $this->gcCount) {
+            $this->similarTextMemo = [];
+        }
+
+        $namePercent = $this->compareNames($a, $b);
         $localePercent = self::compareLocales($a, $b);
 
         $occupationPercent = 1.0;
 
         if ('' !== $a->occupation && '' !== $b->occupation) {
-            $occupationPercent = StringUtilities::similarText($a->occupation, $b->occupation);
+            $occupationPercent = $this->similarText($a->occupation, $b->occupation);
         }
 
         $employerPercent = 1.0;
 
         if ('' !== $a->employer && '' !== $b->employer) {
-            $employerPercent = StringUtilities::similarText($a->employer, $b->employer);
+            $employerPercent = $this->similarText($a->employer, $b->employer);
         }
 
         $nameFactor = $this->options->nameFactor;
@@ -63,23 +109,35 @@ class MatchService implements MatchServiceInterface
         return new MatchResult($a, $b, round($percent, 4), $id);
     }
 
-    private static function compareNames(Donor $a, Donor $b): float
+    private function compareNames(Donor $a, Donor $b): float
     {
-        [$firstA, $lastA] = array_values($a->getNormalizedNameParts());
-        [$firstB, $lastB] = array_values($b->getNormalizedNameParts());
+        [$firstA, $lastA] = $this->getNormalizedNameParts($a);
+        [$firstB, $lastB] = $this->getNormalizedNameParts($b);
 
-        $pctFirst = StringUtilities::similarText($firstA, $firstB);
-        $pctLast = StringUtilities::similarText($lastA, $lastB);
+        $pctFirst = $this->similarText($firstA, $firstB);
+        $pctLast = $this->similarText($lastA, $lastB);
 
         return min($pctFirst, $pctLast);
     }
 
-    private static function compareLocales(Donor $a, Donor $b): float
+    /**
+     * @return NameParts
+     */
+    private function getNormalizedNameParts(Donor $donor): array
+    {
+        if (!isset($this->nameParts[$donor])) {
+            $this->nameParts[$donor] = array_values($donor->getNormalizedNameParts());
+        }
+
+        return $this->nameParts[$donor];
+    }
+
+    private function compareLocales(Donor $a, Donor $b): float
     {
         $localePercent = 0.0;
 
-        $zipA = $a->getParsedZip();
-        $zipB = $b->getParsedZip();
+        $zipA = $this->getParsedZip($a);
+        $zipB = $this->getParsedZip($b);
 
         $zip4Mismatch = null !== $zipA['zip4'] && null !== $zipB['zip4'] && $zipA['zip4'] !== $zipB['zip4'];
 
@@ -87,17 +145,29 @@ class MatchService implements MatchServiceInterface
             $localePercent += $zip4Mismatch ? .20 : .40;
         }
 
-        $cityPercent = StringUtilities::similarText($a->city, $b->city);
+        $cityPercent = $this->similarText($a->city, $b->city);
 
         $localePercent += ($cityPercent * .35);
 
         if ('' !== $a->address && '' !== $b->address) {
-            $addressPercent = StringUtilities::similarText($a->address, $b->address);
+            $addressPercent = $this->similarText($a->address, $b->address);
             $localePercent += ($addressPercent * .25);
         } else {
             $localePercent *= (100 / 75);
         }
 
         return $localePercent;
+    }
+
+    /**
+     * @return ZipCode
+     */
+    private function getParsedZip(Donor $donor): array
+    {
+        if (!isset($this->zipCodes[$donor])) {
+            $this->zipCodes[$donor] = StringUtilities::parseZip($donor->zip);
+        }
+
+        return $this->zipCodes[$donor];
     }
 }
