@@ -16,12 +16,15 @@ use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
  */
 class MatchService implements MatchServiceInterface
 {
+    private const string CACHE_TYPE_A = 'a';
+    private const string CACHE_TYPE_B = 'b';
+
     public const int GC_COUNT = 100000;
-    public const int MAX_MEMORY = 1073741824;
+    public const int MAX_MEMORY = 8589934592;
 
     private MatchOptions $options;
-    /** @var array<string, float> */
-    private array $similarTextMemo = [];
+    /** @var array<self::CACHE_TYPE_*, array<string, float>> */
+    private array $similarTextMemo = [self::CACHE_TYPE_A => [], self::CACHE_TYPE_B => []];
     /** @var \WeakMap<Donor, NameParts> */
     private \WeakMap $nameParts;
     /** @var \WeakMap<Donor, ZipCode> */
@@ -54,23 +57,33 @@ class MatchService implements MatchServiceInterface
     {
         $this->gcCounter = 0;
 
-        if (memory_get_usage() > $this->maxMemory) {
-            $this->similarTextMemo = [];
+        $types = array_reverse(array_keys($this->similarTextMemo));
+
+        foreach ($types as $type) {
+            if (memory_get_usage() < $this->maxMemory) {
+                return;
+            }
+
+            $this->similarTextMemo[$type] = [];
+            gc_collect_cycles();
         }
     }
 
-    private function similarText(string $a, string $b): float
+    /**
+     * @param self::CACHE_TYPE_* $cacheType
+     */
+    private function similarText(string $a, string $b, string $cacheType = self::CACHE_TYPE_A): float
     {
         $key = "$a|$b";
 
-        if (isset($this->similarTextMemo[$key])) {
-            return $this->similarTextMemo[$key];
+        if (isset($this->similarTextMemo[$cacheType][$key])) {
+            return $this->similarTextMemo[$cacheType][$key];
         }
 
         $similarText = StringUtilities::similarText($a, $b);
 
-        $this->similarTextMemo[$key] = $similarText;
-        $this->similarTextMemo["$b|$a"] = $similarText;
+        $this->similarTextMemo[$cacheType][$key] = $similarText;
+        $this->similarTextMemo[$cacheType]["$b|$a"] = $similarText;
 
         return $similarText;
     }
@@ -158,7 +171,8 @@ class MatchService implements MatchServiceInterface
         $localePercent += ($cityPercent * .35);
 
         if ('' !== $a->address && '' !== $b->address) {
-            $addressPercent = $this->similarText($a->address, $b->address);
+            // memoized string similarity scores are evicted from the cache first
+            $addressPercent = $this->similarText($a->address, $b->address, cacheType: self::CACHE_TYPE_B);
             $localePercent += ($addressPercent * .25);
         } else {
             $localePercent *= (100 / 75);

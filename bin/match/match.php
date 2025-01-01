@@ -10,6 +10,7 @@ use CliffordVickrey\Book2024\Common\Service\MatchResult;
 use CliffordVickrey\Book2024\Common\Service\MatchService;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\FileIterator;
+use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 use Webmozart\Assert\Assert;
 
@@ -34,9 +35,12 @@ call_user_func(function () {
         /** @phpstan-var MatchService $matchService */
         static $matchService = new MatchService();
 
+        $k = count($donorsByHash);
+
         printf(
-            'Matching %s possible donors in group...',
-            StringUtilities::numberFormat(count($donorsByHash)),
+            'Matching %s possible donor%s in group...',
+            StringUtilities::numberFormat($k),
+            1 === $k ? '' : 's'
         );
 
         /** @var array<string, Donor> $donorsByHash */
@@ -73,7 +77,17 @@ call_user_func(function () {
 
         $idsGenerated = $lastGeneratedId - $firstGeneratedId;
 
-        printf('done! %s unique IDs generated%s', StringUtilities::numberFormat($idsGenerated), \PHP_EOL);
+        $percent = MathUtilities::multiply(MathUtilities::divide($idsGenerated, $k, 4), 100);
+
+        printf(
+            'done! %s unique ID%s generated (%s%s; %s MB used)%s',
+            StringUtilities::numberFormat($idsGenerated),
+            1 === $idsGenerated ? '' : 's',
+            StringUtilities::numberFormat($percent, 2),
+            '%',
+            StringUtilities::numberFormat(MathUtilities::divide(memory_get_usage(), 1048576)),
+            \PHP_EOL
+        );
 
         return $carry;
     };
