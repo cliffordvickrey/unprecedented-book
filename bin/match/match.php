@@ -35,9 +35,8 @@ call_user_func(function () {
         static $matchService = new MatchService();
 
         printf(
-            'Matching %s possible donors in group%s',
+            'Matching %s possible donors in group...',
             StringUtilities::numberFormat(count($donorsByHash)),
-            \PHP_EOL
         );
 
         /** @var array<string, Donor> $donorsByHash */
@@ -74,7 +73,7 @@ call_user_func(function () {
 
         $idsGenerated = $lastGeneratedId - $firstGeneratedId;
 
-        printf('Done! %s unique IDs generated%s', StringUtilities::numberFormat($idsGenerated), \PHP_EOL);
+        printf('done! %s unique IDs generated%s', StringUtilities::numberFormat($idsGenerated), \PHP_EOL);
 
         return $carry;
     };
