@@ -12,6 +12,25 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MatchService::class)]
 class MatchServiceTest extends TestCase
 {
+    public function testAreNamesSimilar(): void
+    {
+        $nameA = 'COSTANZA, GEORGE COL.';
+        $nameB = 'COSTANZA, GEORGE LOUIS';
+
+        $donorA = Donor::__set_state(['name' => $nameA]);
+        $donorB = Donor::__set_state(['name' => $nameB]);
+
+        $matchService = new MatchService();
+        self::assertTrue($matchService->areNamesSimilar($donorA, $donorB));
+        self::assertEquals(1, $matchService->getLastSimilarName());
+
+        $matchService = new MatchService();
+        $donorA->name = 'COSTANZA, GEORGE ALEXANDER';
+        self::assertFalse($matchService->areNamesSimilar($donorA, $donorB));
+        self::assertEquals(0.7143, $matchService->getLastSimilarName());
+        self::assertEquals(0.1429, $matchService->getLastSimilarText());
+    }
+
     public function testCompare(): void
     {
         $matchService = new MatchService();
@@ -29,7 +48,7 @@ class MatchServiceTest extends TestCase
         $b->name = 'COSTANZA, GEORGE';
         $result = $matchService->compare($a, $b);
 
-        self::assertEquals(0.6111, $result->similarityScore);
+        self::assertEquals(0.6493, $result->similarityScore);
         self::assertNull($result->id);
 
         $b = self::mockDonor();

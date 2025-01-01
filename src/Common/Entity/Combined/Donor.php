@@ -7,9 +7,10 @@ namespace CliffordVickrey\Book2024\Common\Entity\Combined;
 use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Entity\PropMeta;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
+use Webmozart\Assert\Assert;
 
 /**
- * @phpstan-type NameParts array{first: string, last: string}
+ * @phpstan-type NameParts non-empty-list<string>
  */
 class Donor extends Entity implements \Stringable
 {
@@ -51,7 +52,7 @@ class Donor extends Entity implements \Stringable
 
     public function getNormalizedSurname(): string
     {
-        return $this->getNormalizedNameParts()['last'];
+        return $this->getNormalizedNameParts()[0];
     }
 
     /**
@@ -65,14 +66,26 @@ class Donor extends Entity implements \Stringable
     /**
      * @return NameParts
      */
-    public function getNameParts(): array
+    private function getNameParts(): array
     {
-        $nameParts = explode(',', $this->name, 2);
+        $parsed = StringUtilities::parseName($this->name);
 
-        $last = trim($nameParts[0]);
-        $first = trim($nameParts[1] ?? '');
+        $last = $parsed['last'];
+        $first = $parsed['first'];
 
-        return ['first' => $first, 'last' => $last];
+        if (null === $first) {
+            return [$last];
+        }
+
+        $first = preg_replace('/\s+/', ' ', $first);
+        Assert::string($first);
+        $first = trim($first);
+
+        if ('' === $first) {
+            return [$last];
+        }
+
+        return [$last, ...explode(' ', $first)];
     }
 
     public function normalize(): void

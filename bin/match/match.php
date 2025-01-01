@@ -137,7 +137,8 @@ call_user_func(function () {
         $resultsByHash = array_reduce($donorsByGroup, $reducer, []);
 
         foreach ($resultsByHash as $hash => $result) {
-            $uniqueDonorWriter->write([$hash, ...$result->a->toArray(true)]);
+            $result->b->id = (int) $result->id;
+            $uniqueDonorWriter->write([$hash, ...$result->b->toArray(true)]);
         }
 
         $donorReader->close();

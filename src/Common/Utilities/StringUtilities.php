@@ -15,12 +15,15 @@ class StringUtilities
     /** @var list<string> */
     private static array $prefixes = [
         'CAPT',
+        'COL',
+        'COLONEL',
         'DR',
         'MR',
         'MRS',
         'MS',
         'PROF',
         'REV',
+        'REVEREND',
     ];
 
     /** @var list<string> */
@@ -42,7 +45,7 @@ class StringUtilities
 
     public static function normalizeCandidateName(string $name): string
     {
-        $parsed = self::parseCandidateName($name);
+        $parsed = self::parseName($name);
 
         $parts = array_filter([
             $parsed['first'],
@@ -60,7 +63,7 @@ class StringUtilities
     /**
      * @return ParsedName
      */
-    private static function parseCandidateName(string $name): array
+    public static function parseName(string $name): array
     {
         $parts = explode(', ', $name, 2);
 

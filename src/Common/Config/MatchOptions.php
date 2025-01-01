@@ -6,19 +6,21 @@ namespace CliffordVickrey\Book2024\Common\Config;
 
 final readonly class MatchOptions
 {
+    public MatchLocaleOptions $localeOptions;
+
     public function __construct(
         /**
          * Minimum % name surname similarity for contributors to be a match.
          *
          * @var float
          */
-        public float $minimumSurnameSimilarity = 70.0,
+        public float $minimumSurnameSimilarity = 0.70,
         /**
          * Minimum % name similarity for contributors to be a match.
          *
          * @var float
          */
-        public float $minimumNameSimilarity = 88.0,
+        public float $minimumNameSimilarity = 0.80,
         /**
          * Factor by which to multiply name similarity.
          *
@@ -49,6 +51,8 @@ final readonly class MatchOptions
          * @var float
          */
         public float $threshold = .70,
+        ?MatchLocaleOptions $localeOptions = null,
     ) {
+        $this->localeOptions = $localeOptions ?? new MatchLocaleOptions();
     }
 }
