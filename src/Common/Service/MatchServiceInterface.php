@@ -8,6 +8,8 @@ use CliffordVickrey\Book2024\Common\Entity\Combined\Donor;
 
 interface MatchServiceInterface
 {
+    public function areNamesSimilar(Donor $a, Donor $b): bool;
+
     public function areSurnamesSimilar(string $a, string $b): bool;
 
     public function compare(Donor $a, Donor $b): MatchResult;

@@ -16,7 +16,8 @@ use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
  */
 class MatchService implements MatchServiceInterface
 {
-    public const int GC_COUNT = 100000000;
+    public const int GC_COUNT = 100000;
+    public const int MAX_MEMORY = 1073741824;
 
     private MatchOptions $options;
     /** @var array<string, float> */
@@ -25,11 +26,13 @@ class MatchService implements MatchServiceInterface
     private \WeakMap $nameParts;
     /** @var \WeakMap<Donor, ZipCode> */
     private \WeakMap $zipCodes;
+    /** @var int<0, max> */
     private int $gcCounter = 0;
 
     public function __construct(
         ?MatchOptions $options = null,
         private readonly int $gcCount = self::GC_COUNT,
+        private readonly int $maxMemory = self::MAX_MEMORY,
     ) {
         $this->options = $options ?? new MatchOptions();
         $this->nameParts = new \WeakMap();
@@ -38,15 +41,22 @@ class MatchService implements MatchServiceInterface
 
     public function areSurnamesSimilar(string $a, string $b): bool
     {
-        ++$this->gcCounter;
-
-        if ($this->gcCounter > $this->gcCount) {
-            $this->similarTextMemo = [];
+        if (++$this->gcCounter > $this->gcCount) {
+            $this->gc();
         }
 
         $similar = $this->similarText($a, $b);
 
         return $similar >= $this->options->minimumSurnameSimilarity;
+    }
+
+    private function gc(): void
+    {
+        $this->gcCounter = 0;
+
+        if (memory_get_usage() > $this->maxMemory) {
+            $this->similarTextMemo = [];
+        }
     }
 
     private function similarText(string $a, string $b): float
@@ -67,14 +77,12 @@ class MatchService implements MatchServiceInterface
 
     public function compare(Donor $a, Donor $b): MatchResult
     {
-        ++$this->gcCounter;
-
-        if ($this->gcCounter > $this->gcCount) {
-            $this->similarTextMemo = [];
+        if (++$this->gcCounter > $this->gcCount) {
+            $this->gc();
         }
 
         $namePercent = $this->compareNames($a, $b);
-        $localePercent = self::compareLocales($a, $b);
+        $localePercent = $this->compareLocales($a, $b);
 
         $occupationPercent = 1.0;
 
@@ -169,5 +177,14 @@ class MatchService implements MatchServiceInterface
         }
 
         return $this->zipCodes[$donor];
+    }
+
+    public function areNamesSimilar(Donor $a, Donor $b): bool
+    {
+        if (++$this->gcCounter > $this->gcCount) {
+            $this->gc();
+        }
+
+        return $this->compareNames($a, $b) > $this->options->minimumNameSimilarity;
     }
 }

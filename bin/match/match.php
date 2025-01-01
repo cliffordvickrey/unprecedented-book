@@ -41,10 +41,10 @@ call_user_func(function () {
         );
 
         /** @var array<string, Donor> $donorsByHash */
-        $allDonors = $donorsByHash;
+        $donorsA = $donorsByHash;
         $firstGeneratedId = $lastGeneratedId;
 
-        foreach ($allDonors as $hashA => $donorA) {
+        foreach ($donorsA as $hashA => $donorA) {
             if (!isset($donorsByHash[$hashA])) {
                 continue;
             }
@@ -54,7 +54,12 @@ call_user_func(function () {
 
             unset($donorsByHash[$hashA]);
 
-            foreach ($donorsByHash as $hashB => $donorB) {
+            $donorsB = array_filter($donorsByHash, static fn (Donor $donorB) => $matchService->areNamesSimilar(
+                $donorA,
+                $donorB
+            ));
+
+            foreach ($donorsB as $hashB => $donorB) {
                 $result = $matchService->compare($donorA, $donorB);
 
                 if (null === $result->id) {
