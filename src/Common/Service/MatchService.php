@@ -185,6 +185,6 @@ class MatchService implements MatchServiceInterface
             $this->gc();
         }
 
-        return $this->compareNames($a, $b) >= $this->options->minimumNameSimilarity;
+        return ($this->compareNames($a, $b) * 100.0) >= $this->options->minimumNameSimilarity;
     }
 }
