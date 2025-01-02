@@ -202,7 +202,7 @@ class MatchService implements MatchServiceInterface
             if ($zip4Match) {
                 $zip4Similarity = 1.0;
             }
-        } elseif (!$hasZip) {
+        } elseif ($hasZip) {
             $zip5Similarity = 0.0;
             $zip4Similarity = 0.0;
         }
