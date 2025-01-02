@@ -190,18 +190,19 @@ class MatchService implements MatchServiceInterface
         $zipA = $this->getParsedZip($a);
         $zipB = $this->getParsedZip($b);
 
-        $zip5Mismatch = '' !== $zipA['zip5'] && '' !== $zipB['zip5'] && $zipA['zip5'] !== $zipB['zip5'];
+        $hasZip = '' !== $zipA['zip5'] && '' !== $zipB['zip5'];
 
-        if (!$zip5Mismatch) {
+        $zip5Match = $hasZip && $zipA['zip5'] === $zipB['zip5'];
+        $zip4Match = null === $zipA['zip4'] || null === $zipB['zip4'] || $zipA['zip4'] === $zipB['zip4'];
+
+        if ($zip5Match) {
             $zip5Similarity = 1.0;
+            $zip4Similarity = 0.0;
 
-            $zip4Mismatch = null !== $zipA['zip4'] && null !== $zipB['zip4'] && $zipA['zip4'] !== $zipB['zip4'];
-            if ($zip4Mismatch) {
-                $zip4Similarity = 0.0;
-            } else {
+            if ($zip4Match) {
                 $zip4Similarity = 1.0;
             }
-        } elseif ('' !== $zipA['zip5'] && '' !== $zipB['zip5']) {
+        } elseif (!$hasZip) {
             $zip5Similarity = 0.0;
             $zip4Similarity = 0.0;
         }

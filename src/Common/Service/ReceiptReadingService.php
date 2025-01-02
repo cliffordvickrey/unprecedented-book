@@ -42,7 +42,14 @@ class ReceiptReadingService extends AbstractReceiptService implements ReceiptRea
         $reader->next();
 
         while ($reader->valid()) {
-            yield Receipt::__set_state(array_combine($headers, $reader->current()));
+            $current = $reader->current();
+
+            if (\count($current) !== \count($headers)) {
+                print_r($current);
+                exit;
+            }
+
+            yield Receipt::__set_state(array_combine($headers, $current));
             $reader->next();
         }
 
