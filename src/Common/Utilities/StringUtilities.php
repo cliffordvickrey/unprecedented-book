@@ -131,30 +131,40 @@ class StringUtilities
         return md5(serialize($val));
     }
 
-    public static function slugify(string $str, ?int $maxLength = null, bool $uppercase = false): string
-    {
+    public static function slugify(
+        string $str,
+        ?int $maxLength = null,
+        bool $uppercase = false,
+        bool $noNumbers = false,
+    ): string {
         // 1. remove non-alphanumeric characters (except spaces and hyphens)
         $slug = preg_replace('/[^\p{L}\p{N}\s-]/u', '', $str);
         Assert::string($slug);
 
-        // 2. normalize whitespace
+        // 2. strip out numeric digits
+        if ($noNumbers) {
+            $slug = preg_replace('/\d/', '', $slug);
+            Assert::string($slug);
+        }
+
+        // 3. normalize whitespace
         $slug = preg_replace('/\s+/', ' ', str_replace('-', ' ', $slug));
         Assert::string($slug);
 
-        // 3. replace spaces with underscores
+        // 4. replace spaces with underscores
         $slug = str_replace(' ', '_', $slug);
 
-        // 4. Remove diacritics
+        // 5. Remove diacritics
         $slug = iconv('UTF-8', 'ASCII//TRANSLIT', $slug);
         Assert::string($slug);
 
-        // 5. Convert to lowercase or uppercase
+        // 6. Convert to lowercase or uppercase
         $slug = $uppercase ? strtoupper($slug) : strtolower($slug);
 
-        // 6. Trim underscores
+        // 7. Trim underscores
         $slug = trim($slug, '_');
 
-        // 7. Enforce maximum length
+        // 8. Enforce maximum length
         if (null !== $maxLength) {
             $slug = substr($slug, 0, $maxLength);
         }

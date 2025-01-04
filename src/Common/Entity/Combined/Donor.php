@@ -33,7 +33,7 @@ class Donor extends Entity implements \Stringable
 
     private static function normalizeName(string $name): string
     {
-        return StringUtilities::slugify($name, uppercase: true);
+        return StringUtilities::slugify($name, uppercase: true, noNumbers: true);
     }
 
     private static function isNotEmptyString(string $str): bool

@@ -97,19 +97,17 @@ class MatchService implements MatchServiceInterface
             $this->gc();
         }
 
-        $namePercent = $this->compareNames($a, $b);
-        $localePercent = $this->compareLocales($a, $b);
-
-        $occupationPercent = 1.0;
+        $nameSimilarity = $this->compareNames($a, $b);
+        $localeSimilarity = $this->compareLocales($a, $b);
+        $occupationSimilarity = null;
+        $employerSimilarity = null;
 
         if ('' !== $a->occupation && '' !== $b->occupation) {
-            $occupationPercent = $this->similarText($a->occupation, $b->occupation);
+            $occupationSimilarity = $this->similarText($a->occupation, $b->occupation);
         }
 
-        $employerPercent = 1.0;
-
         if ('' !== $a->employer && '' !== $b->employer) {
-            $employerPercent = $this->similarText($a->employer, $b->employer);
+            $employerSimilarity = $this->similarText($a->employer, $b->employer);
         }
 
         $nameFactor = $this->options->nameFactor;
@@ -123,14 +121,14 @@ class MatchService implements MatchServiceInterface
             );
         }
 
-        $percent = ($namePercent * $nameFactor)
-            + ($localePercent * $localeFactor)
-            + ($occupationPercent * $this->options->occupationFactor)
-            + ($employerPercent * $this->options->employerFactor);
+        $similarity = $nameSimilarity * $nameFactor;
+        self::addSimilarity($similarity, $localeSimilarity, $localeFactor);
+        self::addSimilarity($similarity, $occupationSimilarity, $this->options->occupationFactor);
+        self::addSimilarity($similarity, $employerSimilarity, $this->options->employerFactor);
 
-        $id = $percent >= $this->options->threshold ? $a->id : null;
+        $id = $similarity >= $this->options->threshold ? $a->id : null;
 
-        return new MatchResult($a, $b, round($percent, 4), $id);
+        return new MatchResult($a, $b, round($similarity, 4), $id);
     }
 
     private function compareNames(Donor $a, Donor $b): float
