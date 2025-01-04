@@ -120,6 +120,7 @@ class Receipt extends Donor
     public function toDonor(): Donor
     {
         $donor = new Donor();
+        $donor->id = $this->donor_id;
         $donor->name = $this->name;
         $donor->address = $this->address;
         $donor->city = $this->city;

@@ -45,13 +45,7 @@ class MatchService implements MatchServiceInterface
 
     public function areSurnamesSimilar(string $a, string $b): bool
     {
-        if (++$this->gcCounter > $this->gcCount) {
-            $this->gc();
-        }
-
-        $similar = $this->similarText($a, $b);
-
-        return $similar >= $this->options->minimumSurnameSimilarity;
+        return StringUtilities::similarText($a, $b) >= $this->options->minimumSurnameSimilarity;
     }
 
     private function gc(): void
