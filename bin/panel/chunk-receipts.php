@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
 declare(strict_types=1);
@@ -5,6 +6,7 @@ declare(strict_types=1);
 use CliffordVickrey\Book2024\Common\Csv\ChunkedCsvWriter;
 use CliffordVickrey\Book2024\Common\Csv\CsvReader;
 use CliffordVickrey\Book2024\Common\Entity\Combined\Donor;
+use CliffordVickrey\Book2024\Common\Entity\Combined\Receipt;
 use CliffordVickrey\Book2024\Common\Service\ReceiptReadingService;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\FileIterator;
@@ -49,7 +51,7 @@ call_user_func(function (int $chunkSize = 1000) {
 
     $slugs = array_map(static fn (string $file) => basename($file, '.csv'), $files);
 
-    array_shift($headers);
+    $headers = Receipt::headers();
 
     $filenameMemo = [];
 

@@ -21,9 +21,8 @@ require_once __DIR__.'/../../vendor/autoload.php';
 call_user_func(function (int $chunkSize = 1000) {
     // read donors
     $donorsReader = new CsvReader(__DIR__.'/../../data/csv/donor-ids.csv');
+    $headers = array_map(\strval(...), array_map(CastingUtilities::toString(...), $donorsReader->current()));
     $donorsReader->next();
-
-    $headers = Donor::headers();
 
     /** @var list<Donor> $donorBuffer */
     $donorBuffer = [];
@@ -55,6 +54,8 @@ call_user_func(function (int $chunkSize = 1000) {
         $laggedChunkId = $chunkId;
         $laggedId = $donor->id;
         $laggedState = $donor->state;
+
+        $donorsReader->next();
     }
 
     flushDonorBuffer($donorBuffer, $laggedChunkId);

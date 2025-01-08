@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Hydrator;
 
+use CliffordVickrey\Book2024\Common\Entity\Combined\DonorPanel;
+use CliffordVickrey\Book2024\Common\Entity\Combined\ReceiptInPanel;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\CandidateCommitteeLinkage;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Committee;
@@ -19,7 +21,9 @@ final class ClassAliases
         'CandidateCommitteeLinkage' => CandidateCommitteeLinkage::class,
         'Committee' => Committee::class,
         'CommitteeTotals' => CommitteeTotals::class,
+        'DonorPanel' => DonorPanel::class,
         'ImputedCommitteeTotals' => ImputedCommitteeTotals::class,
         'LeadershipPacLinkage' => LeadershipPacLinkage::class,
+        'ReceiptInPanel' => ReceiptInPanel::class,
     ];
 }
