@@ -17,7 +17,7 @@ class DonorPanelRepository implements DonorPanelRepositoryInterface
     /** @var list<string>|null */
     private ?array $filenames = null;
 
-    public function __construct(?string $path = null)
+    public function __construct(?string $path = null, private bool $prettyPrint = false)
     {
         $this->path = $path ?? __DIR__.'/../../../data/panel';
     }
@@ -99,7 +99,7 @@ class DonorPanelRepository implements DonorPanelRepositoryInterface
     {
         $filename = self::getFilename($panels);
 
-        $json = JsonUtilities::jsonEncode($panels, true);
+        $json = JsonUtilities::jsonEncode($panels, $this->prettyPrint);
 
         FileUtilities::saveContents($filename, $json);
 
@@ -118,6 +118,6 @@ class DonorPanelRepository implements DonorPanelRepositoryInterface
 
         Assert::greaterThan($chunkId, 0, 'Chunk ID must be greater than 1');
 
-        return \sprintf('%s/%s/chunk%05d.csv', $this->path, $state, $chunkId);
+        return \sprintf('%s/%s/chunk%05d.json', $this->path, $state, $chunkId);
     }
 }

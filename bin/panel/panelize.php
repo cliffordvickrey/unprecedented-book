@@ -95,6 +95,7 @@ function flushDonorBuffer(array &$donors, int $chunkId): void
 
     $reader = new CsvReader($filename);
     $headers = array_map(\strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
+    $reader->next();
 
     while ($reader->valid()) {
         $receipt = Receipt::__set_state(array_combine($headers, $reader->current()));

@@ -33,26 +33,6 @@ class EntityHydrator implements EntityHydratorInterface
         }
     }
 
-    private static function set(Entity $entity, EntityProp $prop, mixed $value = null): void
-    {
-        $entity->{$prop->name} = self::parseValue($value, $prop);
-    }
-
-    /**
-     * @return list<EntityProp>
-     */
-    private static function getPropsToInitialize(Entity $entity): array
-    {
-        if (isset(self::$propsToInitialize[$entity::class])) {
-            return self::$propsToInitialize[$entity::class];
-        }
-
-        $props = self::buildPropsToInitialize($entity);
-        self::$propsToInitialize[$entity::class] = $props;
-
-        return $props;
-    }
-
     /**
      * @return list<EntityProp>
      */
@@ -87,17 +67,9 @@ class EntityHydrator implements EntityHydratorInterface
         return $props;
     }
 
-    /**
-     * @return list<EntityProp>
-     */
-    private static function buildPropsToInitialize(Entity $entity): array
+    private static function set(Entity $entity, EntityProp $prop, mixed $value = null): void
     {
-        $props = self::getProps($entity);
-
-        return array_values(array_filter(
-            $props,
-            static fn (EntityProp $prop) => $prop->classStr && !$prop->initalized
-        ));
+        $entity->{$prop->name} = self::parseValue($value, $prop);
     }
 
     private static function parseValue(mixed $value, EntityProp $prop): mixed
@@ -224,7 +196,7 @@ class EntityHydrator implements EntityHydratorInterface
             } elseif ($value instanceof \BackedEnum) {
                 $value = $value->value;
             } elseif ($value instanceof Entity) {
-                $value = $this->extract($entity, true);
+                $value = $this->extract($value, true);
             }
 
             $extracted[$prop->name] = $value;
@@ -238,5 +210,33 @@ class EntityHydrator implements EntityHydratorInterface
         $propsToInitialize = self::getPropsToInitialize($entity);
 
         array_walk($propsToInitialize, static fn (EntityProp $prop) => self::set($entity, $prop));
+    }
+
+    /**
+     * @return list<EntityProp>
+     */
+    private static function getPropsToInitialize(Entity $entity): array
+    {
+        if (isset(self::$propsToInitialize[$entity::class])) {
+            return self::$propsToInitialize[$entity::class];
+        }
+
+        $props = self::buildPropsToInitialize($entity);
+        self::$propsToInitialize[$entity::class] = $props;
+
+        return $props;
+    }
+
+    /**
+     * @return list<EntityProp>
+     */
+    private static function buildPropsToInitialize(Entity $entity): array
+    {
+        $props = self::getProps($entity);
+
+        return array_values(array_filter(
+            $props,
+            static fn (EntityProp $prop) => $prop->classStr && !$prop->initalized
+        ));
     }
 }
