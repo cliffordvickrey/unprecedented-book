@@ -36,8 +36,10 @@ call_user_func(function (int $chunkSize = 1000) {
         $row = array_combine($headers, $donorsReader->current());
         $donor = Donor::__set_state($row);
 
-        if ($laggedState !== $donor->state) {
+        if ($laggedChunkId && $laggedState !== $donor->state) {
+            flushDonorBuffer($donorBuffer, $laggedChunkId);
             $counter = 0;
+            $laggedChunkId = null;
         }
 
         if ($laggedId !== $donor->id) {
