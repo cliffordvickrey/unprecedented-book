@@ -12,5 +12,4 @@ class DonorProfile extends Entity
     public bool $_2024_deSantisDonor = false;
     public bool $_2024_nonTrumpPresidentialDonor = false;
     public bool $_2024_democraticNonPresidentialDonor = false;
-
 }
