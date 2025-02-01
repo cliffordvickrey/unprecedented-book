@@ -21,6 +21,13 @@ class DonorProfile extends Entity
     /** @var array<int, DonorProfileCycle> */
     public array $cycles = [];
 
+    public static function build(): self
+    {
+        $self = new self();
+        $self->clearState();
+        return $self;
+    }
+
     public function clearState(): void
     {
         $this->state = null;

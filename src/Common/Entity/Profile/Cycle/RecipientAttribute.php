@@ -18,7 +18,7 @@ class RecipientAttribute
      */
     public function __construct(
         public ?string $slug = null,
-        public PartyType $party = PartyType::other,
+        public PartyType $party = PartyType::thirdParty,
         string|\DateTimeImmutable|null $startDate = null,
         string|\DateTimeImmutable|null $endDate = null,
         public array $committeeIds = [],

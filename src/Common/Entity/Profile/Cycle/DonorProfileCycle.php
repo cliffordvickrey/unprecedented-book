@@ -21,6 +21,13 @@ abstract class DonorProfileCycle extends Entity
 
     public function getElectionDate(): \DateTimeImmutable
     {
+        /** @phpstan-var \DateTimeImmutable|null $dt */
+        static $dt = null;
+
+        if (null !== $dt) {
+            return $dt;
+        }
+
         $dt = \DateTimeImmutable::createFromFormat('Y-m-d', $this->getElectionDayStr()) ?: null;
         $dt = $dt?->setTime(0, 0);
         Assert::isInstanceOf(\DateTimeImmutable::class, $dt);

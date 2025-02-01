@@ -12,6 +12,8 @@ use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2020;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2024;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\RecipientAttribute;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfile;
+use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
+use CliffordVickrey\Book2024\Common\Enum\PartyType;
 use CliffordVickrey\Book2024\Common\Exception\BookUnexpectedValueException;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepositoryInterface;
@@ -23,16 +25,23 @@ use CliffordVickrey\Book2024\Common\Utilities\DateUtilities;
 use Webmozart\Assert\Assert;
 
 /**
- * @phpstan-type Recipient array{cycle: int, recipient: string}
+ * @phpstan-type Recipient array{cycle: int, prop: string}
  */
 class DonorProfileService implements DonorProfileServiceInterface
 {
-    /** @var array<int, RecipientAttributeBag> */
-    private array $recipientAttributes = [];
-    /** @var array<string, Recipient> */
-    private array $recipientMap;
+    /** @var array<string, PartyType> */
+    private static array $actualPartyAffiliations = [
+        'angus_king' => PartyType::democratic,
+        'bernie_sanders' => PartyType::democratic,
+    ];
+
     private readonly CandidateAggregateRepositoryInterface $candidateAggregateRepository;
     private readonly CommitteeAggregateRepositoryInterface $committeeAggregateRepository;
+    private readonly DonorProfile $prototype;
+    /** @var array<int, RecipientAttributeBag> */
+    private array $recipientAttributes = [];
+    /** @var array<string, Recipient|false> */
+    private array $recipientMap;
 
     public function __construct(
         ?CandidateAggregateRepositoryInterface $candidateAggregateRepository = null,
@@ -40,6 +49,9 @@ class DonorProfileService implements DonorProfileServiceInterface
     ) {
         $this->candidateAggregateRepository = $candidateAggregateRepository ?? new CandidateAggregateRepository();
         $this->committeeAggregateRepository = $committeeAggregateRepository ?? new CommitteeAggregateRepository();
+
+        $this->prototype = DonorProfile::build();
+
         $this->recipientMap = $this->buildRecipientMap();
     }
 
@@ -79,14 +91,63 @@ class DonorProfileService implements DonorProfileServiceInterface
         $keyWithCycle = \sprintf('%s|%s', $committeeFecId, $analysis->cycle);
 
         if (isset($this->recipientMap[$keyWithDate])) {
-            $receipt = $this->recipientMap[$keyWithDate];
+            $recipient = $this->recipientMap[$keyWithDate];
         } elseif (isset($this->recipientMap[$keyWithCycle])) {
-            $receipt = $this->recipientMap[$keyWithCycle];
+            $recipient = $this->recipientMap[$keyWithCycle];
+        } elseif ($candidate) {
+            $recipient = $this->determineRecipient($analysis);
+            $this->recipientMap[$keyWithCycle] = $recipient;
         } else {
-
+            $recipient = false;
+            $this->recipientMap[$keyWithCycle] = false;
         }
 
+        if (false !== $recipient) {
+            $analysis->cycle = $recipient['cycle'];
+            $analysis->prop = $recipient['prop'];
+        }
 
+        return $analysis;
+    }
+
+    private function determineRecipient(ReceiptAnalysis $analysis): array|false
+    {
+        $cyclePrototype = $this->prototype->cycles[$analysis->cycle] ?? null;
+
+        if (!$cyclePrototype) {
+            return false;
+        }
+
+        if ($cyclePrototype->getElectionDate() < $analysis->date) {
+            return false;
+        }
+
+        $attr = $this->recipientAttributes[$analysis->cycle];
+
+        if (isset($attr->recipientAttributesByCandidateSlug[$analysis->candidate->slug])) {
+            return false;
+        }
+
+        $candidateInfo = $analysis->candidate->getInfo($analysis->cycle);
+
+        if (!$candidateInfo) {
+            return false;
+        }
+
+        $office = $candidateInfo->CAND_OFFICE;
+
+        if (!$office) {
+            return false;
+        }
+
+        $party = self::$actualPartyAffiliations[$candidate->slug] ?? PartyType::fromCandidateInfo($candidateInfo);
+
+        $isPresidential = CandidateOffice::P === $office;
+
+        $prefix = $isPresidential ? 'pres' : 'nonPres';
+        $suffix = \ucfirst($party->value);
+
+        return [$analysis->cycle, "$prefix$suffix"];
     }
 
     /**
@@ -95,7 +156,7 @@ class DonorProfileService implements DonorProfileServiceInterface
     private function buildRecipientMap(): array
     {
         return array_reduce(
-            [new DonorProfileCycle2016(), new DonorProfileCycle2020(), new DonorProfileCycle2024()],
+            $this->prototype->cycles,
             fn (array $carry, DonorProfileCycle $donorProfileCycle) => \array_merge(
                 $carry,
                 $this->buildRecipientCycleMap($donorProfileCycle)
@@ -125,9 +186,14 @@ class DonorProfileService implements DonorProfileServiceInterface
             $this->assertValidCandidateSlug((string)$attr->slug);
 
             $startDate = $attr->startDate ?? $startOfCycleDate;
+
+            if ($startDate > $startOfCycleDate) {
+                $startDate = $startOfCycleDate;
+            }
+
             $endDate = $attr->endDate ?? $electionDate;
 
-            $recipient = ['cycle' => $donorProfileCycle, 'recipient' => $prop];
+            $recipient = ['cycle' => $donorProfileCycle, 'prop' => $prop];
 
             $map = array_merge($map, array_reduce(
                 DateUtilities::getDateRanges($startDate, $endDate),

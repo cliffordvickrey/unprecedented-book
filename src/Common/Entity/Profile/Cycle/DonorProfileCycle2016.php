@@ -19,7 +19,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     public float $presBenCarson = 0.0;
     #[RecipientAttribute(
         slug: 'bernie_sanders',
-        party: PartyType::democrat,
+        party: PartyType::democratic,
         startDate: '2015-04-30',
         endDate: '2016-07-12',
         committeeIds: [
@@ -63,7 +63,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     public float $presChrisChristie = 0.0;
     #[RecipientAttribute(
         slug: 'evan_mcmullin',
-        party: PartyType::other,
+        party: PartyType::thirdParty,
         startDate: '2016-08-08',
         committeeIds: ['C00623884']
     )]
@@ -104,7 +104,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     public float $presDonaldTrump = 0.0;
     #[RecipientAttribute(
         slug: 'hillary_clinton',
-        party: PartyType::democrat,
+        party: PartyType::democratic,
         startDate: '2015-04-12',
         committeeIds: [
             'C00575795',
@@ -129,7 +129,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     public float $presJebBush = 0.0;
     #[RecipientAttribute(
         slug: 'jim_webb',
-        party: PartyType::democrat,
+        party: PartyType::democratic,
         startDate: '2015-07-02',
         endDate: '2015-10-20',
         committeeIds: ['C00581215', 'C00430819']
@@ -137,7 +137,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     public float $presJimWebb = 0.0;
     #[RecipientAttribute(
         slug: 'jill_stein',
-        party: PartyType::other,
+        party: PartyType::thirdParty,
         startDate: '2015-06-22',
         committeeIds: ['C00581199']
     )]
@@ -176,7 +176,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     public float $presMarcoRubio = 0.0;
     #[RecipientAttribute(
         slug: 'martin_omalley',
-        party: PartyType::democrat,
+        party: PartyType::democratic,
         startDate: '2015-05-30',
         endDate: '2016-02-01',
         committeeIds: ['C00578658', 'C00578724', 'C00525220']

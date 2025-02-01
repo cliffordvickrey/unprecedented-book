@@ -19,7 +19,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     public float $presAsaHutchinson = 0.0;
     #[RecipientAttribute(
         slug: 'chase_oliver',
-        party: PartyType::other,
+        party: PartyType::thirdParty,
         startDate: '2023-04-04',
         committeeIds: ['C00837625']
     )]
@@ -34,14 +34,14 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     public float $presChrisChristie = 0.0;
     #[RecipientAttribute(
         slug: 'cornel_west',
-        party: PartyType::other,
+        party: PartyType::thirdParty,
         startDate: '2023-06-05',
         committeeIds: ['C00843508']
     )]
     public float $presCornelWest = 0.0;
     #[RecipientAttribute(
         slug: 'dean_phillips',
-        party: PartyType::democrat,
+        party: PartyType::democratic,
         startDate: '2023-10-27',
         endDate: '2024-03-06',
         committeeIds: ['C00854778', 'C00858779', 'C00857383']
@@ -114,14 +114,14 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     public float $presFrancisSuarez = 0.0;
     #[RecipientAttribute(
         slug: 'jill_stein',
-        party: PartyType::other,
+        party: PartyType::thirdParty,
         startDate: '2023-11-09',
         committeeIds: ['C00856112']
     )]
     public float $presJillStein = 0.0;
     #[RecipientAttribute(
         slug: 'joe_biden',
-        party: PartyType::democrat,
+        party: PartyType::democratic,
         startDate: '2023-04-25',
         endDate: '2024-07-20',
         committeeIds: [
@@ -194,7 +194,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     public float $presJoeBiden = 0.0;
     #[RecipientAttribute(
         slug: 'kamala_harris',
-        party: PartyType::democrat,
+        party: PartyType::democratic,
         startDate: '2023-04-25',
         endDate: '2024-07-20',
         committeeIds: [
@@ -264,7 +264,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     public float $presKamalaHarris = 0.0;
     #[RecipientAttribute(
         slug: 'marianne_williamson',
-        party: PartyType::democrat,
+        party: PartyType::democratic,
         startDate: '2023-03-04',
         endDate: '2024-07-29',
         committeeIds: ['C00834424', 'C00867770']
@@ -288,7 +288,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     public float $presNikkiHaley = 0.0;
     #[RecipientAttribute(
         slug: 'robert_f_kennedy_jr',
-        party: PartyType::other,
+        party: PartyType::thirdParty,
         startDate: '2023-04-19',
         endDate: '2024-08-23',
         committeeIds: [

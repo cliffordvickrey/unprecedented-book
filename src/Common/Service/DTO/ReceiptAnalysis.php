@@ -15,12 +15,12 @@ class ReceiptAnalysis
     private const string PROP_TRUMP = 'presDonaldTrump';
 
     public function __construct(
-        public \DateTimeImmutable $date,
-        public float              $amount,
-        public int                $cycle,
-        public CommitteeAggregate $committee,
-        public CandidateAggregate $candidate,
-        public ?string            $prop = null
+        public \DateTimeImmutable  $date,
+        public float               $amount,
+        public int                 $cycle,
+        public CommitteeAggregate  $committee,
+        public ?CandidateAggregate $candidate,
+        public ?string             $prop = null
     )
     {
     }
