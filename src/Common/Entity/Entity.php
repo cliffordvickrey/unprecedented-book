@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Entity;
 
+use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
+use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2016;
+use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2020;
+use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2024;
 use CliffordVickrey\Book2024\Common\Hydrator\EntityHydrator;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
@@ -34,7 +38,19 @@ abstract class Entity implements \JsonSerializable
             $value = [];
         }
 
-        return static::__set_state($value);
+        $staticClass = static::class;
+
+        if (DonorProfileCycle::class === static::class) {
+            $cycle = CastingUtilities::toInt($value['cycle'] ?? null);
+
+            $staticClass = match ($cycle) {
+                2020 => DonorProfileCycle2020::class,
+                2024 => DonorProfileCycle2024::class,
+                default => DonorProfileCycle2016::class,
+            };
+        }
+
+        return $staticClass::__set_state($value);
     }
 
     /**

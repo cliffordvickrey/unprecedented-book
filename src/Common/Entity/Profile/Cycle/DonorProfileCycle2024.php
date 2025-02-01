@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace CliffordVickrey\Book2024\Common\Entity\Profile;
+namespace CliffordVickrey\Book2024\Common\Entity\Profile\Cycle;
 
 use CliffordVickrey\Book2024\Common\Enum\PartyType;
 
 class DonorProfileCycle2024 extends DonorProfileCycle
 {
+    public int $cycle = 2024;
     #[RecipientAttribute(
         slug: 'asa_hutchinson',
         party: PartyType::republican,
@@ -15,14 +16,14 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2024-01-16',
         committeeIds: ['C00798173', 'C00837104']
     )]
-    public bool $presAsaHutchinson = false;
+    public float $presAsaHutchinson = 0.0;
     #[RecipientAttribute(
         slug: 'chase_oliver',
         party: PartyType::other,
         startDate: '2023-04-04',
         committeeIds: ['C00837625']
     )]
-    public bool $presChaseOliver = false;
+    public float $presChaseOliver = 0.0;
     #[RecipientAttribute(
         slug: 'chris_christie',
         party: PartyType::republican,
@@ -30,14 +31,14 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2024-01-10',
         committeeIds: ['C00841593', 'C00571778', 'C00842237']
     )]
-    public bool $presChrisChristie = false;
+    public float $presChrisChristie = 0.0;
     #[RecipientAttribute(
         slug: 'cornel_west',
         party: PartyType::other,
         startDate: '2023-06-05',
         committeeIds: ['C00843508']
     )]
-    public bool $presCornelWest = false;
+    public float $presCornelWest = 0.0;
     #[RecipientAttribute(
         slug: 'dean_phillips',
         party: PartyType::democrat,
@@ -45,7 +46,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2024-03-06',
         committeeIds: ['C00854778', 'C00858779', 'C00857383']
     )]
-    public bool $presDeanPhillips = false;
+    public float $presDeanPhillips = 0.0;
     #[RecipientAttribute(
         slug: 'donald_trump',
         party: PartyType::republican,
@@ -94,7 +95,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
             'C00790477',
         ]
     )]
-    public bool $presDonaldTrump = false;
+    public float $presDonaldTrump = 0.0;
     #[RecipientAttribute(
         slug: 'doug_burgum',
         party: PartyType::republican,
@@ -102,7 +103,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2023-12-04',
         committeeIds: ['C00842344', 'C00842302']
     )]
-    public bool $presDougBurgum = false;
+    public float $presDougBurgum = 0.0;
     #[RecipientAttribute(
         slug: 'francis_suarez',
         party: PartyType::republican,
@@ -110,14 +111,14 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2023-08-29',
         committeeIds: ['C00842971', 'C00801803']
     )]
-    public bool $presFrancisSuarez = false;
+    public float $presFrancisSuarez = 0.0;
     #[RecipientAttribute(
         slug: 'jill_stein',
         party: PartyType::other,
         startDate: '2023-11-09',
         committeeIds: ['C00856112']
     )]
-    public bool $presJillStein = false;
+    public float $presJillStein = 0.0;
     #[RecipientAttribute(
         slug: 'joe_biden',
         party: PartyType::democrat,
@@ -190,7 +191,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
             'C00881573',
         ]
     )]
-    public bool $presJoeBiden = false;
+    public float $presJoeBiden = 0.0;
     #[RecipientAttribute(
         slug: 'kamala_harris',
         party: PartyType::democrat,
@@ -260,7 +261,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
             'C00881573',
         ]
     )]
-    public bool $presKamalaHarris = false;
+    public float $presKamalaHarris = 0.0;
     #[RecipientAttribute(
         slug: 'marianne_williamson',
         party: PartyType::democrat,
@@ -268,7 +269,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2024-07-29',
         committeeIds: ['C00834424', 'C00867770']
     )]
-    public bool $presMarianneWilliamson = false;
+    public float $presMarianneWilliamson = 0.0;
     #[RecipientAttribute(
         slug: 'mike_pence',
         party: PartyType::republican,
@@ -276,7 +277,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2024-10-28',
         committeeIds: ['C00842039', 'C00839464', 'C00640664']
     )]
-    public bool $presMikePence = false;
+    public float $presMikePence = 0.0;
     #[RecipientAttribute(
         slug: 'nikki_haley',
         party: PartyType::republican,
@@ -284,7 +285,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2024-03-06',
         committeeIds: ['C00833392', 'C00828061', 'C00765982', 'C00858381']
     )]
-    public bool $presNikkiHaley = false;
+    public float $presNikkiHaley = 0.0;
     #[RecipientAttribute(
         slug: 'robert_f_kennedy_jr',
         party: PartyType::other,
@@ -301,7 +302,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
             'C00870410',
         ]
     )]
-    public bool $presRfkJr = false;
+    public float $presRfkJr = 0.0;
     #[RecipientAttribute(
         slug: 'ron_desantis',
         party: PartyType::republican,
@@ -319,7 +320,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
             'C00828400',
         ]
     )]
-    public bool $presRonDeSantis = false;
+    public float $presRonDeSantis = 0.0;
     #[RecipientAttribute(
         slug: 'tim_scott',
         party: PartyType::republican,
@@ -327,7 +328,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2023-11-12',
         committeeIds: ['C00540302', 'C00840546', 'C00825158', 'C00827519', 'C00750182']
     )]
-    public bool $presTimScott = false;
+    public float $presTimScott = 0.0;
     #[RecipientAttribute(
         slug: 'vivek_ramaswamy',
         party: PartyType::republican,
@@ -335,7 +336,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2024-01-15',
         committeeIds: ['C00833913', 'C00833749']
     )]
-    public bool $presVivekRamaswamy = false;
+    public float $presVivekRamaswamy = 0.0;
     #[RecipientAttribute(
         slug: 'will_hurd',
         party: PartyType::republican,
@@ -343,5 +344,10 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         endDate: '2023-10-09',
         committeeIds: ['C00843540', 'C00693531']
     )]
-    public bool $presWillHurd = false;
+    public float $presWillHurd = 0.0;
+
+    protected function getElectionDayStr(): string
+    {
+        return '2024-11-05';
+    }
 }

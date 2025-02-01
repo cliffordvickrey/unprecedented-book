@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CliffordVickrey\Book2024\Common\Entity\Profile;
+namespace CliffordVickrey\Book2024\Common\Entity\Profile\Cycle;
 
 use CliffordVickrey\Book2024\Common\Enum\PartyType;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
