@@ -9,6 +9,18 @@ use Webmozart\Assert\Assert;
 
 class DateUtilities
 {
+    public static function isWithinWeek(\DateTimeImmutable $a, \DateTimeImmutable $b): bool
+    {
+        self::isWithinDays($a, $b, 7);
+    }
+
+    public static function isWithinDays(\DateTimeImmutable $a, \DateTimeImmutable $b, int $days): bool
+    {
+        $interval = $b->diff($a);
+        $dayDiff = (int)$interval->days;
+        return $dayDiff <= $days && $interval->invert == 0;
+    }
+
     /**
      * @return list<\DateTimeImmutable>
      */

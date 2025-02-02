@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Entity\Profile\Cycle;
 
+use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
 use CliffordVickrey\Book2024\Common\Enum\PartyType;
 
 class DonorProfileCycle2020 extends DonorProfileCycle
@@ -16,7 +17,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-03-02',
         committeeIds: ['C00696419', 'C00738831', 'C00431874']
     )]
-    public float $presAmyKlobuchar = 0.0;
+    public DonorProfileAmount $presAmyKlobuchar;
     #[RecipientAttribute(
         slug: 'andrew_yang',
         party: PartyType::democratic,
@@ -24,7 +25,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-02-11',
         committeeIds: ['C00659938', 'C00712497', 'C00719708', 'C00730937', 'C00725994', 'C00721050'])
     ]
-    public float $presAndrewYang = 0.0;
+    public DonorProfileAmount $presAndrewYang;
     #[RecipientAttribute(
         slug: 'bernie_sanders',
         party: PartyType::democratic,
@@ -32,7 +33,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-04-08',
         committeeIds: ['C00696948', 'C00686477', 'C00406553', 'C00698233', 'C00581967']
     )]
-    public float $presBernieSanders = 0.0;
+    public DonorProfileAmount $presBernieSanders;
     #[RecipientAttribute(
         slug: 'beto_orourke',
         party: PartyType::democratic,
@@ -40,7 +41,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-11-01',
         committeeIds: ['C00699090', 'C00571174', 'C00656439']
     )]
-    public float $presBetoORourke = 0.0;
+    public DonorProfileAmount $presBetoORourke;
     #[RecipientAttribute(
         slug: 'bill_de_blasio',
         party: PartyType::democratic,
@@ -48,7 +49,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-09-20',
         committeeIds: ['C00706697', 'C00683664', 'C00712539']
     )]
-    public float $presBillDeBlasio = 0.0;
+    public DonorProfileAmount $presBillDeBlasio;
     #[RecipientAttribute(
         slug: 'cory_booker',
         party: PartyType::democratic,
@@ -56,7 +57,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-01-13',
         committeeIds: ['C00695510', 'C00726208', 'C00693028', 'C00497131']
     )]
-    public float $presCoryBooker = 0.0;
+    public DonorProfileAmount $presCoryBooker;
     #[RecipientAttribute(
         slug: 'deval_patrick',
         party: PartyType::democratic,
@@ -64,7 +65,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-02-12',
         committeeIds: ['C00727156', 'C00730317', 'C00743252', 'C00686394']
     )]
-    public float $presDevalPatrick = 0.0;
+    public DonorProfileAmount $presDevalPatrick;
     #[RecipientAttribute(
         slug: 'donald_trump',
         party: PartyType::republican,
@@ -115,7 +116,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
             'C00596973',
         ]
     )]
-    public float $presDonaldTrump = 0.0;
+    public DonorProfileAmount $presDonaldTrump;
     #[RecipientAttribute(
         slug: 'elizabeth_warren',
         party: PartyType::democratic,
@@ -123,7 +124,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-03-05',
         committeeIds: ['C00693234', 'C00739110', 'C00714436']
     )]
-    public float $presElizabethWarren = 0.0;
+    public DonorProfileAmount $presElizabethWarren;
     #[RecipientAttribute(
         slug: 'eric_swalwell',
         party: PartyType::democratic,
@@ -131,14 +132,14 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-07-08',
         committeeIds: ['C00701698', 'C00566059']
     )]
-    public float $presEricSwalwell = 0.0;
+    public DonorProfileAmount $presEricSwalwell;
     #[RecipientAttribute(
         slug: 'howie_hawkins',
         party: PartyType::thirdParty,
         startDate: '2019-05-28',
         committeeIds: ['C00708024']
     )]
-    public float $presHowieHawkins = 0.0;
+    public DonorProfileAmount $presHowieHawkins;
     #[RecipientAttribute(
         slug: 'jay_inslee',
         party: PartyType::democratic,
@@ -146,7 +147,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-08-21',
         committeeIds: ['C00698050', 'C00697300', 'C00688937']
     )]
-    public float $presJayInslee = 0.0;
+    public DonorProfileAmount $presJayInslee;
     #[RecipientAttribute(
         slug: 'joe_biden',
         party: PartyType::democratic,
@@ -201,7 +202,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
             'C00758672',
         ]
     )]
-    public float $presJoeBiden = 0.0;
+    public DonorProfileAmount $presJoeBiden;
     #[RecipientAttribute(
         slug: 'joe_sestake',
         party: PartyType::democratic,
@@ -209,7 +210,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-12-01',
         committeeIds: ['C00710574', 'C00455741']
     )]
-    public float $presJoeSestak = 0.0;
+    public DonorProfileAmount $presJoeSestak;
     #[RecipientAttribute(
         slug: 'joe_walsh',
         party: PartyType::republican,
@@ -217,7 +218,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-02-07',
         committeeIds: ['C00717033']
     )]
-    public float $preJoeWalsh = 0.0;
+    public DonorProfileAmount $preJoeWalsh;
     #[RecipientAttribute(
         slug: 'john_delaney',
         party: PartyType::democratic,
@@ -225,7 +226,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-01-31',
         committeeIds: ['C00508416', 'C00683136']
     )]
-    public float $presJohnDelaney = 0.0;
+    public DonorProfileAmount $presJohnDelaney;
     #[RecipientAttribute(
         slug: 'john_w_hickenlooper',
         party: PartyType::democratic,
@@ -233,14 +234,14 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-08-15',
         committeeIds: ['C00698258', 'C00748756', 'C00687582', 'C00701128']
     )]
-    public float $johnHickenlooper = 0.0;
+    public DonorProfileAmount $johnHickenlooper;
     #[RecipientAttribute(
         slug: 'jo_jorgensen',
         party: PartyType::thirdParty,
         startDate: '2019-11-02',
         committeeIds: ['C00718031']
     )]
-    public float $presJoJorgensen = 0.0;
+    public DonorProfileAmount $presJoJorgensen;
     #[RecipientAttribute(
         slug: 'julian_castro',
         party: PartyType::democratic,
@@ -248,7 +249,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-01-02',
         committeeIds: ['C00693044', 'C00652552']
     )]
-    public float $presJulianCastro = 0.0;
+    public DonorProfileAmount $presJulianCastro;
     #[RecipientAttribute(
         slug: 'kamala_harris',
         party: PartyType::democratic,
@@ -256,7 +257,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-12-03',
         committeeIds: ['C00694455', 'C00713099', 'C00629071']
     )]
-    public float $presKamalaHarris = 0.0;
+    public DonorProfileAmount $presKamalaHarris;
     #[RecipientAttribute(
         slug: 'kirsten_gillibrand',
         party: PartyType::democratic,
@@ -264,7 +265,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-08-28',
         committeeIds: ['C00694018', 'C00525600', 'C00477067']
     )]
-    public float $presKirstenGillibrand = 0.0;
+    public DonorProfileAmount $presKirstenGillibrand;
     #[RecipientAttribute(
         slug: 'marianne_williamson',
         party: PartyType::democratic,
@@ -272,7 +273,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-01-10',
         committeeIds: ['C00696054']
     )]
-    public float $presMarianneWilliamson = 0.0;
+    public DonorProfileAmount $presMarianneWilliamson;
     #[RecipientAttribute(
         slug: 'mark_sanford',
         party: PartyType::republican,
@@ -280,7 +281,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-11-12',
         committeeIds: ['C00285254', 'C00579516']
     )]
-    public float $presMarkSanford = 0.0;
+    public DonorProfileAmount $presMarkSanford;
     #[RecipientAttribute(
         slug: 'michael_bennet',
         party: PartyType::democratic,
@@ -288,7 +289,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-02-11',
         committeeIds: ['C00705186', 'C00491936']
     )]
-    public float $presMichaelBennet = 0.0;
+    public DonorProfileAmount $presMichaelBennet;
     #[RecipientAttribute(
         slug: 'michael_bloomberg',
         party: PartyType::democratic,
@@ -296,7 +297,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-03-04',
         committeeIds: ['C00728154']
     )]
-    public float $presMichaelBloomberg = 0.0;
+    public DonorProfileAmount $presMichaelBloomberg;
     #[RecipientAttribute(
         slug: 'mike_gravel',
         party: PartyType::democratic,
@@ -304,7 +305,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-08-16',
         committeeIds: ['C00700609']
     )]
-    public float $presMikeGravel = 0.0;
+    public DonorProfileAmount $presMikeGravel;
     #[RecipientAttribute(
         slug: 'pete_buttigieg',
         party: PartyType::democratic,
@@ -312,7 +313,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-03-01',
         committeeIds: ['C00697441', 'C00648501']
     )]
-    public float $presPeteButtigieg = 0.0;
+    public DonorProfileAmount $presPeteButtigieg;
     #[RecipientAttribute(
         slug: 'seth_moulton',
         party: PartyType::democratic,
@@ -320,7 +321,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-08-23',
         committeeIds: ['C00704510', 'C00571174', 'C00656439']
     )]
-    public float $presSethMoulton = 0.0;
+    public DonorProfileAmount $presSethMoulton;
     #[RecipientAttribute(
         slug: 'steve_bullock',
         party: PartyType::democratic,
@@ -328,7 +329,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-12-02',
         committeeIds: ['C00706416', 'C00493262', 'C00744839', 'C00650754', 'C00760959']
     )]
-    public float $presSteveBullock = 0.0;
+    public DonorProfileAmount $presSteveBullock;
     #[RecipientAttribute(
         slug: 'tim_ryan',
         party: PartyType::democratic,
@@ -336,7 +337,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-10-24',
         committeeIds: ['C00701979', 'C00417584']
     )]
-    public float $presTimRyan = 0.0;
+    public DonorProfileAmount $presTimRyan;
     #[RecipientAttribute(
         slug: 'tom_steyer',
         party: PartyType::democratic,
@@ -344,7 +345,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-02-29',
         committeeIds: ['C00711614']
     )]
-    public float $presTomSteyer = 0.0;
+    public DonorProfileAmount $presTomSteyer;
     #[RecipientAttribute(
         slug: 'tulsi_gabbard',
         party: PartyType::democratic,
@@ -352,7 +353,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-03-19',
         committeeIds: ['C00693713']
     )]
-    public float $presTulsiGabbard = 0.0;
+    public DonorProfileAmount $presTulsiGabbard;
     #[RecipientAttribute(
         slug: 'wayne_messam',
         party: PartyType::democratic,
@@ -360,7 +361,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2019-11-20',
         committeeIds: ['C00699280']
     )]
-    public float $presWayneMessam = 0.0;
+    public DonorProfileAmount $presWayneMessam;
     #[RecipientAttribute(
         slug: 'bill_weld',
         party: PartyType::republican,
@@ -368,7 +369,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
         endDate: '2020-03-18',
         committeeIds: ['C00700906']
     )]
-    public float $presWilliamWeld = 0.0;
+    public DonorProfileAmount $presWilliamWeld;
 
     protected function getElectionDayStr(): string
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Entity\Profile\Cycle;
 
+use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
 use CliffordVickrey\Book2024\Common\Enum\PartyType;
 
 class DonorProfileCycle2016 extends DonorProfileCycle
@@ -16,7 +17,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-03-04',
         committeeIds: ['C00573519', 'C00569905', 'C00548420', 'C00577296', 'C00586685', 'C00574277']
     )]
-    public float $presBenCarson = 0.0;
+    public DonorProfileAmount $presBenCarson;
     #[RecipientAttribute(
         slug: 'bernie_sanders',
         party: PartyType::democratic,
@@ -36,7 +37,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
             'C00590240',
         ]
     )]
-    public float $presBernieSanders = 0.0;
+    public DonorProfileAmount $presBernieSanders;
     #[RecipientAttribute(
         slug: 'bobby_jindal',
         party: PartyType::republican,
@@ -44,7 +45,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2015-11-17',
         committeeIds: ['C00580159', 'C00571711', 'C00559237']
     )]
-    public float $presBobbyJindal = 0.0;
+    public DonorProfileAmount $presBobbyJindal;
     #[RecipientAttribute(
         slug: 'carly_fiorina',
         party: PartyType::republican,
@@ -52,7 +53,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-02-10',
         committeeIds: ['C00577312', 'C00573154', 'C00564534']
     )]
-    public float $presCarlyFiorina = 0.0;
+    public DonorProfileAmount $presCarlyFiorina;
     #[RecipientAttribute(
         slug: 'chris_christie',
         party: PartyType::republican,
@@ -60,14 +61,14 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-02-10',
         committeeIds: ['C00574251', 'C00573055', 'C00571778']
     )]
-    public float $presChrisChristie = 0.0;
+    public DonorProfileAmount $presChrisChristie;
     #[RecipientAttribute(
         slug: 'evan_mcmullin',
         party: PartyType::thirdParty,
         startDate: '2016-08-08',
         committeeIds: ['C00623884']
     )]
-    public float $presEvanMcMullin = 0.0;
+    public DonorProfileAmount $presEvanMcMullin;
     #[RecipientAttribute(
         slug: 'george_pataki',
         party: PartyType::republican,
@@ -75,7 +76,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2015-12-29',
         committeeIds: ['C00578245', 'C00571356']
     )]
-    public float $presGeorgePataki = 0.0;
+    public DonorProfileAmount $presGeorgePataki;
     #[RecipientAttribute(
         slug: 'donald_trump',
         party: PartyType::republican,
@@ -101,7 +102,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
             'C00587881',
         ]
     )]
-    public float $presDonaldTrump = 0.0;
+    public DonorProfileAmount $presDonaldTrump;
     #[RecipientAttribute(
         slug: 'hillary_clinton',
         party: PartyType::democratic,
@@ -118,7 +119,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
             'C00566034',
             'C00573741',
         ])]
-    public float $presHillaryClinton = 0.0;
+    public DonorProfileAmount $presHillaryClinton;
     #[RecipientAttribute(
         slug: 'jeb_bush',
         party: PartyType::republican,
@@ -126,7 +127,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-02-20',
         committeeIds: ['C00579458', 'C00571372', 'C00571950']
     )]
-    public float $presJebBush = 0.0;
+    public DonorProfileAmount $presJebBush;
     #[RecipientAttribute(
         slug: 'jim_webb',
         party: PartyType::democratic,
@@ -134,14 +135,14 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2015-10-20',
         committeeIds: ['C00581215', 'C00430819']
     )]
-    public float $presJimWebb = 0.0;
+    public DonorProfileAmount $presJimWebb;
     #[RecipientAttribute(
         slug: 'jill_stein',
         party: PartyType::thirdParty,
         startDate: '2015-06-22',
         committeeIds: ['C00581199']
     )]
-    public float $presJillStein = 0.0;
+    public DonorProfileAmount $presJillStein;
     #[RecipientAttribute(
         slug: 'jim_gilmore',
         party: PartyType::republican,
@@ -149,7 +150,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-02-12',
         committeeIds: ['C00582668', 'C00568840']
     )]
-    public float $presJimGilmore = 0.0;
+    public DonorProfileAmount $presJimGilmore;
     #[RecipientAttribute(
         slug: 'john_kasich',
         party: PartyType::republican,
@@ -157,7 +158,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-05-04',
         committeeIds: ['C00581876', 'C00581868', 'C00582973']
     )]
-    public float $presJohnKasich = 0.0;
+    public DonorProfileAmount $presJohnKasich;
     #[RecipientAttribute(
         slug: 'lindsey_graham',
         party: PartyType::republican,
@@ -165,7 +166,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-05-04',
         committeeIds: ['C00578757', 'C00573733', 'C00388934', 'C00543157']
     )]
-    public float $presLindseyGraham = 0.0;
+    public DonorProfileAmount $presLindseyGraham;
     #[RecipientAttribute(
         slug: 'marco_rubio',
         party: PartyType::republican,
@@ -173,7 +174,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2015-12-21',
         committeeIds: ['C00458844', 'C00541292', 'C00500025', 'C00591214']
     )]
-    public float $presMarcoRubio = 0.0;
+    public DonorProfileAmount $presMarcoRubio;
     #[RecipientAttribute(
         slug: 'martin_omalley',
         party: PartyType::democratic,
@@ -181,7 +182,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-02-01',
         committeeIds: ['C00578658', 'C00578724', 'C00525220']
     )]
-    public float $presMartinOMalley = 0.0;
+    public DonorProfileAmount $presMartinOMalley;
     #[RecipientAttribute(
         slug: 'mike_huckabee',
         party: PartyType::republican,
@@ -189,7 +190,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-02-01',
         committeeIds: ['C00577981', 'C00573923', 'C00448373', 'C00579243']
     )]
-    public float $presMikeHuckabee = 0.0;
+    public DonorProfileAmount $presMikeHuckabee;
     #[RecipientAttribute(
         slug: 'rand_paul',
         party: PartyType::republican,
@@ -197,7 +198,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-02-03',
         committeeIds: ['C00575449', 'C00525899', 'C00532572', 'C00493924', 'C00572867', 'C00538827', 'C00573410']
     )]
-    public float $presRandPaul = 0.0;
+    public DonorProfileAmount $presRandPaul;
     #[RecipientAttribute(
         slug: 'rick_perry',
         party: PartyType::republican,
@@ -205,7 +206,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2015-09-11',
         committeeIds: ['C00500587', 'C00580092', 'C00573634', 'C00566497']
     )]
-    public float $presRickPerry = 0.0;
+    public DonorProfileAmount $presRickPerry;
     #[RecipientAttribute(
         slug: 'rick_santorum',
         party: PartyType::republican,
@@ -213,7 +214,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2016-02-03',
         committeeIds: ['C00496034', 'C00528307', 'C00580324', 'C00582742']
     )]
-    public float $presRickSantorum = 0.0;
+    public DonorProfileAmount $presRickSantorum;
     #[RecipientAttribute(
         slug: 'ted_cruz',
         party: PartyType::republican,
@@ -233,7 +234,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
             'C00576157',
         ]
     )]
-    public float $presTedCruz = 0.0;
+    public DonorProfileAmount $presTedCruz;
     #[RecipientAttribute(
         slug: 'scott_walker',
         party: PartyType::republican,
@@ -241,7 +242,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
         endDate: '2015-09-21',
         committeeIds: ['C00580480', 'C00576108', 'C00572792', 'C00573147', 'C00574251']
     )]
-    public float $presScottWalker = 0.0;
+    public DonorProfileAmount $presScottWalker;
 
     protected function getElectionDayStr(): string
     {

@@ -12,8 +12,12 @@ use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2020;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2024;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\RecipientAttribute;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfile;
+use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
+use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
+use CliffordVickrey\Book2024\Common\Enum\PacType;
 use CliffordVickrey\Book2024\Common\Enum\PartyType;
+use CliffordVickrey\Book2024\Common\Enum\State;
 use CliffordVickrey\Book2024\Common\Exception\BookUnexpectedValueException;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepositoryInterface;
@@ -57,18 +61,20 @@ class DonorProfileService implements DonorProfileServiceInterface
 
     public function buildDonorProfile(DonorPanel $panel): DonorProfile
     {
+        $profile = clone $this->prototype;
+        $profile->state = State::tryFrom($panel->donor->state);
+
+        $analyses = \array_map($this->analyzeReceipt(...), $panel->receipts);
+
+
 
     }
 
     private function analyzeReceipt(ReceiptInPanel $receiptInPanel): ReceiptAnalysis
     {
-        $year = $receiptInPanel->date->format('Y');
-        Assert::numeric($year);
-        $year = (int)$year;
-        $cycle = ($year % 2 === 0) ? $year : ($year + 1);
-
         $committee = $this->committeeAggregateRepository->getByCommitteeId($receiptInPanel->recipientSlug);
 
+        $cycle = $receiptInPanel->getCycle();
         $fecCandidateId = ($committee->infoByYear[$cycle] ?? null)?->CAND_ID;
 
         if (null === $fecCandidateId) {
@@ -88,7 +94,7 @@ class DonorProfileService implements DonorProfileServiceInterface
         $committeeFecId = $analysis->committee->id;
 
         $keyWithDate = \sprintf('%s|%s', $committeeFecId, $analysis->date->format('Y-m-d'));
-        $keyWithCycle = \sprintf('%s|%s', $committeeFecId, $analysis->cycle);
+        $keyWithCycle = \sprintf('%s|%d', $committeeFecId, $analysis->cycle);
 
         if (isset($this->recipientMap[$keyWithDate])) {
             $recipient = $this->recipientMap[$keyWithDate];
@@ -103,11 +109,67 @@ class DonorProfileService implements DonorProfileServiceInterface
         }
 
         if (false !== $recipient) {
-            $analysis->cycle = $recipient['cycle'];
-            $analysis->prop = $recipient['prop'];
+            $this->setAnalysisRecipient($analysis, $recipient);
         }
 
+        $this->analyzePacType($analysis);
+
         return $analysis;
+    }
+
+    /**
+     * @param Recipient $recipient
+     * @return RecipientAttribute
+     */
+    private function getRecipientAttributeByRecipient(array $recipient): RecipientAttribute
+    {
+        return $this->getRecipientAttribute($recipient['cycle'], $recipient['prop']);
+    }
+
+    private function getRecipientAttribute(int $cycle, string $prop): RecipientAttribute
+    {
+        return $this->recipientAttributes[$cycle][$prop];
+    }
+
+    /**
+     * @param ReceiptAnalysis $analysis
+     * @param Recipient $recipient
+     * @return void
+     */
+    private function setAnalysisRecipient(ReceiptAnalysis $analysis, array $recipient): void
+    {
+        $analysis->cycle = $recipient['cycle'];
+        $analysis->prop = $recipient['prop'];
+
+        $attr = $this->getRecipientAttributeByRecipient($recipient);
+
+        if (null === $analysis->candidate && $attr->slug) {
+            $analysis->candidate = $this->candidateAggregateRepository->getByCandidateId($attr->slug);
+        }
+
+        $analysis->isWeekOneLaunch = $attr->startDate && DateUtilities::isWithinWeek($attr->startDate, $analysis->date);
+    }
+
+    private function analyzePacType(ReceiptAnalysis $analysis): void
+    {
+        $cycle = $analysis->cycle;
+        $isJoint = false;
+        $committeeType = null;
+
+        // exclude Biden/Harris/Trump's joint fundraising committees. We'll consider these donations to the campaign
+        // itself
+        if ($analysis->getCampaignType()) {
+            $isJoint = ($analysis->committee->infoByYear[$cycle] ?? null)?->CMTE_DSGN === CommitteeDesignation::J;
+        }
+
+        if (!$isJoint) {
+            $committeeInfo = $analysis->committee->infoByYear[$cycle] ?? null;
+            $committeeType = $committeeInfo->CMTE_TP;
+        }
+
+        if (null !== $committeeType) {
+            $analysis->pacType = PacType::fromCommitteeType($committeeType);
+        }
     }
 
     private function determineRecipient(ReceiptAnalysis $analysis): array|false

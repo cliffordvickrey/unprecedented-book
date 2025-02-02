@@ -6,6 +6,7 @@ namespace CliffordVickrey\Book2024\Common\Entity\Combined;
 
 use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Entity\PropMeta;
+use Webmozart\Assert\Assert;
 
 class ReceiptInPanel extends Entity
 {
@@ -19,6 +20,14 @@ class ReceiptInPanel extends Entity
     public float $amount = 0.0;
     #[PropMeta(4)]
     public string $zip = '';
+
+    public function getCycle(): int
+    {
+        $year = $this->date->format('Y');
+        Assert::numeric($year);
+        $year = (int)$year;
+        return ($year % 2 === 0) ? $year : ($year + 1);
+    }
 
     public static function fromReceipt(Receipt $receipt): self
     {

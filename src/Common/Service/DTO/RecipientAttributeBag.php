@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Service\DTO;
 
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\RecipientAttribute;
+use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
+use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 
 /**
  * @implements \IteratorAggregate<string, RecipientAttribute>
  */
-readonly class RecipientAttributeBag implements \IteratorAggregate
+readonly class RecipientAttributeBag implements \ArrayAccess, \IteratorAggregate
 {
     /** @var array<string, RecipientAttribute> */
     public array $recipientAttributesByCandidateSlug;
@@ -32,5 +34,29 @@ readonly class RecipientAttributeBag implements \IteratorAggregate
     public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->recipientAttributes);
+    }
+
+    public function offsetExists(mixed $offset): bool
+    {
+        return isset($this->recipientAttributes[CastingUtilities::toString($offset)]);
+    }
+
+
+    public function offsetGet(mixed $offset): RecipientAttribute
+    {
+        $offset = CastingUtilities::toString($offset);
+
+        return $this->recipientAttributes[$offset]
+            ?? throw new BookOutOfBoundsException(\sprintf('Illegal offset, %s', $offset));
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        throw new \BadMethodCallException();
+    }
+
+    public function offsetUnset(mixed $offset): void
+    {
+        throw new \BadMethodCallException();
     }
 }

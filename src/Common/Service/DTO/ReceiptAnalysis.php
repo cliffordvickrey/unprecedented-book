@@ -6,7 +6,8 @@ namespace CliffordVickrey\Book2024\Common\Service\DTO;
 
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CandidateAggregate;
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CommitteeAggregate;
-use CliffordVickrey\Book2024\Common\Enum\RecipientType;
+use CliffordVickrey\Book2024\Common\Enum\PacType;
+use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 
 class ReceiptAnalysis
 {
@@ -19,22 +20,28 @@ class ReceiptAnalysis
         public float               $amount,
         public int                 $cycle,
         public CommitteeAggregate  $committee,
-        public ?CandidateAggregate $candidate,
-        public ?string             $prop = null
+        public ?CandidateAggregate $candidate = null,
+        public ?PacType            $pacType = null,
+        public ?string             $prop = null,
+        public bool                $isWeekOneLaunch = false,
     )
     {
     }
 
-    public function getRecipient(): ?RecipientType
+    public function getCampaignType(?int $cycle = null): ?CampaignType
     {
-        if (null === $this->prop || $this->cycle <> 2024) {
+        if (null === $this->prop) {
+            return null;
+        }
+
+        if (null !== $cycle && $this->cycle <> $cycle) {
             return null;
         }
 
         return match ($this->prop) {
-            self::PROP_BIDEN => RecipientType::biden,
-            self::PROP_HARRIS => RecipientType::harris,
-            self::PROP_TRUMP => RecipientType::trump,
+            self::PROP_BIDEN => CampaignType::joe_biden,
+            self::PROP_HARRIS => CampaignType::kamala_harris,
+            self::PROP_TRUMP => CampaignType::donald_trump,
             default => null,
         };
     }
