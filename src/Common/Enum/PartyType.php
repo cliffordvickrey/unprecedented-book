@@ -10,11 +10,11 @@ enum PartyType: string
 {
     case democratic = 'democrat';
     case republican = 'republican';
-    case thirdParty = 'other';
+    case thirdParty = 'thirdParty';
 
     public static function fromCandidateInfo(Candidate $candidateInfo): PartyType
     {
-        $isDemocratic = (bool)$candidateInfo->CAND_PTY_AFFILIATION?->isDemocratic();
+        $isDemocratic = (bool) $candidateInfo->CAND_PTY_AFFILIATION?->isDemocratic();
         $isRepublican = !$isDemocratic && $candidateInfo->CAND_PTY_AFFILIATION?->isRepublican();
 
         if ($isDemocratic) {
@@ -24,5 +24,10 @@ enum PartyType: string
         }
 
         return self::thirdParty;
+    }
+
+    public function toCode(): string
+    {
+        return strtoupper(substr($this->value, 0, 1));
     }
 }

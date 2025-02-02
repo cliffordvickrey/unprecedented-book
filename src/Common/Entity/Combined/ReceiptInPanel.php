@@ -25,8 +25,9 @@ class ReceiptInPanel extends Entity
     {
         $year = $this->date->format('Y');
         Assert::numeric($year);
-        $year = (int)$year;
-        return ($year % 2 === 0) ? $year : ($year + 1);
+        $year = (int) $year;
+
+        return (0 === $year % 2) ? $year : ($year + 1);
     }
 
     public static function fromReceipt(Receipt $receipt): self

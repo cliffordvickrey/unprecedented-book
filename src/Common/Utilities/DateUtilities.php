@@ -9,16 +9,34 @@ use Webmozart\Assert\Assert;
 
 class DateUtilities
 {
+    public static function getMonthsAfterStartOfElectionCycle(\DateTimeImmutable $dt): int
+    {
+        $year = $dt->format('Y');
+        Assert::numeric($year);
+        $year = (int) $year;
+
+        $startYear = (0 === $year % 2) ? ($year - 1) : $year;
+
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', "$startYear-01-01") ?: null;
+        $startDate = $startDate?->setTime(0, 0);
+        Assert::notEmpty($startDate);
+
+        $interval = $startDate->diff($dt);
+
+        return ($interval->y * 12) + $interval->m;
+    }
+
     public static function isWithinWeek(\DateTimeImmutable $a, \DateTimeImmutable $b): bool
     {
-        self::isWithinDays($a, $b, 7);
+        return self::isWithinDays($a, $b, 7);
     }
 
     public static function isWithinDays(\DateTimeImmutable $a, \DateTimeImmutable $b, int $days): bool
     {
         $interval = $b->diff($a);
-        $dayDiff = (int)$interval->days;
-        return $dayDiff <= $days && $interval->invert == 0;
+        $dayDiff = (int) $interval->days;
+
+        return $dayDiff <= $days && 0 == $interval->invert;
     }
 
     /**

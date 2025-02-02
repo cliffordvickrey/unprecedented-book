@@ -9,4 +9,13 @@ enum CampaignType: string
     case joe_biden = 'joe_biden';
     case kamala_harris = 'kamala_harris';
     case donald_trump = 'donald_trump';
+
+    public function getParty(): PartyType
+    {
+        if (self::donald_trump === $this) {
+            return PartyType::republican;
+        }
+
+        return PartyType::democratic;
+    }
 }

@@ -6,8 +6,8 @@ namespace CliffordVickrey\Book2024\Common\Service\DTO;
 
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CandidateAggregate;
 use CliffordVickrey\Book2024\Common\Entity\Aggregate\CommitteeAggregate;
-use CliffordVickrey\Book2024\Common\Enum\PacType;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
+use CliffordVickrey\Book2024\Common\Enum\PacType;
 
 class ReceiptAnalysis
 {
@@ -16,16 +16,15 @@ class ReceiptAnalysis
     private const string PROP_TRUMP = 'presDonaldTrump';
 
     public function __construct(
-        public \DateTimeImmutable  $date,
-        public float               $amount,
-        public int                 $cycle,
-        public CommitteeAggregate  $committee,
+        public \DateTimeImmutable $date,
+        public float $amount,
+        public int $cycle,
+        public CommitteeAggregate $committee,
         public ?CandidateAggregate $candidate = null,
-        public ?PacType            $pacType = null,
-        public ?string             $prop = null,
-        public bool                $isWeekOneLaunch = false,
-    )
-    {
+        public ?PacType $pacType = null,
+        public ?string $prop = null,
+        public bool $isWeekOneLaunch = false,
+    ) {
     }
 
     public function getCampaignType(?int $cycle = null): ?CampaignType
@@ -34,7 +33,7 @@ class ReceiptAnalysis
             return null;
         }
 
-        if (null !== $cycle && $this->cycle <> $cycle) {
+        if (null !== $cycle && $this->cycle != $cycle) {
             return null;
         }
 

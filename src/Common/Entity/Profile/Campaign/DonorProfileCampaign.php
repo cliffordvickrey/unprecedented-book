@@ -8,7 +8,7 @@ use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
 
 class DonorProfileCampaign
 {
-    public int $maxMonthlyCount = 0;
+    public int $maxConsecutiveMonthlyDonationCount = 0;
     public bool $priorDonor = false;
     public DonorProfileAmount $total;
     public bool $weekOneLaunch = false;

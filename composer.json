@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "analyse": "vendor/bin/phpstan analyse --memory-limit 2147483648",
+    "clear_cache": "vendor/bin/phpstan clear-result-cache",
     "check": "vendor/bin/php-cs-fixer fix check",
     "migrate": "phpunit --migrate-configuration",
     "fix": "vendor/bin/php-cs-fixer fix",

@@ -22,7 +22,7 @@ enum PacType: string
             CommitteeType::U => self::singleCandidateIndependentExpenditureCommittee,
             CommitteeType::O => self::superPac,
             CommitteeType::N, CommitteeType::Q => self::traditionalPac,
-            default => null
+            default => null,
         };
     }
 }

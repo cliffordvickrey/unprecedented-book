@@ -14,6 +14,8 @@ use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\PacType;
 use CliffordVickrey\Book2024\Common\Enum\State;
 use CliffordVickrey\Book2024\Common\Service\DTO\ReceiptAnalysis;
+use CliffordVickrey\Book2024\Common\Utilities\DateUtilities;
+use Webmozart\Assert\Assert;
 
 class DonorProfile extends Entity
 {
@@ -29,6 +31,7 @@ class DonorProfile extends Entity
     {
         $self = new self();
         $self->clearState();
+
         return $self;
     }
 
@@ -51,26 +54,84 @@ class DonorProfile extends Entity
         $this->monthlyReceiptMemo = [];
     }
 
-    public function addCampaignAmount(CampaignType $campaignType, float $amount, bool $isWeekOneLaunch): void
+    /**
+     * @param list<ReceiptAnalysis> $analyses
+     */
+    public function analyze(array $analyses): void
     {
-        $campaign = $this->campaigns[$campaignType->value];
+        array_walk($analyses, $this->addReceiptAnalysis(...));
+        $this->setMaxConsecutiveMonthlyDonationCounts();
+        $this->monthlyReceiptMemo = [];
+    }
 
-        $campaign->total->receipts++;
-        $campaign->total->amount += $amount;
+    private function setMaxConsecutiveMonthlyDonationCounts(): void
+    {
+        if (empty($this->monthlyReceiptMemo)) {
+            return;
+        }
 
-        if ($isWeekOneLaunch) {
-            $campaign->weekOneLaunch = true;
+        ksort($this->monthlyReceiptMemo);
+
+        $maxConsecutiveMonthlyDonationCounts = [
+            CampaignType::joe_biden->value => 0,
+            CampaignType::kamala_harris->value => 0,
+            CampaignType::donald_trump->value => 0,
+        ];
+
+        $keys = array_keys($this->monthlyReceiptMemo);
+
+        $counter = 1;
+
+        $laggedPartyCode = '';
+        $laggedAmt = '';
+        $laggedMonth = -1;
+
+        foreach ($keys as $key) {
+            [$partyCode, $amt, $month] = explode('|', $key);
+
+            Assert::numeric($month);
+            $month = (int) $month;
+
+            if (
+                $partyCode !== $laggedPartyCode
+                || $amt !== $laggedAmt
+                || $month !== ($laggedMonth + 1)
+            ) {
+                $counter = 1;
+            } else {
+                ++$counter;
+            }
+
+            if ($counter > 1) {
+                if ('R' === $partyCode) {
+                    $key = CampaignType::donald_trump->value;
+                } elseif ($month > 18) {
+                    $key = CampaignType::kamala_harris->value;
+                } else {
+                    $key = CampaignType::joe_biden->value;
+                }
+
+                $maxConsecutiveMonthlyDonationCounts[$key] = max($maxConsecutiveMonthlyDonationCounts[$key], $counter);
+            }
+
+            $laggedPartyCode = $partyCode;
+            $laggedAmt = $amt;
+            $laggedMonth = $month;
+        }
+
+        foreach ($maxConsecutiveMonthlyDonationCounts as $key => $maxConsecutiveMonthlyDonationCount) {
+            $this->campaigns[$key]->maxConsecutiveMonthlyDonationCount = $maxConsecutiveMonthlyDonationCount;
         }
     }
 
-    public function addReceiptAnalysis(ReceiptAnalysis $analysis): void
+    private function addReceiptAnalysis(ReceiptAnalysis $analysis): void
     {
         $priorDonor = $analysis->cycle < 2024
             && $analysis->candidate
             && CampaignType::tryFrom($analysis->candidate->slug);
 
         if ($priorDonor) {
-            $campaignType = CampaignType::from((string)$analysis->candidate?->slug);
+            $campaignType = CampaignType::from((string) $analysis->candidate?->slug);
             $this->campaigns[$campaignType->value]->priorDonor = true;
         }
 
@@ -81,7 +142,7 @@ class DonorProfile extends Entity
         $campaignType = $analysis->getCampaignType(2024);
 
         if ($campaignType) {
-            $this->addCampaignAmount($campaignType, $analysis->amount, $analysis->isWeekOneLaunch);
+            $this->addCampaignAmount($campaignType, $analysis->date, $analysis->amount, $analysis->isWeekOneLaunch);
         }
 
         if ($analysis->prop) {
@@ -91,7 +152,31 @@ class DonorProfile extends Entity
         if ($analysis->pacType) {
             $this->addPacTypeForCycle($analysis->cycle, $analysis->pacType, $analysis->amount);
         }
+    }
 
+    private function addCampaignAmount(
+        CampaignType $campaignType,
+        \DateTimeImmutable $date,
+        float $amount,
+        bool $isWeekOneLaunch,
+    ): void {
+        $monthKey = \sprintf(
+            '%s|%010d|%02d',
+            $campaignType->getParty()->toCode(),
+            (int) floor($amount),
+            DateUtilities::getMonthsAfterStartOfElectionCycle($date)
+        );
+
+        $this->monthlyReceiptMemo[$monthKey] = true;
+
+        $campaign = $this->campaigns[$campaignType->value];
+
+        ++$campaign->total->receipts;
+        $campaign->total->amount += $amount;
+
+        if ($isWeekOneLaunch) {
+            $campaign->weekOneLaunch = true;
+        }
     }
 
     private function addAmountForCycle(int $cycle, string $prop, float $amount): void

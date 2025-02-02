@@ -7,12 +7,8 @@ namespace CliffordVickrey\Book2024\Common\Service;
 use CliffordVickrey\Book2024\Common\Entity\Combined\DonorPanel;
 use CliffordVickrey\Book2024\Common\Entity\Combined\ReceiptInPanel;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
-use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2016;
-use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2020;
-use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2024;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\RecipientAttribute;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfile;
-use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use CliffordVickrey\Book2024\Common\Enum\PacType;
@@ -59,15 +55,145 @@ class DonorProfileService implements DonorProfileServiceInterface
         $this->recipientMap = $this->buildRecipientMap();
     }
 
+    /**
+     * @return array<string, Recipient>
+     */
+    private function buildRecipientMap(): array
+    {
+        /** @var array<string, Recipient> $map */
+        $map = array_reduce(
+            $this->prototype->cycles,
+            fn (array $carry, DonorProfileCycle $donorProfileCycle) => array_merge(
+                $carry,
+                $this->buildRecipientCycleMap($donorProfileCycle)
+            ),
+            []
+        );
+
+        return $map;
+    }
+
+    /**
+     * @return array<string, Recipient>
+     */
+    private function buildRecipientCycleMap(DonorProfileCycle $donorProfileCycle): array
+    {
+        $recipientAttributes = $this->getRecipientAttributes($donorProfileCycle);
+
+        $electionDate = $donorProfileCycle->getElectionDate();
+
+        $startOfCycleDateStr = \sprintf('%d-01-01', $donorProfileCycle->cycle - 2);
+
+        $startOfCycleDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startOfCycleDateStr);
+
+        Assert::isInstanceOf($startOfCycleDate, \DateTimeImmutable::class);
+
+        $map = [];
+
+        foreach ($recipientAttributes as $prop => $attr) {
+            if (empty($attr->committeeIds)) {
+                // probably not a candidate
+                continue;
+            }
+
+            $this->initRecipientAttribute($attr);
+
+            $startDate = $attr->startDate ?? $startOfCycleDate;
+
+            if (
+                $startDate > $startOfCycleDate
+                && '2024-07-21' !== $startDate->format('Y-m-d')
+            ) {
+                $startDate = $startOfCycleDate;
+            }
+
+            $endDate = $attr->endDate ?? $electionDate;
+
+            $recipient = ['cycle' => $donorProfileCycle, 'prop' => $prop];
+
+            // (extremely nerds voice) my Lisp-like higher order functions
+            $map = array_merge($map, array_reduce(
+                DateUtilities::getDateRanges($startDate, $endDate),
+                static fn (array $carry, \DateTimeImmutable $date) => array_merge(
+                    $carry,
+                    array_reduce(
+                        $attr->committeeIds,
+                        static fn (array $carryInner, string $committeeId) => array_merge(
+                            $carryInner,
+                            [\sprintf('%s|%s', $committeeId, $date->format('Y-m-d')) => $recipient]
+                        ),
+                        []
+                    )
+                ),
+                []
+            ));
+        }
+
+        /* @var array<string, Recipient> $map */
+        return $map;
+    }
+
+    private function getRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeBag
+    {
+        if (\is_int($cycle)) {
+            $key = $cycle;
+        } else {
+            $key = $cycle->cycle;
+        }
+
+        $this->recipientAttributes[$key] ??= $this->collectRecipientAttributes($cycle);
+
+        return $this->recipientAttributes[$key];
+    }
+
+    private function collectRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeBag
+    {
+        $donorProfileCycle = $cycle;
+
+        if (\is_int($donorProfileCycle)) {
+            $donorProfileCycle = DonorProfileCycle::create(['cycle' => $cycle]);
+        }
+
+        $reflectionObj = new \ReflectionObject($donorProfileCycle);
+
+        $properties = $reflectionObj->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+        $attrs = array_reduce($properties, function (array $carry, \ReflectionProperty $property): array {
+            $attrs = $property->getAttributes(RecipientAttribute::class);
+
+            /* @var array<string, RecipientAttribute> $carry */
+            if (0 === \count($attrs)) {
+                return $carry;
+            }
+
+            return array_merge($carry, [$property->getName() => $attrs[0]->newInstance()]);
+        }, []);
+
+        return new RecipientAttributeBag($attrs);
+    }
+
     public function buildDonorProfile(DonorPanel $panel): DonorProfile
     {
         $profile = clone $this->prototype;
         $profile->state = State::tryFrom($panel->donor->state);
 
-        $analyses = \array_map($this->analyzeReceipt(...), $panel->receipts);
+        $analyses = array_map($this->analyzeReceipt(...), $panel->receipts);
+        $profile->analyze($analyses);
 
+        return $profile;
+    }
 
-
+    private function initRecipientAttribute(RecipientAttribute $attr): void
+    {
+        try {
+            $slug = $attr->slug;
+            Assert::notEmpty($slug);
+            $candidate = $this->candidateAggregateRepository->getAggregate($slug);
+            $attr->description = $candidate->name;
+        } catch (\Throwable) {
+            $msg = \sprintf('Invalid candidate slug, "%s"', $slug);
+            throw new BookUnexpectedValueException($msg);
+        }
     }
 
     private function analyzeReceipt(ReceiptInPanel $receiptInPanel): ReceiptAnalysis
@@ -118,23 +244,54 @@ class DonorProfileService implements DonorProfileServiceInterface
     }
 
     /**
-     * @param Recipient $recipient
-     * @return RecipientAttribute
+     * @return Recipient|false
      */
-    private function getRecipientAttributeByRecipient(array $recipient): RecipientAttribute
+    private function determineRecipient(ReceiptAnalysis $analysis): array|false
     {
-        return $this->getRecipientAttribute($recipient['cycle'], $recipient['prop']);
-    }
+        $cyclePrototype = $this->prototype->cycles[$analysis->cycle] ?? null;
 
-    private function getRecipientAttribute(int $cycle, string $prop): RecipientAttribute
-    {
-        return $this->recipientAttributes[$cycle][$prop];
+        if (
+            !$cyclePrototype
+            || !$analysis->candidate
+            || $cyclePrototype->getElectionDate() < $analysis->date
+        ) {
+            return false;
+        }
+
+        $attr = $this->recipientAttributes[$analysis->cycle]->getAttributeByCandidateSlug($analysis->candidate->slug);
+
+        if (null !== $attr) {
+            return false;
+        }
+
+        $candidateInfo = $analysis->candidate->getInfo($analysis->cycle);
+
+        if (!$candidateInfo) {
+            return false;
+        }
+
+        $office = $candidateInfo->CAND_OFFICE;
+
+        if (!$office) {
+            return false;
+        }
+
+        $slug = $analysis->candidate->slug;
+        $party = self::$actualPartyAffiliations[$slug] ?? PartyType::fromCandidateInfo($candidateInfo);
+
+        $prefix = match ($office) {
+            CandidateOffice::H => 'house',
+            CandidateOffice::S => 'senate',
+            default => 'presOther',
+        };
+
+        $suffix = ucfirst($party->value);
+
+        return ['cycle' => $analysis->cycle, 'prop' => "$prefix$suffix"];
     }
 
     /**
-     * @param ReceiptAnalysis $analysis
      * @param Recipient $recipient
-     * @return void
      */
     private function setAnalysisRecipient(ReceiptAnalysis $analysis, array $recipient): void
     {
@@ -148,6 +305,19 @@ class DonorProfileService implements DonorProfileServiceInterface
         }
 
         $analysis->isWeekOneLaunch = $attr->startDate && DateUtilities::isWithinWeek($attr->startDate, $analysis->date);
+    }
+
+    /**
+     * @param Recipient $recipient
+     */
+    private function getRecipientAttributeByRecipient(array $recipient): RecipientAttribute
+    {
+        return $this->getRecipientAttribute($recipient['cycle'], $recipient['prop']);
+    }
+
+    private function getRecipientAttribute(int $cycle, string $prop): RecipientAttribute
+    {
+        return $this->recipientAttributes[$cycle][$prop];
     }
 
     private function analyzePacType(ReceiptAnalysis $analysis): void
@@ -164,165 +334,11 @@ class DonorProfileService implements DonorProfileServiceInterface
 
         if (!$isJoint) {
             $committeeInfo = $analysis->committee->infoByYear[$cycle] ?? null;
-            $committeeType = $committeeInfo->CMTE_TP;
+            $committeeType = $committeeInfo?->CMTE_TP;
         }
 
         if (null !== $committeeType) {
             $analysis->pacType = PacType::fromCommitteeType($committeeType);
         }
-    }
-
-    private function determineRecipient(ReceiptAnalysis $analysis): array|false
-    {
-        $cyclePrototype = $this->prototype->cycles[$analysis->cycle] ?? null;
-
-        if (!$cyclePrototype) {
-            return false;
-        }
-
-        if ($cyclePrototype->getElectionDate() < $analysis->date) {
-            return false;
-        }
-
-        $attr = $this->recipientAttributes[$analysis->cycle];
-
-        if (isset($attr->recipientAttributesByCandidateSlug[$analysis->candidate->slug])) {
-            return false;
-        }
-
-        $candidateInfo = $analysis->candidate->getInfo($analysis->cycle);
-
-        if (!$candidateInfo) {
-            return false;
-        }
-
-        $office = $candidateInfo->CAND_OFFICE;
-
-        if (!$office) {
-            return false;
-        }
-
-        $party = self::$actualPartyAffiliations[$candidate->slug] ?? PartyType::fromCandidateInfo($candidateInfo);
-
-        $isPresidential = CandidateOffice::P === $office;
-
-        $prefix = $isPresidential ? 'pres' : 'nonPres';
-        $suffix = \ucfirst($party->value);
-
-        return [$analysis->cycle, "$prefix$suffix"];
-    }
-
-    /**
-     * @return array<string, Recipient>
-     */
-    private function buildRecipientMap(): array
-    {
-        return array_reduce(
-            $this->prototype->cycles,
-            fn (array $carry, DonorProfileCycle $donorProfileCycle) => \array_merge(
-                $carry,
-                $this->buildRecipientCycleMap($donorProfileCycle)
-            ),
-            []
-        );
-    }
-
-    /**
-     * @return array<string, Recipient>
-     */
-    private function buildRecipientCycleMap(DonorProfileCycle $donorProfileCycle): array
-    {
-        $recipientAttributes = $this->getRecipientAttributes($donorProfileCycle);
-
-        $electionDate = $donorProfileCycle->getElectionDate();
-
-        $startOfCycleDateStr = \sprintf('%d-01-01', $donorProfileCycle->cycle - 2);
-
-        $startOfCycleDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startOfCycleDateStr);
-
-        Assert::isInstanceOf(\DateTimeImmutable::class, $startOfCycleDate);
-
-        $map = [];
-
-        foreach ($recipientAttributes as $prop => $attr) {
-            $this->assertValidCandidateSlug((string)$attr->slug);
-
-            $startDate = $attr->startDate ?? $startOfCycleDate;
-
-            if ($startDate > $startOfCycleDate) {
-                $startDate = $startOfCycleDate;
-            }
-
-            $endDate = $attr->endDate ?? $electionDate;
-
-            $recipient = ['cycle' => $donorProfileCycle, 'prop' => $prop];
-
-            $map = array_merge($map, array_reduce(
-                DateUtilities::getDateRanges($startDate, $endDate),
-                static fn (array $carry, \DateTimeImmutable $date) => array_merge(
-                    $carry,
-                    array_reduce(
-                        $attr->committeeIds,
-                        static fn (array $carryInner, string $committeeId) => array_merge(
-                            $carryInner,
-                            [\sprintf('%s|%s', $committeeId, $date->format('Y-m-d')) => $recipient]
-                        ),
-                        []
-                    )
-                ),
-                []
-            ));
-        }
-
-        return $map;
-    }
-
-    private function assertValidCandidateSlug(string $slug): void
-    {
-        try {
-            Assert::notEmpty($slug);
-            $this->candidateAggregateRepository->getAggregate($slug);
-        } catch (\Throwable) {
-            $msg = \sprintf('Invalid candidate slug, "%s"', $slug);
-            throw new BookUnexpectedValueException($msg);
-        }
-    }
-
-    private function getRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeBag
-    {
-        $key = $cycle;
-
-        if ($cycle instanceof DonorProfileCycle) {
-            $key = $cycle->cycle;
-        }
-
-        $this->recipientAttributes[$key] ??= $this->collectRecipientAttributes($cycle);
-
-        return $this->recipientAttributes[$key];
-    }
-
-    private function collectRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeBag
-    {
-        $donorProfileCycle = $cycle;
-
-        if (\is_int($donorProfileCycle)) {
-            $donorProfileCycle = DonorProfileCycle::create(['cycle' => $cycle]);
-        }
-
-        $reflectionObj = new \ReflectionObject($donorProfileCycle);
-
-        $properties = $reflectionObj->getProperties(\ReflectionProperty::IS_PUBLIC);
-
-        $attrs = array_reduce($properties, function (array $carry, \ReflectionProperty $property): array {
-            $attrs = $property->getAttributes(RecipientAttribute::class);
-
-            if (0 === \count($attrs)) {
-                return $carry;
-            }
-
-            return array_merge($carry, [$property->getName() => $attrs[0]]);
-        }, []);
-
-        return new RecipientAttributeBag($attrs);
     }
 }

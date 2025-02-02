@@ -14,14 +14,15 @@ class RecipientAttribute
     public ?\DateTimeImmutable $endDate = null;
 
     /**
-     * @param array<string, mixed> $committeeIds
+     * @param list<string> $committeeIds
      */
     public function __construct(
         public ?string $slug = null,
-        public PartyType $party = PartyType::thirdParty,
+        public ?PartyType $party = null,
         string|\DateTimeImmutable|null $startDate = null,
         string|\DateTimeImmutable|null $endDate = null,
         public array $committeeIds = [],
+        public ?string $description = null,
     ) {
         $this->startDate = $startDate ? CastingUtilities::toDateTime($startDate) : null;
         $this->endDate = $endDate ? CastingUtilities::toDateTime($endDate) : null;
