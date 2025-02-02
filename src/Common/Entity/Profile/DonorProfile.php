@@ -19,6 +19,8 @@ use Webmozart\Assert\Assert;
 
 class DonorProfile extends Entity
 {
+    public int $id = 0;
+    public string $name = '';
     public ?State $state = null;
     /** @var array<string, DonorProfileCampaign> */
     public array $campaigns = [];
@@ -39,11 +41,7 @@ class DonorProfile extends Entity
     {
         $this->state = null;
 
-        $this->campaigns = [
-            CampaignType::joe_biden->value => new DonorProfileCampaign(),
-            CampaignType::kamala_harris->value => new DonorProfileCampaign(),
-            CampaignType::donald_trump->value => new DonorProfileCampaign(),
-        ];
+        $this->campaigns = $this->buildCampaigns();
 
         $this->cycles = [
             2016 => new DonorProfileCycle2016(),
@@ -52,6 +50,24 @@ class DonorProfile extends Entity
         ];
 
         $this->monthlyReceiptMemo = [];
+    }
+
+    /**
+     * @return array<string, DonorProfileCampaign>
+     */
+    private function buildCampaigns(): array
+    {
+        /** @var array<string, DonorProfileCampaign> $campaigns */
+        $campaigns = array_reduce(
+            CampaignType::cases(),
+            static fn (array $carry, CampaignType $campaignType) => array_merge(
+                $carry,
+                [$campaignType->value => DonorProfileCampaign::__set_state(['campaignType' => $campaignType])]
+            ),
+            []
+        );
+
+        return $campaigns;
     }
 
     /**
@@ -102,17 +118,15 @@ class DonorProfile extends Entity
                 ++$counter;
             }
 
-            if ($counter > 1) {
-                if ('R' === $partyCode) {
-                    $key = CampaignType::donald_trump->value;
-                } elseif ($month > 18) {
-                    $key = CampaignType::kamala_harris->value;
-                } else {
-                    $key = CampaignType::joe_biden->value;
-                }
-
-                $maxConsecutiveMonthlyDonationCounts[$key] = max($maxConsecutiveMonthlyDonationCounts[$key], $counter);
+            if ('R' === $partyCode) {
+                $key = CampaignType::donald_trump->value;
+            } elseif ($month > 18) {
+                $key = CampaignType::kamala_harris->value;
+            } else {
+                $key = CampaignType::joe_biden->value;
             }
+
+            $maxConsecutiveMonthlyDonationCounts[$key] = max($maxConsecutiveMonthlyDonationCounts[$key], $counter);
 
             $laggedPartyCode = $partyCode;
             $laggedAmt = $amt;

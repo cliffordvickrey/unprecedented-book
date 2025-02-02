@@ -10,4 +10,6 @@ use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfile;
 interface DonorProfileServiceInterface
 {
     public function buildDonorProfile(DonorPanel $panel): DonorProfile;
+
+    public function serializeDonorProfile(DonorProfile $profile): string;
 }

@@ -18,4 +18,13 @@ enum CampaignType: string
 
         return PartyType::democratic;
     }
+
+    public function toProp(): string
+    {
+        return match ($this) {
+            self::joe_biden => 'presJoeBiden',
+            self::kamala_harris => 'presKamalaHarris',
+            self::donald_trump => 'presDonaldTrump',
+        };
+    }
 }

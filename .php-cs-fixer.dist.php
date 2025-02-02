@@ -10,6 +10,7 @@ return (new PhpCsFixer\Config())
         'native_function_invocation' => ['include' => ['@compiler_optimized', 'sprintf'], 'scope' => 'namespaced', 'strict' => true],
         'nullable_type_declaration' => true,
         'nullable_type_declaration_for_default_null_value' => true,
+        'phpdoc_to_comment' => false, // LOL, this one is pointless and destructive
     ])
     ->setRiskyAllowed(true)
     ->setFinder(

@@ -19,6 +19,7 @@ use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepositoryInterface;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepositoryInterface;
+use CliffordVickrey\Book2024\Common\Service\Decorator\DonorProfileDecorator;
 use CliffordVickrey\Book2024\Common\Service\DTO\ReceiptAnalysis;
 use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeBag;
 use CliffordVickrey\Book2024\Common\Utilities\DateUtilities;
@@ -39,7 +40,7 @@ class DonorProfileService implements DonorProfileServiceInterface
     private readonly CommitteeAggregateRepositoryInterface $committeeAggregateRepository;
     private readonly DonorProfile $prototype;
     /** @var array<int, RecipientAttributeBag> */
-    private array $recipientAttributes = [];
+    private array $recipientAttributesByCycle = [];
     /** @var array<string, Recipient|false> */
     private array $recipientMap;
 
@@ -82,7 +83,7 @@ class DonorProfileService implements DonorProfileServiceInterface
 
         $electionDate = $donorProfileCycle->getElectionDate();
 
-        $startOfCycleDateStr = \sprintf('%d-01-01', $donorProfileCycle->cycle - 2);
+        $startOfCycleDateStr = \sprintf('%d-01-01', $donorProfileCycle->cycle - 1);
 
         $startOfCycleDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startOfCycleDateStr);
 
@@ -129,7 +130,7 @@ class DonorProfileService implements DonorProfileServiceInterface
             ));
         }
 
-        /* @var array<string, Recipient> $map */
+        /** @var array<string, Recipient> $map */
         return $map;
     }
 
@@ -141,9 +142,9 @@ class DonorProfileService implements DonorProfileServiceInterface
             $key = $cycle->cycle;
         }
 
-        $this->recipientAttributes[$key] ??= $this->collectRecipientAttributes($cycle);
+        $this->recipientAttributesByCycle[$key] ??= $this->collectRecipientAttributes($cycle);
 
-        return $this->recipientAttributes[$key];
+        return $this->recipientAttributesByCycle[$key];
     }
 
     private function collectRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeBag
@@ -161,7 +162,7 @@ class DonorProfileService implements DonorProfileServiceInterface
         $attrs = array_reduce($properties, function (array $carry, \ReflectionProperty $property): array {
             $attrs = $property->getAttributes(RecipientAttribute::class);
 
-            /* @var array<string, RecipientAttribute> $carry */
+            /** @var array<string, RecipientAttribute> $carry */
             if (0 === \count($attrs)) {
                 return $carry;
             }
@@ -175,6 +176,8 @@ class DonorProfileService implements DonorProfileServiceInterface
     public function buildDonorProfile(DonorPanel $panel): DonorProfile
     {
         $profile = clone $this->prototype;
+        $profile->id = $panel->donor->id;
+        $profile->name = $panel->donor->name;
         $profile->state = State::tryFrom($panel->donor->state);
 
         $analyses = array_map($this->analyzeReceipt(...), $panel->receipts);
@@ -189,7 +192,7 @@ class DonorProfileService implements DonorProfileServiceInterface
             $slug = $attr->slug;
             Assert::notEmpty($slug);
             $candidate = $this->candidateAggregateRepository->getAggregate($slug);
-            $attr->description = $candidate->name;
+            $attr->description = $candidate->name.' for President';
         } catch (\Throwable) {
             $msg = \sprintf('Invalid candidate slug, "%s"', $slug);
             throw new BookUnexpectedValueException($msg);
@@ -258,7 +261,8 @@ class DonorProfileService implements DonorProfileServiceInterface
             return false;
         }
 
-        $attr = $this->recipientAttributes[$analysis->cycle]->getAttributeByCandidateSlug($analysis->candidate->slug);
+        $attr = $this->recipientAttributesByCycle[$analysis->cycle]
+            ->getAttributeByCandidateSlug($analysis->candidate->slug);
 
         if (null !== $attr) {
             return false;
@@ -317,7 +321,7 @@ class DonorProfileService implements DonorProfileServiceInterface
 
     private function getRecipientAttribute(int $cycle, string $prop): RecipientAttribute
     {
-        return $this->recipientAttributes[$cycle][$prop];
+        return $this->recipientAttributesByCycle[$cycle][$prop];
     }
 
     private function analyzePacType(ReceiptAnalysis $analysis): void
@@ -340,5 +344,10 @@ class DonorProfileService implements DonorProfileServiceInterface
         if (null !== $committeeType) {
             $analysis->pacType = PacType::fromCommitteeType($committeeType);
         }
+    }
+
+    public function serializeDonorProfile(DonorProfile $profile): string
+    {
+        return (string) new DonorProfileDecorator($profile, $this->recipientAttributesByCycle);
     }
 }
