@@ -201,7 +201,7 @@ class DonorProfileService implements DonorProfileServiceInterface
 
     private function analyzeReceipt(ReceiptInPanel $receiptInPanel): ReceiptAnalysis
     {
-        $committee = $this->committeeAggregateRepository->getByCommitteeId($receiptInPanel->recipientSlug);
+        $committee = $this->committeeAggregateRepository->getAggregate($receiptInPanel->recipientSlug);
 
         $cycle = $receiptInPanel->getCycle();
         $fecCandidateId = ($committee->infoByYear[$cycle] ?? null)?->CAND_ID;

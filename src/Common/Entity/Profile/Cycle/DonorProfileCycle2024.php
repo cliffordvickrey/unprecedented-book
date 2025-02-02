@@ -19,7 +19,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presAsaHutchinson;
     #[RecipientAttribute(
-        slug: 'chase_oliver',
+        slug: 'chase_russell_oliver',
         party: PartyType::thirdParty,
         startDate: '2023-04-04',
         committeeIds: ['C00837625']
@@ -106,7 +106,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presDougBurgum;
     #[RecipientAttribute(
-        slug: 'francis_suarez',
+        slug: 'francis_x_suarez',
         party: PartyType::republican,
         startDate: '2023-06-14',
         endDate: '2023-08-29',
@@ -288,7 +288,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presNikkiHaley;
     #[RecipientAttribute(
-        slug: 'robert_f_kennedy_jr',
+        slug: 'rfk_jr',
         party: PartyType::thirdParty,
         startDate: '2023-04-19',
         endDate: '2024-08-23',

@@ -141,7 +141,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presHowieHawkins;
     #[RecipientAttribute(
-        slug: 'jay_inslee',
+        slug: 'jay_r_inslee',
         party: PartyType::democratic,
         startDate: '2019-03-01',
         endDate: '2019-08-21',
@@ -204,7 +204,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presJoeBiden;
     #[RecipientAttribute(
-        slug: 'joe_sestake',
+        slug: 'joseph_a_sestak_jr',
         party: PartyType::democratic,
         startDate: '2019-06-23',
         endDate: '2019-12-01',
@@ -220,7 +220,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
     )]
     public DonorProfileAmount $preJoeWalsh;
     #[RecipientAttribute(
-        slug: 'john_delaney',
+        slug: 'john_k_delaney',
         party: PartyType::democratic,
         startDate: '2017-07-28',
         endDate: '2020-01-31',
@@ -291,7 +291,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presMichaelBennet;
     #[RecipientAttribute(
-        slug: 'michael_bloomberg',
+        slug: 'mike_bloomberg',
         party: PartyType::democratic,
         startDate: '2019-11-24',
         endDate: '2020-03-04',
@@ -331,7 +331,7 @@ class DonorProfileCycle2020 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presSteveBullock;
     #[RecipientAttribute(
-        slug: 'tim_ryan',
+        slug: 'timothy_j_ryan',
         party: PartyType::democratic,
         startDate: '2019-04-04',
         endDate: '2019-10-24',

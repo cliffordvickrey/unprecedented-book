@@ -12,7 +12,7 @@ interface DonorPanelRepositoryInterface
     /**
      * @return \Generator<DonorPanel>
      */
-    public function get(?string $state = '', ?int $chunkId = null): \Generator;
+    public function get(?string $state = null, ?int $chunkId = null): \Generator;
 
     public function deleteAll(): void;
 

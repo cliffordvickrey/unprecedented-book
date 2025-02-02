@@ -17,7 +17,7 @@ class DonorPanelRepository implements DonorPanelRepositoryInterface
     /** @var list<string>|null */
     private ?array $filenames = null;
 
-    public function __construct(?string $path = null, private bool $prettyPrint = false)
+    public function __construct(?string $path = null, private readonly bool $prettyPrint = false)
     {
         $this->path = $path ?? __DIR__.'/../../../data/panel';
     }
@@ -68,7 +68,7 @@ class DonorPanelRepository implements DonorPanelRepositoryInterface
         return $this->filenames;
     }
 
-    public function get(?string $state = '', ?int $chunkId = null): \Generator
+    public function get(?string $state = null, ?int $chunkId = null): \Generator
     {
         $filenames = $this->getFilenames($state, $chunkId);
 

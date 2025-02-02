@@ -10,6 +10,8 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\CandidateCommitteeLinkage;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\Committee;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
+use CliffordVickrey\Book2024\Common\Entity\Profile\Campaign\DonorProfileCampaign;
+use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\ImputedCommitteeTotals;
 
@@ -22,6 +24,8 @@ final class ClassAliases
         'Committee' => Committee::class,
         'CommitteeTotals' => CommitteeTotals::class,
         'DonorPanel' => DonorPanel::class,
+        'DonorProfileCampaign' => DonorProfileCampaign::class,
+        'DonorProfileCycle' => DonorProfileCycle::class,
         'ImputedCommitteeTotals' => ImputedCommitteeTotals::class,
         'LeadershipPacLinkage' => LeadershipPacLinkage::class,
         'ReceiptInPanel' => ReceiptInPanel::class,

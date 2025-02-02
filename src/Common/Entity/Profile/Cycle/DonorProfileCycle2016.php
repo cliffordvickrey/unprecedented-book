@@ -70,7 +70,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presEvanMcMullin;
     #[RecipientAttribute(
-        slug: 'george_pataki',
+        slug: 'george_e_pataki',
         party: PartyType::republican,
         startDate: '2015-05-28',
         endDate: '2015-12-29',
@@ -144,7 +144,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presJillStein;
     #[RecipientAttribute(
-        slug: 'jim_gilmore',
+        slug: 'james_s_gilmore_iii',
         party: PartyType::republican,
         startDate: '2015-07-29',
         endDate: '2016-02-12',
@@ -152,7 +152,7 @@ class DonorProfileCycle2016 extends DonorProfileCycle
     )]
     public DonorProfileAmount $presJimGilmore;
     #[RecipientAttribute(
-        slug: 'john_kasich',
+        slug: 'john_r_kasich',
         party: PartyType::republican,
         startDate: '2015-07-21',
         endDate: '2016-05-04',
