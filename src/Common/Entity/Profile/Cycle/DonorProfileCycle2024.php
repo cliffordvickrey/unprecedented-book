@@ -196,8 +196,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
     #[RecipientAttribute(
         slug: 'kamala_harris',
         party: PartyType::democratic,
-        startDate: '2023-04-25',
-        endDate: '2024-07-20',
+        startDate: '2024-07-21',
         committeeIds: [
             'C00703975',
             'C00744946',

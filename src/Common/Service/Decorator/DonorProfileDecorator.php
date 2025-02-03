@@ -74,7 +74,7 @@ final readonly class DonorProfileDecorator implements \Stringable
         $attr = $this->recipientAttributesByCycle[2024][$prop];
 
         $lines = [
-            \sprintf('%s:', $attr->description),
+            \sprintf('2024 Race - %s:', $attr->description),
             $this->stringify(2024, $prop, $profileByCampaign->total),
         ];
 
