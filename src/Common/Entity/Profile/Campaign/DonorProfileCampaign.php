@@ -12,6 +12,7 @@ class DonorProfileCampaign extends Entity
 {
     public CampaignType $campaignType;
     public int $maxConsecutiveMonthlyDonationCount = 0;
+    public int $maxConsecutiveWeeklyDonationCount = 0;
     public bool $priorDonor = false;
     public DonorProfileAmount $total;
     public bool $weekOneLaunch = false;

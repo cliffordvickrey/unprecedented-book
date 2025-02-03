@@ -11,6 +11,23 @@ class DateUtilities
 {
     public static function getMonthsAfterStartOfElectionCycle(\DateTimeImmutable $dt): int
     {
+        $interval = self::getIntervalAfterStartOfElectionCycle($dt);
+
+        return ($interval->y * 12) + $interval->m;
+    }
+
+    public static function getWeeksAfterStartOfElectionCycle(\DateTimeImmutable $dt): int
+    {
+        $interval = self::getIntervalAfterStartOfElectionCycle($dt);
+
+        $daysElapsed = $interval->format('%a');
+        Assert::numeric($daysElapsed);
+
+        return (int) floor($daysElapsed / 7);
+    }
+
+    private static function getIntervalAfterStartOfElectionCycle(\DateTimeImmutable $dt): \DateInterval
+    {
         $year = $dt->format('Y');
         Assert::numeric($year);
         $year = (int) $year;
@@ -21,9 +38,7 @@ class DateUtilities
         $startDate = $startDate?->setTime(0, 0);
         Assert::notEmpty($startDate);
 
-        $interval = $startDate->diff($dt);
-
-        return ($interval->y * 12) + $interval->m;
+        return $startDate->diff($dt);
     }
 
     public static function isWithinWeek(\DateTimeImmutable $a, \DateTimeImmutable $b): bool

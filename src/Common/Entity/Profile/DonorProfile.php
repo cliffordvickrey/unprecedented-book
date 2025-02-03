@@ -28,6 +28,8 @@ class DonorProfile extends Entity
     public array $cycles = [];
     /** @var array<string, bool> */
     private array $monthlyReceiptMemo = [];
+    /** @var array<string, bool> */
+    private array $weeklyReceiptMemo = [];
 
     public static function build(): self
     {
@@ -50,6 +52,7 @@ class DonorProfile extends Entity
         ];
 
         $this->monthlyReceiptMemo = [];
+        $this->weeklyReceiptMemo = [];
     }
 
     /**
@@ -77,41 +80,48 @@ class DonorProfile extends Entity
     {
         array_walk($analyses, $this->addReceiptAnalysis(...));
         $this->setMaxConsecutiveMonthlyDonationCounts();
-        $this->monthlyReceiptMemo = [];
     }
 
     private function setMaxConsecutiveMonthlyDonationCounts(): void
     {
-        if (empty($this->monthlyReceiptMemo)) {
+        $this->doSetMaxConsecutiveDonationCounts();
+        $this->doSetMaxConsecutiveDonationCounts(monthly: false);
+    }
+
+    private function doSetMaxConsecutiveDonationCounts(bool $monthly = true): void
+    {
+        $memo = $monthly ? $this->monthlyReceiptMemo : $this->weeklyReceiptMemo;
+
+        if (empty($memo)) {
             return;
         }
 
-        ksort($this->monthlyReceiptMemo);
+        ksort($memo);
 
-        $maxConsecutiveMonthlyDonationCounts = [
+        $maxConsecutiveDonationCounts = [
             CampaignType::joe_biden->value => 0,
             CampaignType::kamala_harris->value => 0,
             CampaignType::donald_trump->value => 0,
         ];
 
-        $keys = array_keys($this->monthlyReceiptMemo);
+        $keys = array_keys($memo);
 
         $counter = 1;
 
         $laggedPartyCode = '';
         $laggedAmt = '';
-        $laggedMonth = -1;
+        $laggedWeekOrMonth = -1;
 
         foreach ($keys as $key) {
-            [$partyCode, $amt, $month] = explode('|', $key);
+            [$partyCode, $amt, $weekOrMonth] = explode('|', $key);
 
-            Assert::numeric($month);
-            $month = (int) $month;
+            Assert::numeric($weekOrMonth);
+            $weekOrMonth = (int) $weekOrMonth;
 
             if (
                 $partyCode !== $laggedPartyCode
                 || $amt !== $laggedAmt
-                || $month !== ($laggedMonth + 1)
+                || $weekOrMonth !== ($laggedWeekOrMonth + 1)
             ) {
                 $counter = 1;
             } else {
@@ -120,21 +130,25 @@ class DonorProfile extends Entity
 
             if ('R' === $partyCode) {
                 $key = CampaignType::donald_trump->value;
-            } elseif ($month > 18) {
+            } elseif ($weekOrMonth > 18) {
                 $key = CampaignType::kamala_harris->value;
             } else {
                 $key = CampaignType::joe_biden->value;
             }
 
-            $maxConsecutiveMonthlyDonationCounts[$key] = max($maxConsecutiveMonthlyDonationCounts[$key], $counter);
+            $maxConsecutiveDonationCounts[$key] = max($maxConsecutiveDonationCounts[$key], $counter);
 
             $laggedPartyCode = $partyCode;
             $laggedAmt = $amt;
-            $laggedMonth = $month;
+            $laggedWeekOrMonth = $weekOrMonth;
         }
 
-        foreach ($maxConsecutiveMonthlyDonationCounts as $key => $maxConsecutiveMonthlyDonationCount) {
-            $this->campaigns[$key]->maxConsecutiveMonthlyDonationCount = $maxConsecutiveMonthlyDonationCount;
+        foreach ($maxConsecutiveDonationCounts as $key => $maxConsecutiveMonthlyDonationCount) {
+            if ($monthly) {
+                $this->campaigns[$key]->maxConsecutiveMonthlyDonationCount = $maxConsecutiveMonthlyDonationCount;
+            } else {
+                $this->campaigns[$key]->maxConsecutiveWeeklyDonationCount = $maxConsecutiveMonthlyDonationCount;
+            }
         }
     }
 
@@ -174,14 +188,25 @@ class DonorProfile extends Entity
         float $amount,
         bool $isWeekOneLaunch,
     ): void {
+        $partyCode = $campaignType->getParty()->toCode();
+
         $monthKey = \sprintf(
             '%s|%010d|%02d',
-            $campaignType->getParty()->toCode(),
+            $partyCode,
             (int) floor($amount),
             DateUtilities::getMonthsAfterStartOfElectionCycle($date)
         );
 
         $this->monthlyReceiptMemo[$monthKey] = true;
+
+        $weekKey = \sprintf(
+            '%s|%010d|%03d',
+            $partyCode,
+            (int) floor($amount),
+            DateUtilities::getWeeksAfterStartOfElectionCycle($date)
+        );
+
+        $this->weeklyReceiptMemo[$weekKey] = true;
 
         $campaign = $this->campaigns[$campaignType->value];
 

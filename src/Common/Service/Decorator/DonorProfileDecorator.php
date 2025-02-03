@@ -85,6 +85,13 @@ final readonly class DonorProfileDecorator implements \Stringable
             );
         }
 
+        if ($profileByCampaign->maxConsecutiveWeeklyDonationCount > 1) {
+            $lines[] = \sprintf(
+                'Gave the same contribution for %d consecutive weeks',
+                $profileByCampaign->maxConsecutiveWeeklyDonationCount
+            );
+        }
+
         if ($profileByCampaign->priorDonor) {
             $lines[] = 'Gave to this candidate in a previous election cycle';
         }
