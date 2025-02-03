@@ -8,7 +8,7 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\Candidate;
 
 enum PartyType: string
 {
-    case democratic = 'democrat';
+    case democratic = 'democratic';
     case republican = 'republican';
     case thirdParty = 'thirdParty';
 

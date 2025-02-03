@@ -10,7 +10,7 @@ enum PacType: string
 {
     case hybridPac = 'hybridPac';
     case partyCommittee = 'partyCommittee';
-    case singleCandidateIndependentExpenditureCommittee = 'singleCandidateIndependentExpenditure';
+    case singleCandidateIndependentExpenditureCommittee = 'singleCandidateIndependentExpenditureCommittee';
     case superPac = 'superPac';
     case traditionalPac = 'traditionalPac';
 

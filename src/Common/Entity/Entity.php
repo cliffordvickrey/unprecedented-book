@@ -116,4 +116,36 @@ abstract class Entity implements \JsonSerializable
     {
         return $this->toArray(true);
     }
+
+    public function __clone()
+    {
+        $props = $this->toArray();
+
+        foreach ($props as $prop => $value) {
+            if (self::isCloneable($value)) {
+                $this->{$prop} = clone $value;
+                continue;
+            }
+
+            if (!\is_array($value)) {
+                continue;
+            }
+
+            $arrayOfObjects = array_filter($value, self::isCloneable(...));
+
+            foreach ($arrayOfObjects as $nestedProp => $nestedValue) {
+                $value[$nestedProp] = clone $nestedValue;
+            }
+
+            $this->{$prop} = $value;
+        }
+    }
+
+    /**
+     * @phpstan-assert-if-true object $val
+     */
+    private static function isCloneable(mixed $val): bool
+    {
+        return \is_object($val) && !$val instanceof \BackedEnum;
+    }
 }

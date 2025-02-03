@@ -15,7 +15,7 @@ class DonorProfileAmount extends Entity implements \Stringable
     public function __toString(): string
     {
         return \sprintf(
-            '%s%s (%s contributions%s)',
+            '%s%s (%s contribution%s)',
             '$',
             StringUtilities::numberFormat($this->amount, 2),
             StringUtilities::numberFormat($this->receipts),

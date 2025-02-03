@@ -28,8 +28,8 @@ abstract class DonorProfileCycle extends Entity
     public DonorProfileAmount $presOtherRepublican;
     #[RecipientAttribute(
         party: PartyType::republican,
-        description: 'Other Third Party/Independent Presidential candidate(s)')
-    ]
+        description: 'Other Third Party/Independent Presidential candidate(s)'
+    )]
     public DonorProfileAmount $presOtherThirdParty;
     #[RecipientAttribute(party: PartyType::democratic, description: 'Democratic Senate candidate(s)')]
     public DonorProfileAmount $senateDemocratic;

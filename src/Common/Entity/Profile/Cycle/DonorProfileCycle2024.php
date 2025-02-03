@@ -301,7 +301,8 @@ class DonorProfileCycle2024 extends DonorProfileCycle
             'C00851451',
             'C00858670',
             'C00870410',
-        ]
+        ],
+        description: 'RFK JR'
     )]
     public DonorProfileAmount $presRfkJr;
     #[RecipientAttribute(

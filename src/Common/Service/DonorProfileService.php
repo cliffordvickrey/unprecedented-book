@@ -14,6 +14,7 @@ use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use CliffordVickrey\Book2024\Common\Enum\PacType;
 use CliffordVickrey\Book2024\Common\Enum\PartyType;
 use CliffordVickrey\Book2024\Common\Enum\State;
+use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Exception\BookUnexpectedValueException;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepositoryInterface;
@@ -110,7 +111,7 @@ class DonorProfileService implements DonorProfileServiceInterface
 
             $endDate = $attr->endDate ?? $electionDate;
 
-            $recipient = ['cycle' => $donorProfileCycle, 'prop' => $prop];
+            $recipient = ['cycle' => $donorProfileCycle->cycle, 'prop' => $prop];
 
             // (extremely nerds voice) my Lisp-like higher order functions
             $map = array_merge($map, array_reduce(
@@ -192,7 +193,8 @@ class DonorProfileService implements DonorProfileServiceInterface
             $slug = $attr->slug;
             Assert::notEmpty($slug);
             $candidate = $this->candidateAggregateRepository->getAggregate($slug);
-            $attr->description = $candidate->name.' for President';
+            $attr->description ??= $candidate->name;
+            $attr->description .= ' (pres. campaign + joint fundraising + outside groups targeting candidate)';
         } catch (\Throwable) {
             $msg = \sprintf('Invalid candidate slug, "%s"', $slug);
             throw new BookUnexpectedValueException($msg);
@@ -210,7 +212,13 @@ class DonorProfileService implements DonorProfileServiceInterface
             $fecCandidateId = $committee->getCandidateIdByYear($cycle);
         }
 
-        $candidate = $fecCandidateId ? $this->candidateAggregateRepository->getByCandidateId($fecCandidateId) : null;
+        try {
+            $candidate = $fecCandidateId
+                ? $this->candidateAggregateRepository->getByCandidateId($fecCandidateId)
+                : null;
+        } catch (BookOutOfBoundsException) {
+            $candidate = null;
+        }
 
         $analysis = new ReceiptAnalysis(
             $receiptInPanel->date,
@@ -305,7 +313,7 @@ class DonorProfileService implements DonorProfileServiceInterface
         $attr = $this->getRecipientAttributeByRecipient($recipient);
 
         if (null === $analysis->candidate && $attr->slug) {
-            $analysis->candidate = $this->candidateAggregateRepository->getByCandidateId($attr->slug);
+            $analysis->candidate = $this->candidateAggregateRepository->getAggregate($attr->slug);
         }
 
         $analysis->isWeekOneLaunch = $attr->startDate && DateUtilities::isWithinWeek($attr->startDate, $analysis->date);
