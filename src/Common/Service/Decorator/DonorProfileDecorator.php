@@ -96,6 +96,10 @@ final readonly class DonorProfileDecorator implements \Stringable
             $lines[] = 'Gave to this candidate in a previous election cycle';
         }
 
+        if ($profileByCampaign->dayOneLaunch) {
+            $lines[] = 'Gave to this candidate within the first day of the campaign';
+        }
+
         if ($profileByCampaign->weekOneLaunch) {
             $lines[] = 'Gave to this candidate within the first week of the campaign';
         }

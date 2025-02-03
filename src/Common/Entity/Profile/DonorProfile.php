@@ -76,19 +76,19 @@ class DonorProfile extends Entity
     /**
      * @param list<ReceiptAnalysis> $analyses
      */
-    public function analyze(array $analyses): void
+    public function acceptAnalyses(array $analyses): void
     {
         array_walk($analyses, $this->addReceiptAnalysis(...));
-        $this->setMaxConsecutiveMonthlyDonationCounts();
+        $this->setMaxConsecutiveDonationCounts();
     }
 
-    private function setMaxConsecutiveMonthlyDonationCounts(): void
+    private function setMaxConsecutiveDonationCounts(): void
     {
         $this->doSetMaxConsecutiveDonationCounts();
-        $this->doSetMaxConsecutiveDonationCounts(monthly: false);
+        $this->doSetMaxConsecutiveDonationCounts(monthly: true);
     }
 
-    private function doSetMaxConsecutiveDonationCounts(bool $monthly = true): void
+    private function doSetMaxConsecutiveDonationCounts(bool $monthly = false): void
     {
         $memo = $monthly ? $this->monthlyReceiptMemo : $this->weeklyReceiptMemo;
 
@@ -170,7 +170,13 @@ class DonorProfile extends Entity
         $campaignType = $analysis->getCampaignType(2024);
 
         if ($campaignType) {
-            $this->addCampaignAmount($campaignType, $analysis->date, $analysis->amount, $analysis->isWeekOneLaunch);
+            $this->addCampaignAmount(
+                $campaignType,
+                $analysis->date,
+                $analysis->amount,
+                $analysis->isWeekOneLaunch,
+                $analysis->isDayOneLaunch
+            );
         }
 
         if ($analysis->prop) {
@@ -187,6 +193,7 @@ class DonorProfile extends Entity
         \DateTimeImmutable $date,
         float $amount,
         bool $isWeekOneLaunch,
+        bool $isDayOneLaunch,
     ): void {
         $partyCode = $campaignType->getParty()->toCode();
 
@@ -215,6 +222,10 @@ class DonorProfile extends Entity
 
         if ($isWeekOneLaunch) {
             $campaign->weekOneLaunch = true;
+        }
+
+        if ($isDayOneLaunch) {
+            $campaign->dayOneLaunch = true;
         }
     }
 

@@ -24,6 +24,7 @@ class ReceiptAnalysis
         public ?PacType $pacType = null,
         public ?string $prop = null,
         public bool $isWeekOneLaunch = false,
+        public bool $isDayOneLaunch = false,
     ) {
     }
 

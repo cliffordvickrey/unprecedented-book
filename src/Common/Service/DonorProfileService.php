@@ -182,7 +182,7 @@ class DonorProfileService implements DonorProfileServiceInterface
         $profile->state = State::tryFrom($panel->donor->state);
 
         $analyses = array_map($this->analyzeReceipt(...), $panel->receipts);
-        $profile->analyze($analyses);
+        $profile->acceptAnalyses($analyses);
 
         return $profile;
     }
@@ -320,6 +320,8 @@ class DonorProfileService implements DonorProfileServiceInterface
             $analysis->candidate = $this->candidateAggregateRepository->getAggregate($attr->slug);
         }
 
+        // weak comparison is intentional here
+        $analysis->isDayOneLaunch = $attr->startDate && $attr->startDate == $analysis->date;
         $analysis->isWeekOneLaunch = $attr->startDate && DateUtilities::isWithinWeek($attr->startDate, $analysis->date);
     }
 

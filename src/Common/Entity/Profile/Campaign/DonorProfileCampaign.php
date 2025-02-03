@@ -11,6 +11,7 @@ use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 class DonorProfileCampaign extends Entity
 {
     public CampaignType $campaignType;
+    public bool $dayOneLaunch = false;
     public int $maxConsecutiveMonthlyDonationCount = 0;
     public int $maxConsecutiveWeeklyDonationCount = 0;
     public bool $priorDonor = false;
