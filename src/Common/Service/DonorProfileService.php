@@ -194,7 +194,7 @@ class DonorProfileService implements DonorProfileServiceInterface
             Assert::notEmpty($slug);
             $candidate = $this->candidateAggregateRepository->getAggregate($slug);
             $attr->description ??= $candidate->name;
-            $attr->description .= ' (pres. campaign + joint fundraising + outside groups targeting candidate)';
+            $attr->description .= ' (President)';
         } catch (\Throwable) {
             $msg = \sprintf('Invalid candidate slug, "%s"', $slug);
             throw new BookUnexpectedValueException($msg);
@@ -233,15 +233,23 @@ class DonorProfileService implements DonorProfileServiceInterface
         $keyWithDate = \sprintf('%s|%s', $committeeFecId, $analysis->date->format('Y-m-d'));
         $keyWithCycle = \sprintf('%s|%d', $committeeFecId, $analysis->cycle);
 
+        $beforeElection = isset($this->recipientMap[$keyWithDate]);
+
+        if (!$beforeElection) {
+            $cyclePrototype = $this->prototype->cycles[$analysis->cycle] ?? null;
+            $beforeElection = $cyclePrototype && $cyclePrototype->getElectionDate() < $analysis->date;
+        }
+
+        $recipient = false;
+
         if (isset($this->recipientMap[$keyWithDate])) {
             $recipient = $this->recipientMap[$keyWithDate];
-        } elseif (isset($this->recipientMap[$keyWithCycle])) {
+        } elseif (isset($this->recipientMap[$keyWithCycle]) && $beforeElection) {
             $recipient = $this->recipientMap[$keyWithCycle];
-        } elseif ($candidate) {
+        } elseif ($candidate && $beforeElection) {
             $recipient = $this->determineRecipient($analysis);
             $this->recipientMap[$keyWithCycle] = $recipient;
-        } else {
-            $recipient = false;
+        } elseif ($beforeElection) {
             $this->recipientMap[$keyWithCycle] = false;
         }
 
@@ -261,11 +269,7 @@ class DonorProfileService implements DonorProfileServiceInterface
     {
         $cyclePrototype = $this->prototype->cycles[$analysis->cycle] ?? null;
 
-        if (
-            !$cyclePrototype
-            || !$analysis->candidate
-            || $cyclePrototype->getElectionDate() < $analysis->date
-        ) {
+        if (!$cyclePrototype || !$analysis->candidate) {
             return false;
         }
 
