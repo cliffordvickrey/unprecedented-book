@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CliffordVickrey\Book2024\App\Enum;
+namespace CliffordVickrey\Book2024\Common\Enum;
 
 enum DonorCharacteristic: string
 {
@@ -31,6 +31,7 @@ enum DonorCharacteristic: string
     case cycle_2020_party_elite = 'cycle_2020_party_elite';
     case cycle_2020_super_pac = 'cycle_2020_super_pac';
     case cycle_2024_biden = 'cycle_2024_biden';
+    case cycle_2024_harris = 'cycle_2024_harris';
     case cycle_2024_trump = 'cycle_2024_trump';
     case cycle_2024_desantis = 'cycle_2024_desantis';
     case cycle_2024_haley = 'cycle_2024_haley';

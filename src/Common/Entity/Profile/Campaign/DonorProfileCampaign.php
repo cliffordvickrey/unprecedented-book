@@ -8,7 +8,7 @@ use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 
-class DonorProfileCampaign extends Entity
+class DonorProfileCampaign extends Entity implements \Countable
 {
     public CampaignType $campaignType;
     public bool $dayOneLaunch = false;
@@ -17,4 +17,9 @@ class DonorProfileCampaign extends Entity
     public bool $priorDonor = false;
     public DonorProfileAmount $total;
     public bool $weekOneLaunch = false;
+
+    public function count(): int
+    {
+        return $this->total->receipts;
+    }
 }

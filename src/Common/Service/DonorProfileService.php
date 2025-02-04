@@ -20,7 +20,7 @@ use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepositoryInterface;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepositoryInterface;
-use CliffordVickrey\Book2024\Common\Service\Decorator\DonorProfileDecorator;
+use CliffordVickrey\Book2024\Common\Service\Decorator\DonorProfileSerializationDecorator;
 use CliffordVickrey\Book2024\Common\Service\DTO\ReceiptAnalysis;
 use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeBag;
 use CliffordVickrey\Book2024\Common\Utilities\DateUtilities;
@@ -362,6 +362,6 @@ class DonorProfileService implements DonorProfileServiceInterface
 
     public function serializeDonorProfile(DonorProfile $profile): string
     {
-        return (string) new DonorProfileDecorator($profile, $this->recipientAttributesByCycle);
+        return (string) new DonorProfileSerializationDecorator($profile, $this->recipientAttributesByCycle);
     }
 }

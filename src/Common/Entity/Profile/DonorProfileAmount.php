@@ -10,6 +10,7 @@ use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 class DonorProfileAmount extends Entity implements \Stringable
 {
     public float $amount = 0.0;
+    /** @var int<0, max> */
     public int $receipts = 0;
 
     public function __toString(): string

@@ -10,7 +10,7 @@ use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfile;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
 use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeBag;
 
-final readonly class DonorProfileDecorator implements \Stringable
+final readonly class DonorProfileSerializationDecorator implements \Stringable
 {
     /**
      * @param array<int, RecipientAttributeBag> $recipientAttributesByCycle

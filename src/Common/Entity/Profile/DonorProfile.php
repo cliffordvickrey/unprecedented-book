@@ -17,7 +17,7 @@ use CliffordVickrey\Book2024\Common\Service\DTO\ReceiptAnalysis;
 use CliffordVickrey\Book2024\Common\Utilities\DateUtilities;
 use Webmozart\Assert\Assert;
 
-class DonorProfile extends Entity
+class DonorProfile extends Entity implements \Countable
 {
     public int $id = 0;
     public string $name = '';
@@ -237,5 +237,10 @@ class DonorProfile extends Entity
     private function addPacTypeForCycle(int $cycle, PacType $pacType, float $amount): void
     {
         $this->addAmountForCycle($cycle, $pacType->value, $amount);
+    }
+
+    public function count(): int
+    {
+        return array_sum(array_map(\count(...), $this->campaigns));
     }
 }
