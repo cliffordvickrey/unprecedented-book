@@ -20,9 +20,11 @@ use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CandidateAggregateRepositoryInterface;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepositoryInterface;
-use CliffordVickrey\Book2024\Common\Service\Decorator\DonorProfileSerializationDecorator;
+use CliffordVickrey\Book2024\Common\Service\DTO\DonorCharacteristicCollection;
 use CliffordVickrey\Book2024\Common\Service\DTO\ReceiptAnalysis;
-use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeBag;
+use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeCollection;
+use CliffordVickrey\Book2024\Common\Service\Helper\DonorProfileCharacteristicCollector;
+use CliffordVickrey\Book2024\Common\Service\Helper\DonorProfileSerializationDecorator;
 use CliffordVickrey\Book2024\Common\Utilities\DateUtilities;
 use Webmozart\Assert\Assert;
 
@@ -37,10 +39,11 @@ class DonorProfileService implements DonorProfileServiceInterface
         'bernie_sanders' => PartyType::democratic,
     ];
 
+    private readonly DonorProfileCharacteristicCollector $characteristicCollector;
     private readonly CandidateAggregateRepositoryInterface $candidateAggregateRepository;
     private readonly CommitteeAggregateRepositoryInterface $committeeAggregateRepository;
     private readonly DonorProfile $prototype;
-    /** @var array<int, RecipientAttributeBag> */
+    /** @var array<int, RecipientAttributeCollection> */
     private array $recipientAttributesByCycle = [];
     /** @var array<string, Recipient|false> */
     private array $recipientMap;
@@ -55,6 +58,8 @@ class DonorProfileService implements DonorProfileServiceInterface
         $this->prototype = DonorProfile::build();
 
         $this->recipientMap = $this->buildRecipientMap();
+
+        $this->characteristicCollector = new DonorProfileCharacteristicCollector($this->recipientAttributesByCycle);
     }
 
     /**
@@ -135,7 +140,7 @@ class DonorProfileService implements DonorProfileServiceInterface
         return $map;
     }
 
-    private function getRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeBag
+    private function getRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeCollection
     {
         if (\is_int($cycle)) {
             $key = $cycle;
@@ -148,7 +153,7 @@ class DonorProfileService implements DonorProfileServiceInterface
         return $this->recipientAttributesByCycle[$key];
     }
 
-    private function collectRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeBag
+    private function collectRecipientAttributes(int|DonorProfileCycle $cycle): RecipientAttributeCollection
     {
         $donorProfileCycle = $cycle;
 
@@ -171,7 +176,7 @@ class DonorProfileService implements DonorProfileServiceInterface
             return array_merge($carry, [$property->getName() => $attrs[0]->newInstance()]);
         }, []);
 
-        return new RecipientAttributeBag($attrs);
+        return new RecipientAttributeCollection($attrs);
     }
 
     public function buildDonorProfile(DonorPanel $panel): DonorProfile
@@ -363,5 +368,16 @@ class DonorProfileService implements DonorProfileServiceInterface
     public function serializeDonorProfile(DonorProfile $profile): string
     {
         return (string) new DonorProfileSerializationDecorator($profile, $this->recipientAttributesByCycle);
+    }
+
+    public function colorDonorCharacteristics(DonorPanel|DonorProfile $panelOrProfile): DonorCharacteristicCollection
+    {
+        if ($panelOrProfile instanceof DonorPanel) {
+            $profile = $this->buildDonorProfile($panelOrProfile);
+        } else {
+            $profile = $panelOrProfile;
+        }
+
+        return new DonorCharacteristicCollection($this->characteristicCollector->collectCharacteristics($profile));
     }
 }

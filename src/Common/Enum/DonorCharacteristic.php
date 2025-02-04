@@ -10,9 +10,12 @@ enum DonorCharacteristic: string
     case amt_up_to_200 = 'amt_up_to_200';
     case amt_up_to_1000 = 'amt_up_to_1000';
     case amt_up_to_2800 = 'amt_up_to_2800';
+    case amt_more_than_2800 = 'amt_more_than_2800';
     case prior = 'prior';
     case day_one_launch = 'day_one_launch';
     case week_one_launch = 'week_one_launch';
+    case weekly = 'weekly';
+    case monthly = 'monthly';
     case cycle_2016_clinton = 'cycle_2016_clinton';
     case cycle_2016_sanders = 'cycle_2016_sanders';
     case cycle_2016_trump = 'cycle_2016_trump';

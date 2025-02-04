@@ -12,7 +12,7 @@ use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
  * @implements \ArrayAccess<string, RecipientAttribute>
  * @implements \IteratorAggregate<string, RecipientAttribute>
  */
-readonly class RecipientAttributeBag implements \ArrayAccess, \IteratorAggregate
+readonly class RecipientAttributeCollection implements \ArrayAccess, \IteratorAggregate
 {
     /** @var array<string, RecipientAttribute> */
     private array $recipientAttributesByCandidateSlug;

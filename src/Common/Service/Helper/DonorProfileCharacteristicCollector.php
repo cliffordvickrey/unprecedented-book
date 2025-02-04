@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CliffordVickrey\Book2024\Common\Service\Collector;
+namespace CliffordVickrey\Book2024\Common\Service\Helper;
 
 use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Campaign\DonorProfileCampaign;
@@ -12,12 +12,12 @@ use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2020;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2024;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfile;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
-use CliffordVickrey\Book2024\Common\Service\Collector\Strategy\DonorProfileCampaignCharacteristicCollectionStrategy;
-use CliffordVickrey\Book2024\Common\Service\Collector\Strategy\DonorProfileCharacteristicCollectionStrategyInterface;
-use CliffordVickrey\Book2024\Common\Service\Collector\Strategy\DonorProfileCycleCharacteristicCollectionStrategy2016;
-use CliffordVickrey\Book2024\Common\Service\Collector\Strategy\DonorProfileCycleCharacteristicCollectionStrategy2020;
-use CliffordVickrey\Book2024\Common\Service\Collector\Strategy\DonorProfileCycleCharacteristicCollectionStrategy2024;
-use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeBag;
+use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeCollection;
+use CliffordVickrey\Book2024\Common\Service\Helper\Strategy\DonorProfileCampaignCharacteristicCollectionStrategy;
+use CliffordVickrey\Book2024\Common\Service\Helper\Strategy\DonorProfileCharacteristicCollectionStrategyInterface;
+use CliffordVickrey\Book2024\Common\Service\Helper\Strategy\DonorProfileCycleCharacteristicCollectionStrategy2016;
+use CliffordVickrey\Book2024\Common\Service\Helper\Strategy\DonorProfileCycleCharacteristicCollectionStrategy2020;
+use CliffordVickrey\Book2024\Common\Service\Helper\Strategy\DonorProfileCycleCharacteristicCollectionStrategy2024;
 use Webmozart\Assert\Assert;
 
 final readonly class DonorProfileCharacteristicCollector
@@ -26,7 +26,7 @@ final readonly class DonorProfileCharacteristicCollector
     private array $collectionStrategies;
 
     /**
-     * @param array<int, RecipientAttributeBag> $recipientAttributesByCycle
+     * @param array<int, RecipientAttributeCollection> $recipientAttributesByCycle
      */
     public function __construct(array $recipientAttributesByCycle)
     {
@@ -45,7 +45,7 @@ final readonly class DonorProfileCharacteristicCollector
     }
 
     /**
-     * @return array<string, DonorCharacteristic>
+     * @return array<string, list<DonorCharacteristic>>
      */
     public function collectCharacteristics(DonorProfile $profile): array
     {
@@ -58,12 +58,12 @@ final readonly class DonorProfileCharacteristicCollector
             $profile->cycles,
             fn (array $carry, DonorProfileCycle $profileCycle) => [
                 ...$carry,
-                ...$this->doCollect($profileCycle),
+                ...$this->doCollectCharacteristics($profileCycle),
             ],
             []
         );
 
-        /** @var array<string, DonorCharacteristic> $campaignCharacteristics */
+        /** @var array<string, list<DonorCharacteristic>> $campaignCharacteristics */
         $campaignCharacteristics = array_reduce(
             array_filter(
                 $profile->campaigns,
@@ -73,7 +73,7 @@ final readonly class DonorProfileCharacteristicCollector
                 $carry,
                 [$profileCampaign->campaignType->value => [
                     ...$donorCharacteristics,
-                    ...$this->doCollect($profileCampaign)],
+                    ...$this->doCollectCharacteristics($profileCampaign)],
                 ]
             ),
             []
@@ -83,9 +83,12 @@ final readonly class DonorProfileCharacteristicCollector
     }
 
     /**
+     * Combining two of everyone's favorite things: US elections AND enterprise code! Excitement city! A better duo than
+     * chocolate and peanut butter...
+     *
      * @return list<DonorCharacteristic>
      */
-    private function doCollect(Entity $entity): array
+    private function doCollectCharacteristics(Entity $entity): array
     {
         return $this->strategize($entity)->collectCharacteristics($entity);
     }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CliffordVickrey\Book2024\Common\Service\Collector\Strategy;
+namespace CliffordVickrey\Book2024\Common\Service\Helper\Strategy;
 
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2020;

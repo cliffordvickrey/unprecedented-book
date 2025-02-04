@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace CliffordVickrey\Book2024\Common\Service\Decorator;
+namespace CliffordVickrey\Book2024\Common\Service\Helper;
 
 use CliffordVickrey\Book2024\Common\Entity\Profile\Campaign\DonorProfileCampaign;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfile;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
-use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeBag;
+use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeCollection;
 
 final readonly class DonorProfileSerializationDecorator implements \Stringable
 {
     /**
-     * @param array<int, RecipientAttributeBag> $recipientAttributesByCycle
+     * @param array<int, RecipientAttributeCollection> $recipientAttributesByCycle
      */
     public function __construct(
         private DonorProfile $subject,

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace CliffordVickrey\Book2024\Common\Service\Collector\Strategy;
+namespace CliffordVickrey\Book2024\Common\Service\Helper\Strategy;
 
 use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
 use CliffordVickrey\Book2024\Common\Enum\PartyType;
-use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeBag;
+use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeCollection;
 
 /**
  * @implements DonorProfileCharacteristicCollectionStrategyInterface<TCycle>
@@ -21,7 +21,7 @@ abstract class AbstractDonorProfileCycleCharacteristicCollectionStrategy impleme
     /** @var array<string, list<string>> */
     private array $presidentialPropertiesByParty = [];
 
-    final public function __construct(private readonly RecipientAttributeBag $recipientAttributes)
+    final public function __construct(private readonly RecipientAttributeCollection $recipientAttributes)
     {
     }
 
