@@ -106,7 +106,7 @@ final readonly class DonorReportRepository implements DonorReportRepositoryInter
             $collection = new DonorReportCollection();
         }
 
-        $collection->donorReports[$report->characteristicA->value ?? DonorReport::ALL] = $report;
+        $collection->donorReports[$report->characteristicB->value ?? DonorReport::ALL] = $report;
 
         FileUtilities::saveContents($this->getFilename($report), $this->marshalCollection($collection));
     }
