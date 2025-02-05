@@ -10,6 +10,7 @@ use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
 use CliffordVickrey\Book2024\Common\Enum\State;
 use CliffordVickrey\Book2024\Common\Repository\DonorPanelRepository;
+use CliffordVickrey\Book2024\Common\Repository\DonorReportRepository;
 use CliffordVickrey\Book2024\Common\Service\DonorProfileService;
 
 ini_set('memory_limit', '-1');
@@ -25,8 +26,12 @@ call_user_func(function () {
 
     $panels = $donorPanelRepository->get();
 
+    $oldState = null;
+
+    // build the reports...
     foreach ($panels as $panel) {
         /** @var DonorPanel $panel */
+        echo sprintf('Donor %d%s', $panel->donor->id, \PHP_EOL);
         $profile = $profiler->buildDonorProfile($panel);
 
         $characteristicsByCampaign = $profiler->collectDonorCharacteristics($profile);
@@ -35,6 +40,17 @@ call_user_func(function () {
 
         if (State::USA !== $profile->state) {
             $states[] = State::USA;
+        }
+
+        if ($oldState !== $profile->state) {
+            printf('Profiling donors in %s...%s', $profile->state->getDescription(), \PHP_EOL);
+        }
+
+        $oldState = $profile->state;
+
+        // @todo remove
+        if (State::AL === $profile->state) {
+            break;
         }
 
         foreach ($characteristicsByCampaign as $campaignStr => $characteristics) {
@@ -69,4 +85,11 @@ call_user_func(function () {
             }
         }
     }
+
+    printf('Saving...%s', \PHP_EOL);
+
+    // and save 'em
+    $donorReportRepository = new DonorReportRepository();
+    $donorReportRepository->deleteAll();
+    array_walk($reports, static fn (DonorReport $report) => $donorReportRepository->save($report));
 });

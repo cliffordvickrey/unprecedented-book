@@ -51,11 +51,11 @@ enum DonorCharacteristic: string
 
         foreach ($characteristics as $characteristic) {
             if (self::areMutuallyExclusive($this, $characteristic)) {
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     public static function areMutuallyExclusive(
