@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 use CliffordVickrey\Book2024\Common\Entity\Combined\DonorPanel;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportCollection;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportValue;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
@@ -31,7 +32,6 @@ call_user_func(function () {
     // build the reports...
     foreach ($panels as $panel) {
         /** @var DonorPanel $panel */
-        echo sprintf('Donor %d%s', $panel->donor->id, \PHP_EOL);
         $profile = $profiler->buildDonorProfile($panel);
 
         $characteristicsByCampaign = $profiler->collectDonorCharacteristics($profile);
@@ -47,11 +47,6 @@ call_user_func(function () {
         }
 
         $oldState = $profile->state;
-
-        // @todo remove
-        if (State::AL === $profile->state) {
-            break;
-        }
 
         foreach ($characteristicsByCampaign as $campaignStr => $characteristics) {
             $valueToAdd = DonorReportValue::fromDonorProfileAmount($profile->campaigns[$campaignStr]->total);
@@ -86,10 +81,32 @@ call_user_func(function () {
         }
     }
 
+    // ...reduce them to collections (stored in each file)
     printf('Saving...%s', \PHP_EOL);
 
-    // and save 'em
+    $collections = array_reduce($reports, function (array $carry, DonorReport $report): array {
+        $report->setPercentages();
+
+        $key = $report->getKey();
+
+        $parts = explode('-', $key);
+        array_pop($parts);
+        $key = implode('-', $parts);
+
+        /** @var array<string, DonorReportCollection> $carry */
+        $reports = $carry[$key] ?? new DonorReportCollection();
+
+        $reports->donorReports[$report->characteristicB->value ?? DonorReport::ALL] = $report;
+        $carry[$key] = $reports;
+
+        return $carry;
+    }, []);
+
+    // ...and save 'em
     $donorReportRepository = new DonorReportRepository();
     $donorReportRepository->deleteAll();
-    array_walk($reports, static fn (DonorReport $report) => $donorReportRepository->save($report));
+    array_walk(
+        $collections,
+        static fn (DonorReportCollection $reports) => $donorReportRepository->saveCollection($reports)
+    );
 });

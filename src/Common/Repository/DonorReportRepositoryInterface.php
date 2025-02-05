@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Repository;
 
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportCollection;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
 use CliffordVickrey\Book2024\Common\Enum\State;
@@ -17,6 +18,8 @@ interface DonorReportRepositoryInterface
         ?DonorCharacteristic $characteristicA = null,
         ?DonorCharacteristic $characteristicB = null,
     ): DonorReport;
+
+    public function saveCollection(DonorReportCollection $reports): void;
 
     public function save(DonorReport $report): void;
 

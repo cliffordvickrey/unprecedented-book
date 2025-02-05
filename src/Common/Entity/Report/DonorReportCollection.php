@@ -25,4 +25,16 @@ class DonorReportCollection extends Entity
 
         return $report;
     }
+
+    public function getKey(): string
+    {
+        Assert::notEmpty($this->donorReports);
+
+        $key = $this->donorReports[array_key_first($this->donorReports)]->getKey();
+
+        $parts = explode('-', $key);
+        array_pop($parts);
+
+        return implode('-', $parts);
+    }
 }

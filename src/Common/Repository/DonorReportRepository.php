@@ -75,12 +75,15 @@ final readonly class DonorReportRepository implements DonorReportRepositoryInter
         return self::unmarshallCollection($contents);
     }
 
-    private function getFilename(DonorReport|string $report): string
+    private function getFilename(DonorReportCollection|DonorReport|string $report): string
     {
         $key = \is_object($report) ? $report->getKey() : $report;
 
-        $parts = explode('-', $key);
-        array_pop($parts);
+        $parts = explode('-', $key, 4);
+
+        if (\count($parts) > 3) {
+            array_pop($parts);
+        }
 
         return \sprintf('%s/%s.json', $this->path, implode(\DIRECTORY_SEPARATOR, $parts));
     }
@@ -97,23 +100,27 @@ final readonly class DonorReportRepository implements DonorReportRepositoryInter
         $report->setPercentages();
 
         try {
-            $collection = $this->getCollection(
+            $reports = $this->getCollection(
                 $report->campaignType,
                 $report->state,
                 $report->characteristicA
             );
         } catch (DonorReportDoesNotExistException) {
-            $collection = new DonorReportCollection();
+            $reports = new DonorReportCollection();
         }
 
-        $collection->donorReports[$report->characteristicB->value ?? DonorReport::ALL] = $report;
-
-        FileUtilities::saveContents($this->getFilename($report), $this->marshalCollection($collection));
+        $reports->donorReports[$report->characteristicB->value ?? DonorReport::ALL] = $report;
+        $this->saveCollection($reports);
     }
 
-    private function marshalCollection(DonorReportCollection $reportCollection): string
+    public function saveCollection(DonorReportCollection $reports): void
     {
-        return JsonUtilities::jsonEncode($reportCollection, $this->prettyPrint);
+        FileUtilities::saveContents($this->getFilename($reports), $this->marshalCollection($reports));
+    }
+
+    private function marshalCollection(DonorReportCollection $reports): string
+    {
+        return JsonUtilities::jsonEncode($reports, $this->prettyPrint);
     }
 
     public function deleteAll(): void
