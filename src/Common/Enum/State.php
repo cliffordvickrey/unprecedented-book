@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Enum;
 
+use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
+
 enum State: string
 {
+    case USA = 'USA';
     case AL = 'AL';
     case AK = 'AK';
     case AS = 'AS';
@@ -66,6 +69,17 @@ enum State: string
     case WI = 'WI';
     case WY = 'WY';
 
+    public static function create(mixed $value): self
+    {
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        $value = (string) CastingUtilities::toString($value);
+
+        return self::tryFrom($value) ?? self::USA;
+    }
+
     public function getDescription(): string
     {
         /** @phpstan-var array<string, string> $descriptions */
@@ -80,6 +94,7 @@ enum State: string
     public static function getDescriptions(): array
     {
         return [
+            self::USA->value => 'UNITED STATES OF AMERICA',
             self::AL->value => 'ALABAMA',
             self::AK->value => 'ALASKA',
             self::AS->value => 'AMERICAN SAMOA',

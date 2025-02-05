@@ -21,6 +21,6 @@ call_user_func(function () {
     foreach ($panels as $panel) {
         /** @var DonorPanel $panel */
         $profile = $profiler->buildDonorProfile($panel);
-        echo $profiler->serializeDonorProfile($profile);
+        echo $profiler->collectDonorCharacteristics($profile);
     }
 });

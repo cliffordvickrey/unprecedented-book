@@ -41,7 +41,7 @@ class DonorProfileCycleCharacteristicCollectionStrategy2024 extends AbstractDono
             $characteristics[] = DonorCharacteristic::cycle_2024_rfk_jr;
         }
 
-        if ($this->hasPresReceiptsForCycle($profileCycle) && !$profileCycle->presDonaldTrump->receipts) {
+        if (!$profileCycle->presDonaldTrump->receipts) {
             $characteristics[] = DonorCharacteristic::cycle_2024_non_trump;
         }
 

@@ -64,13 +64,6 @@ abstract class AbstractDonorProfileCycleCharacteristicCollectionStrategy impleme
      */
     abstract protected function doCollectAttributesForCycle(DonorProfileCycle $profileCycle): array;
 
-    protected function hasPresReceiptsForCycle(DonorProfileCycle $profileCycle): bool
-    {
-        return $this->hasPresReceiptsByPartyForCycle($profileCycle, PartyType::democratic)
-            || $this->hasPresReceiptsByPartyForCycle($profileCycle, PartyType::republican)
-            || $this->hasPresReceiptsByPartyForCycle($profileCycle, PartyType::thirdParty);
-    }
-
     protected function hasPresReceiptsByPartyForCycle(DonorProfileCycle $profileCycle, PartyType $party): bool
     {
         $props = $this->getPresidentialPropertiesByParty($profileCycle, $party);

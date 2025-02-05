@@ -184,7 +184,7 @@ class DonorProfileService implements DonorProfileServiceInterface
         $profile = clone $this->prototype;
         $profile->id = $panel->donor->id;
         $profile->name = $panel->donor->name;
-        $profile->state = State::tryFrom($panel->donor->state);
+        $profile->state = State::create($panel->donor->state);
 
         $analyses = array_map($this->analyzeReceipt(...), $panel->receipts);
         $profile->acceptAnalyses($analyses);
@@ -370,8 +370,9 @@ class DonorProfileService implements DonorProfileServiceInterface
         return (string) new DonorProfileSerializationDecorator($profile, $this->recipientAttributesByCycle);
     }
 
-    public function colorDonorCharacteristics(DonorPanel|DonorProfile $panelOrProfile): DonorCharacteristicCollection
-    {
+    public function collectDonorCharacteristics(
+        DonorPanel|DonorProfile $panelOrProfile,
+    ): DonorCharacteristicCollection {
         if ($panelOrProfile instanceof DonorPanel) {
             $profile = $this->buildDonorProfile($panelOrProfile);
         } else {

@@ -21,7 +21,7 @@ class DonorProfile extends Entity implements \Countable
 {
     public int $id = 0;
     public string $name = '';
-    public ?State $state = null;
+    public State $state = State::USA;
     /** @var array<string, DonorProfileCampaign> */
     public array $campaigns = [];
     /** @var array<int, DonorProfileCycle> */
@@ -41,7 +41,9 @@ class DonorProfile extends Entity implements \Countable
 
     public function clearState(): void
     {
-        $this->state = null;
+        $this->id = 0;
+        $this->name = '';
+        $this->state = State::USA;
 
         $this->campaigns = $this->buildCampaigns();
 

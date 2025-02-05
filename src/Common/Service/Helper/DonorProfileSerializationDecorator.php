@@ -35,11 +35,8 @@ final readonly class DonorProfileSerializationDecorator implements \Stringable
             str_repeat('-', 80),
             \sprintf('ID: %d', $this->subject->id),
             \sprintf('Name: %s', $this->subject->name),
+            \sprintf('State: %s', $this->subject->state->getDescription()),
         ];
-
-        if (null !== $this->subject->state) {
-            $lines[] = \sprintf('State: %s', $this->subject->state->getDescription());
-        }
 
         foreach ($this->subject->campaigns as $profileByCampaign) {
             $linesForCampaign = $this->linesForCampaign($profileByCampaign);

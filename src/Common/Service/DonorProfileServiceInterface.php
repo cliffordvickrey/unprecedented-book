@@ -12,7 +12,7 @@ interface DonorProfileServiceInterface
 {
     public function buildDonorProfile(DonorPanel $panel): DonorProfile;
 
-    public function colorDonorCharacteristics(DonorPanel|DonorProfile $panelOrProfile): DonorCharacteristicCollection;
+    public function collectDonorCharacteristics(DonorPanel|DonorProfile $panelOrProfile): DonorCharacteristicCollection;
 
     public function serializeDonorProfile(DonorProfile $profile): string;
 }

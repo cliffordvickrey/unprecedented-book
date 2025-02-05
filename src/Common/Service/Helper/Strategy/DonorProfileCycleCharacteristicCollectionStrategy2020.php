@@ -32,7 +32,7 @@ class DonorProfileCycleCharacteristicCollectionStrategy2020 extends AbstractDono
             $characteristics[] = DonorCharacteristic::cycle_2020_progressive;
         }
 
-        if ($this->hasPresReceiptsForCycle($profileCycle) && !$profileCycle->presJoeBiden->receipts) {
+        if (!$profileCycle->presJoeBiden->receipts) {
             $characteristics[] = DonorCharacteristic::cycle_2020_non_biden;
         }
 
