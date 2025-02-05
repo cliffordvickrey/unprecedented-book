@@ -45,6 +45,19 @@ enum DonorCharacteristic: string
     case cycle_2024_party_elite = 'cycle_2024_party_elite';
     case cycle_2024_super_pac = 'cycle_2024_super_pac';
 
+    public function isMutuallyExclusive(?DonorCharacteristic ...$characteristics): bool
+    {
+        $characteristics = array_filter($characteristics);
+
+        foreach ($characteristics as $characteristic) {
+            if (self::areMutuallyExclusive($this, $characteristic)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static function areMutuallyExclusive(
         DonorCharacteristic $characteristicA,
         DonorCharacteristic $characteristicB,
