@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\Common\Entity\Report;
 
 use CliffordVickrey\Book2024\Common\Entity\Entity;
+use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
 use CliffordVickrey\Book2024\Common\Enum\State;
 use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
@@ -19,19 +20,78 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
 {
     public const string ALL = 'all';
 
+    public CampaignType $campaignType = CampaignType::donald_trump;
     public State $state = State::USA;
     public ?DonorCharacteristic $characteristicA = null;
     public ?DonorCharacteristic $characteristicB = null;
     public int $n = 0;
     /** @var list<DonorReportRow> */
     public array $rows = [];
+    /** @var array<string, DonorReportRow>|null */
+    private ?array $rowsByCharacteristic = null;
+
+    /**
+     * @return array<string, self>
+     */
+    public static function collectNew(): array
+    {
+        $campaigns = CampaignType::cases();
+        $states = State::cases();
+        $characteristicsA = DonorCharacteristic::cases();
+        $characteristicsB = DonorCharacteristic::cases();
+
+        $reports = [];
+
+        foreach ($campaigns as $campaign) {
+            foreach ($states as $state) {
+                $reports[self::inflectForKey($campaign, $state)] = self::build($campaign, $state);
+
+                foreach ($characteristicsA as $characteristicA) {
+                    $reports[self::inflectForKey($campaign, $state, $characteristicA)] = self::build(
+                        $campaign,
+                        $state,
+                        $characteristicA
+                    );
+
+                    foreach ($characteristicsB as $characteristicB) {
+                        if ($characteristicA->isMutuallyExclusive($characteristicB)) {
+                            continue;
+                        }
+
+                        $key = self::inflectForKey($campaign, $state, $characteristicA, $characteristicB);
+
+                        $reports[$key] = self::build($campaign, $state, $characteristicA, $characteristicB);
+                    }
+                }
+            }
+        }
+
+        return $reports;
+    }
+
+    public static function inflectForKey(
+        CampaignType $campaignType = CampaignType::donald_trump,
+        State $state = State::USA,
+        ?DonorCharacteristic $characteristicA = null,
+        ?DonorCharacteristic $characteristicB = null,
+    ): string {
+        return \sprintf(
+            '%s-%s-%s-%s',
+            $campaignType->value,
+            strtolower($state->value),
+            $characteristicA->value ?? self::ALL,
+            $characteristicB->value ?? self::ALL
+        );
+    }
 
     public static function build(
+        CampaignType $campaignType = CampaignType::donald_trump,
         State $state = State::USA,
         ?DonorCharacteristic $characteristicA = null,
         ?DonorCharacteristic $characteristicB = null,
     ): self {
         $self = new self();
+        $self->campaignType = $campaignType;
         $self->state = $state;
         $self->characteristicA = $characteristicA;
         $self->characteristicB = $characteristicB;
@@ -56,56 +116,8 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
 
     public function getKey(): string
     {
-        return self::inflectForKey($this->state, $this->characteristicA, $this->characteristicB);
-    }
-
-    public static function inflectForKey(
-        State $state = State::USA,
-        ?DonorCharacteristic $characteristicA = null,
-        ?DonorCharacteristic $characteristicB = null,
-    ): string {
-        return \sprintf(
-            '%s-%s-%s',
-            strtolower($state->value),
-            $characteristicA->value ?? self::ALL,
-            $characteristicB->value ?? self::ALL
-        );
-    }
-
-    /**
-     * @return array<string, self>
-     */
-    public static function collectNew(): array
-    {
-        $states = State::cases();
-
-        $reports = [];
-
-        $characteristicsA = DonorCharacteristic::cases();
-
-        foreach ($states as $state) {
-            $reports[self::inflectForKey($state)] = self::build($state);
-
-            foreach ($characteristicsA as $characteristicA) {
-                $reports[self::inflectForKey($state, $characteristicA)] = self::build($state, $characteristicA);
-
-                $characteristicsB = DonorCharacteristic::cases();
-
-                foreach ($characteristicsB as $characteristicB) {
-                    if ($characteristicA->isMutuallyExclusive($characteristicB)) {
-                        continue;
-                    }
-
-                    $reports[self::inflectForKey($state, $characteristicA, $characteristicB)] = self::build(
-                        $state,
-                        $characteristicA,
-                        $characteristicB
-                    );
-                }
-            }
-        }
-
-        return $reports;
+        return self::inflectForKey(
+            $this->campaignType, $this->state, $this->characteristicA, $this->characteristicB);
     }
 
     public function setPercentages(): void
@@ -158,6 +170,7 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
         $rows = $this->rows;
         $rows[self::normalizeOffset($offset)] = $value;
         $this->rows = array_values($rows);
+        $this->rowsByCharacteristic = null;
     }
 
     public function offsetUnset(mixed $offset): void
@@ -165,10 +178,65 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
         $rows = $this->rows;
         unset($rows[self::normalizeOffset($offset)]);
         $this->rows = array_values($rows);
+        $this->rowsByCharacteristic = null;
     }
 
     public function count(): int
     {
         return \count($this->rows);
+    }
+
+    /**
+     * @param list<DonorCharacteristic> $characteristics
+     */
+    public function add(DonorReportValue $value, array $characteristics): void
+    {
+        $this->n += $value->donors;
+
+        array_walk($characteristics, function (DonorCharacteristic $characteristic) use ($value): void {
+            if (!$this->hasCharacteristic($characteristic)) {
+                return;
+            }
+
+            $this->getByCharacteristic($characteristic)->value->add($value);
+        });
+    }
+
+    public function hasCharacteristic(DonorCharacteristic $characteristic): bool
+    {
+        return isset($this->mapByCharacteristic()[$characteristic->value]);
+    }
+
+    /**
+     * @return array<string, DonorReportRow>
+     */
+    private function mapByCharacteristic(): array
+    {
+        if (null === $this->rowsByCharacteristic) {
+            /** @var array<string, DonorReportRow> $rowsByCharacteristic */
+            $rowsByCharacteristic = array_reduce(
+                $this->rows,
+                static fn (array $carry, DonorReportRow $row) => array_merge(
+                    $carry,
+                    [$row->characteristic->value => $row]
+                ),
+                []
+            );
+
+            $this->rowsByCharacteristic = $rowsByCharacteristic;
+        }
+
+        return $this->rowsByCharacteristic;
+    }
+
+    public function getByCharacteristic(DonorCharacteristic $characteristic): DonorReportRow
+    {
+        $row = $this->mapByCharacteristic()[$characteristic->value] ?? null;
+
+        if (null !== $row) {
+            return $row;
+        }
+
+        throw new BookOutOfBoundsException(\sprintf('Report lacks characteristic "%s"', $characteristic->value));
     }
 }
