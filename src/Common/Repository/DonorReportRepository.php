@@ -94,6 +94,8 @@ final readonly class DonorReportRepository implements DonorReportRepositoryInter
 
     public function save(DonorReport $report): void
     {
+        $report->setPercentages();
+
         try {
             $collection = $this->getCollection(
                 $report->campaignType,
