@@ -45,7 +45,7 @@ abstract class AbstractDonorProfileCycleCharacteristicCollectionStrategy impleme
         }
 
         if ($entity->superPac->receipts) {
-            $arr[] = 'cycle_%d_party_elite';
+            $arr[] = 'cycle_%d_super_pac';
         }
 
         return [

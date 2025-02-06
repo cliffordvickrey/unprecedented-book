@@ -242,7 +242,7 @@ class DonorProfileService implements DonorProfileServiceInterface
 
         if (!$beforeElection) {
             $cyclePrototype = $this->prototype->cycles[$analysis->cycle] ?? null;
-            $beforeElection = $cyclePrototype && $cyclePrototype->getElectionDate() < $analysis->date;
+            $beforeElection = $cyclePrototype && $cyclePrototype->getElectionDate() > $analysis->date;
         }
 
         $recipient = false;

@@ -310,6 +310,7 @@ class DonorProfileCycle2024 extends DonorProfileCycle
         startDate: '2023-05-24',
         endDate: '2024-01-21',
         committeeIds: [
+            'C00841130',
             'C00834077',
             'C00834853',
             'C00857011',
