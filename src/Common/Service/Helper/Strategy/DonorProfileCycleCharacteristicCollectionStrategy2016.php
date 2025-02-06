@@ -26,6 +26,10 @@ class DonorProfileCycleCharacteristicCollectionStrategy2016 extends AbstractDono
             $characteristics[] = DonorCharacteristic::cycle_2016_trump;
         }
 
+        if ($profileCycle->presBernieSanders->receipts) {
+            $characteristics[] = DonorCharacteristic::cycle_2016_sanders;
+        }
+
         if ($this->hasPresReceiptsByPartyForCycle($profileCycle, PartyType::democratic)) {
             $characteristics[] = DonorCharacteristic::cycle_2016_dem_pres;
         }
