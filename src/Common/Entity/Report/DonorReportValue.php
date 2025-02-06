@@ -20,7 +20,7 @@ class DonorReportValue extends Entity
         $self = new self();
         $self->donors = 1;
         $self->receipts = $amount->receipts;
-        $self->amount = $amount->amount;
+        $self->amount = max($amount->amount, 0.0);
 
         return $self;
     }
