@@ -1,6 +1,8 @@
 parameters:
     level: max
     paths:
+        - app
         - bin
+        - public
         - src
         - tests

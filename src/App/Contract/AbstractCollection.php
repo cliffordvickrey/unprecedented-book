@@ -86,7 +86,7 @@ abstract class AbstractCollection implements \ArrayAccess, \Countable, \Iterator
      */
     public function current(): mixed
     {
-        $value = \current($this->data);
+        $value = current($this->data);
 
         if (false === $value) {
             throw new BookOutOfBoundsException('Key is out of bounds');
@@ -97,7 +97,7 @@ abstract class AbstractCollection implements \ArrayAccess, \Countable, \Iterator
 
     public function next(): void
     {
-        \next($this->data);
+        next($this->data);
     }
 
     public function valid(): bool
@@ -112,7 +112,7 @@ abstract class AbstractCollection implements \ArrayAccess, \Countable, \Iterator
 
     public function rewind(): void
     {
-        \reset($this->data);
+        reset($this->data);
     }
 
     /**

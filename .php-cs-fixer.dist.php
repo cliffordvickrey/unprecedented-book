@@ -11,12 +11,16 @@ return (new PhpCsFixer\Config())
         'nullable_type_declaration' => true,
         'nullable_type_declaration_for_default_null_value' => true,
         'phpdoc_to_comment' => false, // LOL, this one is pointless and destructive
+        'echo_tag_syntax' => ['format' => 'short'],
+        'no_alternative_syntax' => false,
     ])
     ->setRiskyAllowed(true)
     ->setFinder(
         (new PhpCsFixer\Finder())
-            ->in(__DIR__.'/src')
+            ->in(__DIR__.'/app')
             ->in(__DIR__.'/bin')
+            ->in(__DIR__.'/public')
+            ->in(__DIR__.'/src')
             ->in(__DIR__.'/tests')
             ->append([__FILE__])
     )
