@@ -15,6 +15,8 @@ use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
 /**
  * @implements \ArrayAccess<int, DonorReportRow>
  * @implements \IteratorAggregate<int, DonorReportRow>
+ *
+ * @phpstan-import-type DonorReportRecord from DonorReportRow
  */
 class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorAggregate
 {
@@ -29,6 +31,28 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
     public array $rows = [];
     /** @var array<string, DonorReportRow>|null */
     private ?array $rowsByCharacteristic = null;
+
+    /**
+     * @param callable(DonorReportRow): bool $filter
+     *
+     * @return $this
+     */
+    public function withFilter(callable $filter): self
+    {
+        $self = clone $this;
+
+        $self->rows = array_values(array_filter($self->rows, $filter));
+
+        return $this;
+    }
+
+    /**
+     * @return list<DonorReportRecord>
+     */
+    public function toRecords(): array
+    {
+        return array_map(static fn (DonorReportRow $row) => $row->toRecord(), $this->rows);
+    }
 
     /**
      * @return array<string, self>

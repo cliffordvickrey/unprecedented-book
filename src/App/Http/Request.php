@@ -13,6 +13,11 @@ final readonly class Request
     {
     }
 
+    public static function fromSuperGlobals(): self
+    {
+        return new self($_GET);
+    }
+
     /**
      * @return array<array-key, mixed>
      */
@@ -21,7 +26,7 @@ final readonly class Request
         return $this->queryParams;
     }
 
-    public function getQueryParams(string $name): mixed
+    public function getQueryParam(string $name): mixed
     {
         return $this->queryParams[$name] ?? null;
     }

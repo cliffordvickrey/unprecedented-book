@@ -211,4 +211,11 @@ class StringUtilities
 
         return $nonce;
     }
+
+    public static function snakeCaseToPascalCase(string $str): string
+    {
+        $words = explode('_', $str);
+
+        return implode('', array_map(\ucfirst(...), $words));
+    }
 }

@@ -7,9 +7,48 @@ namespace CliffordVickrey\Book2024\App\DataGrid\Grids;
 use CliffordVickrey\Book2024\App\DataGrid\DataGrid;
 use CliffordVickrey\Book2024\App\DataGrid\DataGridColumn;
 use CliffordVickrey\Book2024\App\DataGrid\DataGridColumnFormat;
+use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportRow;
+use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristicGenre;
+use CliffordVickrey\Book2024\Common\Exception\BookUnexpectedValueException;
+use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
+use Webmozart\Assert\Assert;
 
-class DonorProfileGrid extends DataGrid
+abstract class DonorProfileGrid extends DataGrid
 {
+    /**
+     * @return list<DonorProfileGrid>
+     */
+    public static function collectChildren(): array
+    {
+        return array_map(
+            static function (DonorCharacteristicGenre $genre): DonorProfileGrid {
+                $classStr = self::class.StringUtilities::snakeCaseToPascalCase($genre->value);
+
+                Assert::classExists($classStr);
+
+                if (!is_subclass_of($classStr, self::class)) {
+                    $msg = \sprintf('Expected subclass of %s; got %s', self::class, $classStr);
+                    throw new BookUnexpectedValueException($msg);
+                }
+
+                return new $classStr();
+            },
+            DonorCharacteristicGenre::cases(),
+        );
+    }
+
+    public function setReport(DonorReport $report): void
+    {
+        $genre = $this->getGenre();
+
+        $filteredReport = $report->withFilter(fn (DonorReportRow $row) => $row->characteristic->getGenre() === $genre);
+
+        $this->setValues($filteredReport->toRecords());
+    }
+
+    abstract public function getGenre(): DonorCharacteristicGenre;
+
     public function init(array $options = []): void
     {
         $col = new DataGridColumn();

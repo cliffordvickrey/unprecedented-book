@@ -22,6 +22,12 @@ final class Response extends AbstractCollection
         $this->data = [self::ATTR_JS => false, self::ATTR_LAYOUT => true];
     }
 
+    public function setObject(object $obj, ?string $key = null): void
+    {
+        $key ??= $obj::class;
+        $this[$key] = $obj;
+    }
+
     /**
      * @template T
      *
@@ -63,9 +69,9 @@ final class Response extends AbstractCollection
      *
      * @phpstan-return T
      */
-    public function getObject(string $classname): object
+    public function getObject(string $classname, ?string $key = null): object
     {
-        $obj = $this->getObjectNullable($classname);
+        $obj = $this->getObjectNullable($classname, $key);
         Assert::isInstanceOf($obj, $classname);
 
         return $obj;
@@ -78,9 +84,9 @@ final class Response extends AbstractCollection
      *
      * @phpstan-return  T|null
      */
-    public function getObjectNullable(string $classname): ?object
+    public function getObjectNullable(string $classname, ?string $key = null): ?object
     {
-        $obj = $this->get($classname);
+        $obj = $this->get($key ?? $classname);
 
         if (\is_object($obj) && is_a($obj, $classname)) {
             return $obj;
