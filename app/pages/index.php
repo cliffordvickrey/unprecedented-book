@@ -40,7 +40,7 @@ $query = $response->getObject(DonorProfileQuery::class);
                 ); ?>
             </div>
             <?php if ($query->campaignType): ?>
-                <div id="app-clear-button" class="col-12 col-lg-6">
+                <div id="app-clear-button" class="col-12 col-lg-6 mt-2 mt-lg-0">
                     <button class="btn btn-secondary">Clear All</button>
                 </div>
             <?php endif; ?>
@@ -105,6 +105,10 @@ $query = $response->getObject(DonorProfileQuery::class);
         <?php endif; ?>
     </form>
     <?php if ($query->campaignType): ?>
-        <?= $view->partial('profiles', $response); ?>
+        <div class="row">
+            <div class="col-12">
+                <?= $view->partial('profiles', $response); ?>
+            </div>
+        </div>
     <?php endif; ?>
 </div>
