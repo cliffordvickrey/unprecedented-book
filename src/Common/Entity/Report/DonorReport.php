@@ -26,33 +26,11 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
     public State $state = State::USA;
     public ?DonorCharacteristic $characteristicA = null;
     public ?DonorCharacteristic $characteristicB = null;
-    public int $n = 0;
+    public DonorReportValue $totals;
     /** @var list<DonorReportRow> */
     public array $rows = [];
     /** @var array<string, DonorReportRow>|null */
     private ?array $rowsByCharacteristic = null;
-
-    /**
-     * @param callable(DonorReportRow): bool $filter
-     *
-     * @return $this
-     */
-    public function withFilter(callable $filter): self
-    {
-        $self = clone $this;
-
-        $self->rows = array_values(array_filter($self->rows, $filter));
-
-        return $this;
-    }
-
-    /**
-     * @return list<DonorReportRecord>
-     */
-    public function toRecords(): array
-    {
-        return array_map(static fn (DonorReportRow $row) => $row->toRecord(), $this->rows);
-    }
 
     /**
      * @return array<string, self>
@@ -138,6 +116,28 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
         return $self;
     }
 
+    /**
+     * @param callable(DonorReportRow): bool $filter
+     *
+     * @return $this
+     */
+    public function withFilter(callable $filter): self
+    {
+        $self = clone $this;
+
+        $self->rows = array_values(array_filter($self->rows, $filter));
+
+        return $this;
+    }
+
+    /**
+     * @return list<DonorReportRecord>
+     */
+    public function toRecords(): array
+    {
+        return array_map(static fn (DonorReportRow $row) => $row->toRecord(), $this->rows);
+    }
+
     public function getKey(): string
     {
         return self::inflectForKey(
@@ -148,7 +148,7 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
     {
         array_walk($this->rows, fn (DonorReportRow $row) => $row->value->percent = MathUtilities::divide(
             $row->value->donors,
-            $this->n,
+            $this->totals->donors,
             4
         ));
     }
@@ -215,7 +215,7 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
      */
     public function add(DonorReportValue $value, array $characteristics): void
     {
-        $this->n += $value->donors;
+        $this->totals->add($value);
 
         array_walk($characteristics, function (DonorCharacteristic $characteristic) use ($value): void {
             if (!$this->hasCharacteristic($characteristic)) {

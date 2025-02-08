@@ -187,6 +187,12 @@ enum DonorCharacteristic: string
             'weeks' => (string) DonorProfileCampaignCharacteristicCollectionStrategy::DEFAULT_WEEKLY_THRESHOLD,
         ];
 
+        $params['launchDate'] = match ($campaignType) {
+            CampaignType::joe_biden => '2023-04-25',
+            CampaignType::kamala_harris => '2023-07-21',
+            CampaignType::donald_trump => '2022-11-15',
+        };
+
         $blurb = match ($this) {
             self::amt_up_to_1 => 'Donors who gave a total of <= $1 to %campaign% for the 2024 election cycle',
             self::amt_up_to_200 => 'Donors who gave a total of between $1.01 to $199.99 to %campaign% for the 2024 election cycle',

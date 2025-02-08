@@ -18,7 +18,7 @@ final readonly class DonorReportRepository implements DonorReportRepositoryInter
 {
     public function __construct(
         private string $path = __DIR__.'/../../../web-data/donors',
-        private bool $prettyPrint = true,
+        private bool $prettyPrint = false,
     ) {
     }
 

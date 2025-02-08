@@ -46,7 +46,7 @@ final readonly class DonorProfileCampaignCharacteristicCollectionStrategy implem
             $characteristics[] = DonorCharacteristic::monthly;
         }
 
-        if ($entity->maxConsecutiveWeeklyDonationCount > $this->weeklyThreshold) {
+        if ($entity->maxConsecutiveWeeklyDonationCount >= $this->weeklyThreshold) {
             $characteristics[] = DonorCharacteristic::weekly;
         }
 

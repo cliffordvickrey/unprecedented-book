@@ -44,7 +44,22 @@ abstract class DonorProfileGrid extends DataGrid
 
         $filteredReport = $report->withFilter(fn (DonorReportRow $row) => $row->characteristic->getGenre() === $genre);
 
-        $this->setValues($filteredReport->toRecords());
+        $records = $filteredReport->toRecords();
+
+        if (DonorCharacteristicGenre::donor === $genre) {
+            $records = [
+                [
+                    'characteristic' => 'All donors',
+                    'donors' => $report->totals->donors,
+                    'receipts' => $report->totals->receipts,
+                    'amount' => $report->totals->amount,
+                    'percent' => $report->totals->percent,
+                ],
+                ...$records,
+            ];
+        }
+
+        $this->setValues($records);
     }
 
     abstract public function getGenre(): DonorCharacteristicGenre;
