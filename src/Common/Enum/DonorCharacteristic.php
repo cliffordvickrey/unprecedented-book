@@ -180,7 +180,7 @@ enum DonorCharacteristic: string
         $params = [
             'campaign' => $campaignType->getDescription(),
             'coda' => CampaignType::kamala_harris === $campaignType
-                ? " (recurring donations inherited from Biden's candidacy count)"
+                ? " (includes recurring donations inherited from Biden's candidacy)"
                 : '',
             'cycle' => (string) $this->getCycle(),
             'months' => (string) DonorProfileCampaignCharacteristicCollectionStrategy::DEFAULT_MONTHLY_THRESHOLD,
@@ -202,8 +202,8 @@ enum DonorCharacteristic: string
             self::prior => 'Donors who had contributed to a campaign or leadership PAC belonging to %campaign% prior to the 2024 election cycle',
             self::day_one_launch => 'Donors who contributed to %campaign% on %launchDate%',
             self::week_one_launch => 'Donors who contributed to %campaign% within a week after %launchDate%',
-            self::weekly => 'Donors who contributed to %campaign% for %weeks% consecutive weeks%coda%',
-            self::monthly => 'Donors who contributed to %campaign% for %months% consecutive months%coda%',
+            self::weekly => 'Donors who contributed to %campaign% for %weeks% or more consecutive weeks%coda%',
+            self::monthly => 'Donors who contributed to %campaign% for %months% or more consecutive months%coda%',
             self::cycle_2016_clinton => 'Donors who contributed to Hillary Clinton in the %cycle% election cycle',
             self::cycle_2016_sanders => 'Donors who contributed to Bernie Sanders in the %cycle% election cycle',
             self::cycle_2016_trump, self::cycle_2020_trump, self::cycle_2024_trump => 'Donors who contributed to Donald Trump in the %cycle% election cycle',
