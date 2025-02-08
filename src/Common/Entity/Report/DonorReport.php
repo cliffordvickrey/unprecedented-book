@@ -146,6 +146,8 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
 
     public function setPercentages(): void
     {
+        $this->totals->percent = 1.0;
+
         array_walk($this->rows, fn (DonorReportRow $row) => $row->value->percent = MathUtilities::divide(
             $row->value->donors,
             $this->totals->donors,
