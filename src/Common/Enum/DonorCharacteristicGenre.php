@@ -20,6 +20,16 @@ enum DonorCharacteristicGenre: string
         return self::donor;
     }
 
+    public function getOrder(): int
+    {
+        return match ($this) {
+            self::donor => 0,
+            self::cycle_2024 => 1,
+            self::cycle_2020 => 2,
+            self::cycle_2016 => 3,
+        };
+    }
+
     public function getDescription(): string
     {
         return match ($this) {

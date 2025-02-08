@@ -2,11 +2,6 @@
 
 declare(strict_types=1);
 
-use CliffordVickrey\Book2024\App\DataGrid\Grids\DonorProfileGrid;
-use CliffordVickrey\Book2024\App\DataGrid\Grids\DonorProfileGridCycle2016;
-use CliffordVickrey\Book2024\App\DataGrid\Grids\DonorProfileGridCycle2020;
-use CliffordVickrey\Book2024\App\DataGrid\Grids\DonorProfileGridCycle2024;
-use CliffordVickrey\Book2024\App\DataGrid\Grids\DonorProfileGridDonor;
 use CliffordVickrey\Book2024\App\DTO\DonorProfileQuery;
 use CliffordVickrey\Book2024\App\Http\Response;
 use CliffordVickrey\Book2024\App\View\View;
@@ -94,53 +89,24 @@ $query = $response->getObject(DonorProfileQuery::class);
                     ); ?>
                 </div>
             </div>
-            <div class="row pt-1 pb-3">
-                <div class="col-12 col-lg-6">
-                    <?= $view->select(
-                        id: 'app-characteristic-filter-b',
-                        name: sprintf('%s[]', DonorProfileQuery::PARAM_CHARACTERISTIC),
-                        label: 'Characteristic',
-                        options: DonorCharacteristic::getDescriptions($query->characteristicA),
-                        value: $query->characteristicB?->value
-                    ); ?>
+            <?php if ($query->characteristicA): ?>
+                <div class="row py-1">
+                    <div class="col-12 col-lg-6">
+                        <?= $view->select(
+                            id: 'app-characteristic-filter-b',
+                            name: sprintf('%s[]', DonorProfileQuery::PARAM_CHARACTERISTIC),
+                            label: 'Characteristic',
+                            options: DonorCharacteristic::getDescriptions($query->characteristicA),
+                            value: $query->characteristicB?->value
+                        ); ?>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
         <?php endif; ?>
     </form>
     <?php if ($query->campaignType): ?>
-        <?php if ($query->characteristicA): ?>
-            <?= $view->partial('blurb', [
-                CampaignType::class => $query->campaignType,
-                DonorCharacteristic::class => $query->characteristicA,
-            ]); ?>
-        <?php endif; ?>
-        <?php if ($query->characteristicB): ?>
-            <?= $view->partial('blurb', [
-                CampaignType::class => $query->campaignType,
-                DonorCharacteristic::class => $query->characteristicB,
-            ]); ?>
-        <?php endif; ?>
-        <div class="row">
-            <div class="col-12">
-                <div class="accordion">
-                    <?= $view->partial(
-                        'profile',
-                        [DonorProfileGrid::class => $response->getObject(DonorProfileGridDonor::class)]
-                    ); ?>
-                    <?= $view->partial(
-                        'profile',
-                        [DonorProfileGrid::class => $response->getObject(DonorProfileGridCycle2024::class)]
-                    ); ?>
-                    <?= $view->partial(
-                        'profile',
-                        [DonorProfileGrid::class => $response->getObject(DonorProfileGridCycle2020::class)]
-                    ); ?>
-                    <?= $view->partial(
-                        'profile',
-                        [DonorProfileGrid::class => $response->getObject(DonorProfileGridCycle2016::class)]
-                    ); ?>
-                </div>
-            </div>
+        <div class="pt-2">
+            <?= $view->partial('profiles', $response); ?>
         </div>
     <?php endif; ?>
 </div>

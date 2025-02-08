@@ -63,6 +63,18 @@ enum DonorCharacteristic: string
             ));
         }
 
+        $genres = DonorCharacteristicGenre::cases();
+        usort(
+            $genres,
+            static fn (DonorCharacteristicGenre $a, DonorCharacteristicGenre $b) => $a->getOrder() <=> $b->getOrder()
+        );
+
+        $optionGroups = [];
+
+        foreach ($genres as $genre) {
+            $optionGroups[$genre->getDescription()] = [];
+        }
+
         return array_reduce($cases, static function (array $carry, DonorCharacteristic $case): array {
             $genre = $case->getGenre()->getDescription();
 
@@ -74,7 +86,7 @@ enum DonorCharacteristic: string
             $carry[$genre][$case->value] = $case->getDescription();
 
             return $carry;
-        }, []);
+        }, $optionGroups);
     }
 
     public function isMutuallyExclusive(?DonorCharacteristic ...$characteristics): bool
