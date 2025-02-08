@@ -20,23 +20,19 @@ Assert::isInstanceOf($view, View::class);
 $query = $response->getObject(DonorProfileQuery::class);
 
 ?>
-<div class="container-fluid pt-2">
-    <div class="row">
-        <div class="col-12">
-            <?php if ($query->characteristicA): ?>
-                <?= $view->partial('blurb', [
-                    CampaignType::class => $query->campaignType,
-                    DonorCharacteristic::class => $query->characteristicA,
-                ]); ?>
-            <?php endif; ?>
-            <?php if ($query->characteristicB): ?>
-                <?= $view->partial('blurb', [
-                    CampaignType::class => $query->campaignType,
-                    DonorCharacteristic::class => $query->characteristicB,
-                ]); ?>
-            <?php endif; ?>
-        </div>
-    </div>
+<div class="container-fluid pt-3">
+    <?php if ($query->characteristicA): ?>
+        <?= $view->partial('blurb', [
+            CampaignType::class => $query->campaignType,
+            DonorCharacteristic::class => $query->characteristicA,
+        ]); ?>
+    <?php endif; ?>
+    <?php if ($query->characteristicB): ?>
+        <?= $view->partial('blurb', [
+            CampaignType::class => $query->campaignType,
+            DonorCharacteristic::class => $query->characteristicB,
+        ]); ?>
+    <?php endif; ?>
     <div class="row">
         <div class="col-12">
             <div class="accordion">

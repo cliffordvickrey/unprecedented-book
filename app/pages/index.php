@@ -105,8 +105,6 @@ $query = $response->getObject(DonorProfileQuery::class);
         <?php endif; ?>
     </form>
     <?php if ($query->campaignType): ?>
-        <div class="pt-2">
-            <?= $view->partial('profiles', $response); ?>
-        </div>
+        <?= $view->partial('profiles', $response); ?>
     <?php endif; ?>
 </div>
