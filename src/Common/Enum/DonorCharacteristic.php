@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Enum;
 
+use CliffordVickrey\Book2024\Common\Service\Helper\Strategy\DonorProfileCampaignCharacteristicCollectionStrategy;
+use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
+
 enum DonorCharacteristic: string
 {
     case amt_up_to_1 = 'amt_up_to_1';
@@ -44,6 +47,35 @@ enum DonorCharacteristic: string
     case cycle_2024_gop_non_pres = 'cycle_2024_gop_non_pres';
     case cycle_2024_party_elite = 'cycle_2024_party_elite';
     case cycle_2024_super_pac = 'cycle_2024_super_pac';
+
+    /**
+     * @return array<string, array<string, string>>
+     */
+    public static function getDescriptions(?DonorCharacteristic ...$characteristics): array
+    {
+        $characteristics = array_values(array_filter($characteristics));
+
+        $cases = self::cases();
+
+        if (0 !== \count($characteristics)) {
+            $cases = array_filter($cases, static fn (DonorCharacteristic $case) => !$case->isMutuallyExclusive(
+                ...$characteristics
+            ));
+        }
+
+        return array_reduce($cases, static function (array $carry, DonorCharacteristic $case): array {
+            $genre = $case->getGenre()->getDescription();
+
+            /** @var array<string, array<string, string>> $carry */
+            if (!isset($carry[$genre])) {
+                $carry[$genre] = [];
+            }
+
+            $carry[$genre][$case->value] = $case->getDescription();
+
+            return $carry;
+        }, []);
+    }
 
     public function isMutuallyExclusive(?DonorCharacteristic ...$characteristics): bool
     {
@@ -105,11 +137,6 @@ enum DonorCharacteristic: string
         return $mutuallyExclusive;
     }
 
-    public function getGenre(): DonorCharacteristicGenre
-    {
-        return DonorCharacteristicGenre::fromCharacteristic($this);
-    }
-
     public function getDescription(): string
     {
         return match ($this) {
@@ -141,5 +168,68 @@ enum DonorCharacteristic: string
             self::cycle_2024_rfk_jr => 'RFK Jr. Donors',
             self::cycle_2024_non_trump => 'Non-Trump Donors',
         };
+    }
+
+    public function getGenre(): DonorCharacteristicGenre
+    {
+        return DonorCharacteristicGenre::fromCharacteristic($this);
+    }
+
+    public function getBlurb(CampaignType $campaignType): string
+    {
+        $params = [
+            'campaign' => $campaignType->getDescription(),
+            'coda' => CampaignType::kamala_harris === $campaignType
+                ? " (recurring donations inherited from Biden's candidacy count)"
+                : '',
+            'cycle' => (string) $this->getCycle(),
+            'months' => (string) DonorProfileCampaignCharacteristicCollectionStrategy::DEFAULT_MONTHLY_THRESHOLD,
+            'weeks' => (string) DonorProfileCampaignCharacteristicCollectionStrategy::DEFAULT_WEEKLY_THRESHOLD,
+        ];
+
+        $blurb = match ($this) {
+            self::amt_up_to_1 => 'Donors who gave a total of <= $1 to %campaign% for the 2024 election cycle',
+            self::amt_up_to_200 => 'Donors who gave a total of between $1.01 to $199.99 to %campaign% for the 2024 election cycle',
+            self::amt_up_to_1000 => 'Donors who gave a total of between $200 to $999.99 to %campaign% for the 2024 election cycle',
+            self::amt_up_to_2800 => 'Donors who gave a total of between 1,000 to $2,799.99 to %campaign% for the 2024 election cycle',
+            self::amt_more_than_2800 => 'Donors who gave a total of at least $2,800.00 to %campaign% for the 2024 election cycle',
+            self::prior => 'Donors who had contributed to a campaign or leadership PAC belonging to %campaign% prior to the 2024 election cycle',
+            self::day_one_launch => 'Donors who contributed to %campaign% on %launchDate%',
+            self::week_one_launch => 'Donors who contributed to %campaign% within a week after %launchDate%',
+            self::weekly => 'Donors who contributed to %campaign% for %weeks% consecutive weeks%coda%',
+            self::monthly => 'Donors who contributed to %campaign% for %months% consecutive months%coda%',
+            self::cycle_2016_clinton => 'Donors who contributed to Hillary Clinton in the %cycle% election cycle',
+            self::cycle_2016_sanders => 'Donors who contributed to Bernie Sanders in the %cycle% election cycle',
+            self::cycle_2016_trump, self::cycle_2020_trump, self::cycle_2024_trump => 'Donors who contributed to Donald Trump in the %cycle% election cycle',
+            self::cycle_2016_dem_pres => 'Donors who contributed to a Democratic presidential campaign in the %cycle% election cycle',
+            self::cycle_2016_gop_pres => 'Donors who contributed to a Republican presidential campaign in the %cycle% election cycle',
+            self::cycle_2016_dem_non_pres, self::cycle_2020_dem_non_pres, self::cycle_2024_dem_non_pres => 'Donors who contributed to a Democratic House or Senate campaign in the %cycle% election cycle',
+            self::cycle_2016_gop_non_pres, self::cycle_2020_gop_non_pres, self::cycle_2024_gop_non_pres => 'Donors who contributed to a Republican House or Senate campaign in the %cycle% election cycle',
+            self::cycle_2016_party_elite, self::cycle_2020_party_elite, self::cycle_2024_party_elite => 'Donors who contributed to a party committee (FEC committee types X, Y, and Z) in the %cycle% election cycle',
+            self::cycle_2016_super_pac, self::cycle_2020_super_pac, self::cycle_2024_super_pac => 'Donors who contributed to a super PAC (independent expenditure committee; FEC committee type O) in the %cycle% election cycle',
+            self::cycle_2020_biden, self::cycle_2024_biden => 'Donors who contributed to Joe Biden in the %cycle% election cycle',
+            self::cycle_2020_progressive => 'Donors who contributed to either Bernie Sanders or Elizabeth Warren in the %cycle% election cycle',
+            self::cycle_2020_non_biden => 'Donors who did NOT contribute to Joe Biden in the %cycle% election cycle',
+            self::cycle_2024_harris => 'Donors to contributed to Kamala Harris in the %cycle% election cycle',
+            self::cycle_2024_desantis => 'Donors who contributed to Ron DeSantis in the %cycle% election cycle',
+            self::cycle_2024_haley => 'Donors who contributed to Nikki Haley in the %cycle% election cycle',
+            self::cycle_2024_rfk_jr => 'Donors who contributed to RFK Jr. in the %cycle% election cycle',
+            self::cycle_2024_non_trump => 'Donors who did NOT contribute to Donald Trump in the %cycle% election cycle',
+        };
+
+        $toReplace = array_map(static fn (string $str) => "%$str%", array_keys($params));
+
+        return str_replace($toReplace, array_values($params), $blurb);
+    }
+
+    public function getCycle(): ?int
+    {
+        if (preg_match('/^cycle_(\d{4})_/', $this->value, $matches)) {
+            $cycle = $matches[1];
+
+            return CastingUtilities::toInt($cycle);
+        }
+
+        return null;
     }
 }

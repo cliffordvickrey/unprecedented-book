@@ -23,7 +23,7 @@ final readonly class IndexController implements ControllerInterface
 
     public function dispatch(Request $request): Response
     {
-        $response = new Response();
+        $response = self::buildResponse();
 
         $query = self::initQuery($request, $response);
 
@@ -32,6 +32,15 @@ final readonly class IndexController implements ControllerInterface
         }
 
         $this->initGrids($response);
+
+        return $response;
+    }
+
+    private static function buildResponse(): Response
+    {
+        $response = new Response();
+        $response[Response::ATTR_JS] = true;
+        $response[Response::ATTR_PAGE] = 'index';
 
         return $response;
     }

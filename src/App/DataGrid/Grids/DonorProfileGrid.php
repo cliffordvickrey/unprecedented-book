@@ -70,13 +70,13 @@ abstract class DonorProfileGrid extends DataGrid
         $this[] = $col;
 
         $col = new DataGridColumn();
-        $col->id = 'amt';
+        $col->id = 'amount';
         $col->title = 'Amount';
         $col->format = DataGridColumnFormat::currency;
         $this[] = $col;
 
         $col = new DataGridColumn();
-        $col->id = 'pct';
+        $col->id = 'percent';
         $col->title = '%';
         $col->format = DataGridColumnFormat::percent;
         $this[] = $col;

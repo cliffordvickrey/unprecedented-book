@@ -38,7 +38,7 @@ $renderOption = function (int|string $key, mixed $optionValue) use ($value, $vie
     <span class="input-group-text" id="<?= $view->htmlEncode($id); ?>-addon"><?= $view->htmlEncode($label); ?></span>
     <select id="<?= $view->htmlEncode($id); ?>" class="form-select" autocomplete="off"
             aria-label="<?= $view->htmlEncode($label); ?>" aria-describedby="<?= $view->htmlEncode($id); ?>-addon"
-            name="<?= $view->htmlEncode($name); ?>" data-dropdown="1">
+            name="<?= $view->htmlEncode($name); ?>">
         <?php foreach ($options as $k => $v):
             if (is_array($v)): ?>
                 <optgroup label="<?= $view->htmlEncode($k); ?>">

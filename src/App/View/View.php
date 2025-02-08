@@ -11,6 +11,12 @@ use Webmozart\Assert\Assert;
 
 class View
 {
+    private const string NUMBER_FORMATTER_CURRENCY = 'numberFormatterCurrency';
+    private const string NUMBER_FORMATTER_NUMBER = 'numberFormatterNumber';
+    private const string NUMBER_FORMATTER_PERCENT = 'numberFormatterPercent';
+
+    /** @var array<self::NUMBER_FORMATTER_*, \NumberFormatter> */
+    private array $numberFormatters = [];
     private ?\IntlDateFormatter $intlDateFormatter = null;
 
     public function htmlEncode(mixed $value): string
@@ -65,6 +71,8 @@ class View
             $response = clone $params;
         }
 
+        $view = $this;
+
         try {
             ob_start();
             require $filename;
@@ -96,5 +104,62 @@ class View
     public function dataGrid(DataGrid $grid): string
     {
         return $this->partial('grid', [DataGrid::class => $grid]);
+    }
+
+    public function formatCurrency(mixed $value): string
+    {
+        return $this->doFormat($value, self::NUMBER_FORMATTER_CURRENCY);
+    }
+
+    public function formatNumber(mixed $value): string
+    {
+        return $this->doFormat($value, self::NUMBER_FORMATTER_NUMBER);
+    }
+
+    public function formatPercent(mixed $value): string
+    {
+        return $this->doFormat($value, self::NUMBER_FORMATTER_PERCENT);
+    }
+
+    /**
+     * @param self::NUMBER_FORMATTER_* $type
+     */
+    private function doFormat(mixed $value, string $type): string
+    {
+        $value = CastingUtilities::toNumeric($value);
+
+        if (null === $value) {
+            return '';
+        }
+
+        return (string) $this->getNumberFormatter($type)->format($value);
+    }
+
+    /**
+     * @phpstan-param self::NUMBER_FORMATTER_* $type
+     */
+    private function getNumberFormatter(string $type): \NumberFormatter
+    {
+        $this->numberFormatters[$type] ??= $this->resolveNumberFormatter($type);
+
+        return $this->numberFormatters[$type];
+    }
+
+    /**
+     * @phpstan-param self::NUMBER_FORMATTER_* $type
+     */
+    private function resolveNumberFormatter(string $type): \NumberFormatter
+    {
+        switch ($type) {
+            case self::NUMBER_FORMATTER_CURRENCY:
+                return new \NumberFormatter('en_US', \NumberFormatter::CURRENCY);
+            case self::NUMBER_FORMATTER_PERCENT:
+                $numberFormatter = new \NumberFormatter('en_US', \NumberFormatter::PERCENT);
+                $numberFormatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, 2);
+
+                return $numberFormatter;
+            default:
+                return new \NumberFormatter('en_US', \NumberFormatter::DECIMAL);
+        }
     }
 }

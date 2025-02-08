@@ -58,8 +58,34 @@ $js = $response->getAttribute(Response::ATTR_JS, false);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"></script>
-    <!--suppress HtmlUnknownTarget -->
-    <script src="js/app.js?version=1"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const clearButton = document.querySelector("#app-clear-button");
+            const dropDowns = document.querySelectorAll("#app-search-form select");
+
+            if (null !== clearButton) {
+                clearButton.addEventListener("click", e => {
+                    dropDowns.forEach(dropDown => {
+                        let blankValue = "";
+
+                        if (dropDown.id === "app-state-filter") {
+                            blankValue = "USA";
+                        }
+
+                        dropDown.value = blankValue;
+                    });
+
+                    clearButton.closest("form").submit();
+
+                    e.stopPropagation();
+                    e.preventDefault();
+                    return false;
+                });
+            }
+
+            dropDowns.forEach(dropDown => dropDown.addEventListener("change", () => dropDown.closest("form").submit()));
+        });
+    </script>
 <?php } ?>
 </body>
 </html>

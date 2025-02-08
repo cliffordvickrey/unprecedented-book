@@ -19,6 +19,29 @@ enum CampaignType: string
         return PartyType::democratic;
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public static function getDescriptions(): array
+    {
+        /** @var array<string, string> $arr */
+        $arr = array_reduce(self::cases(), static fn (array $carry, self $campaignType): array => array_merge(
+            $carry,
+            [$campaignType->value => $campaignType->getDescription()]
+        ), []);
+
+        return $arr;
+    }
+
+    public function getDescription(): string
+    {
+        return match ($this) {
+            self::joe_biden => 'Joe Biden',
+            self::kamala_harris => 'Kamala Harris',
+            self::donald_trump => 'Donald Trump',
+        };
+    }
+
     public function toProp(): string
     {
         return match ($this) {

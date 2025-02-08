@@ -14,12 +14,6 @@ Assert::isInstanceOf($response, Response::class);
 $view = $view ?? new View();
 Assert::isInstanceOf($view, View::class);
 
-$numberFormatter = new NumberFormatter('en_US', NumberFormatter::DECIMAL);
-$currencyFormatter = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
-$intlDateFormatter = new IntlDateFormatter('en_US', IntlDateFormatter::SHORT, IntlDateFormatter::NONE);
-$percentFormatter = new NumberFormatter('en_US', NumberFormatter::PERCENT);
-$percentFormatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
-
 $grid = $response->getObject(DataGrid::class);
 
 $metaColSpans = $grid->getMetaColSpans();
@@ -31,7 +25,7 @@ $values = $grid->getValues();
     <table class="table table-sm table-bordered">
         <colgroup>
             <?php foreach ($colWidths as $colWidth): ?>
-                <col style="width: <?= $view->htmlEncode($percentFormatter->format($colWidth)); ?>;">
+                <col style="width: <?= $view->htmlEncode($view->formatPercent($colWidth)); ?>;">
             <?php endforeach; ?>
         </colgroup>
         <thead>
@@ -72,8 +66,7 @@ $values = $grid->getValues();
                         if (null !== $value && '' !== $value) {
                             switch ($col->format) {
                                 case DataGridColumnFormat::currency:
-                                    $valueFloat = (float) CastingUtilities::toFloat($value);
-                                    $formattedValue = $currencyFormatter->format($valueFloat);
+                                    $formattedValue = $view->formatCurrency($value);
                                     break;
                                 case DataGridColumnFormat::date:
                                     $valueDt = CastingUtilities::toDateTime($value);
@@ -81,17 +74,18 @@ $values = $grid->getValues();
                                     if (null === $valueDt) {
                                         $formattedValue = '';
                                     } else {
-                                        $formattedValue = $intlDateFormatter->format($valueDt);
+                                        $formattedValue = $view->formatDate($valueDt);
                                     }
 
                                     break;
                                 case DataGridColumnFormat::none:
-                                    $valueInt = (int) CastingUtilities::toInt($value);
-                                    $formattedValue = $numberFormatter->format($valueInt);
+                                    $formattedValue = (string) CastingUtilities::toString($value);
+                                    break;
+                                case DataGridColumnFormat::number:
+                                    $formattedValue = $view->formatNumber($value);
                                     break;
                                 case DataGridColumnFormat::percent:
-                                    $valueFloat = (float) CastingUtilities::toFloat($value);
-                                    $formattedValue = $percentFormatter->format($valueFloat);
+                                    $formattedValue = $view->formatPercent($value);
                                     break;
                             }
                         }
