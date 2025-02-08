@@ -327,7 +327,7 @@ class DonorProfileService implements DonorProfileServiceInterface
 
         // weak comparison is intentional here
         $analysis->isDayOneLaunch = $attr->startDate && $attr->startDate == $analysis->date;
-        $analysis->isWeekOneLaunch = $attr->startDate && DateUtilities::isWithinWeek($attr->startDate, $analysis->date);
+        $analysis->isWeekOneLaunch = $attr->startDate && DateUtilities::isWithinWeek($analysis->date, $attr->startDate);
     }
 
     /**
