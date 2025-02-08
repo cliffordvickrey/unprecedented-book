@@ -127,7 +127,7 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
 
         $self->rows = array_values(array_filter($self->rows, $filter));
 
-        return $this;
+        return $self;
     }
 
     /**
