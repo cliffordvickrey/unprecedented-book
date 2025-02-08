@@ -160,7 +160,7 @@ enum DonorCharacteristic: string
             self::cycle_2016_party_elite, self::cycle_2020_party_elite, self::cycle_2024_party_elite => 'Party Committee Donors',
             self::cycle_2016_super_pac, self::cycle_2020_super_pac, self::cycle_2024_super_pac => 'Super PAC Donors',
             self::cycle_2020_biden, self::cycle_2024_biden => 'Biden Donors',
-            self::cycle_2020_progressive => 'Progress Donors',
+            self::cycle_2020_progressive => 'Progressive Donors',
             self::cycle_2020_non_biden => 'Non Biden Donors',
             self::cycle_2024_harris => 'Harris Donors',
             self::cycle_2024_desantis => 'DeSantis Donors',
