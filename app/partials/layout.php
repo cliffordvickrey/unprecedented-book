@@ -20,6 +20,13 @@ $js = $response->getAttribute(Response::ATTR_JS, false);
     <meta charset="UTF-8">
     <meta content="IE=edge" http-equiv="X-UA-Compatible">
     <meta content="width=device-width,initial-scale=1" name="viewport">
+    <meta content="https://www.cliffordvickrey.com/report2024/" property="og:url"/>
+    <meta content="2024 FEC Reporter" property="og:title"/>
+    <meta content="Shows profiles of contributors to 2024 presidential campaigns using data sources from the FEC API and bulk fles."
+          property="og:description"/>
+    <meta content="https://www.cliffordvickrey.com/selfie.jpg" property="og:image"/>
+    <meta content="Shows profiles of contributors to 2024 presidential campaigns using data sources from the FEC API and bulk files."
+          name="description"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <title>FEC Reporter 2.0</title>

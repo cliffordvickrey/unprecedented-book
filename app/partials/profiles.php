@@ -20,7 +20,7 @@ Assert::isInstanceOf($view, View::class);
 $query = $response->getObject(DonorProfileQuery::class);
 
 ?>
-<div class="container-fluid pt-3">
+<div class="container-fluid pt-3 gx-0">
     <?php if ($query->characteristicA): ?>
         <?= $view->partial('blurb', [
             CampaignType::class => $query->campaignType,

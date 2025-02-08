@@ -26,7 +26,7 @@ $label = $view->htmlEncode($response->getAttribute('label', ''));
     <div id="app-accordion-collapse-<?= $id; ?>" class="accordion-collapse collapse show"
          aria-labelledby="app-accordion-heading-<?= $id; ?>">
         <div class="accordion-body">
-            <div class="container-fluid">
+            <div class="container-fluid gx-0">
                 <!-- pane content -->
                 <?= $response->getAttribute('content', ''); ?>
                 <!-- /pane content -->

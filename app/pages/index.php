@@ -18,7 +18,7 @@ Assert::isInstanceOf($view, View::class);
 $query = $response->getObject(DonorProfileQuery::class);
 
 ?>
-<div class="container-fluid">
+<div class="container-fluid gx-0">
     <form method="get" id="app-search-form">
         <div class="row">
             <div class="col-12">
