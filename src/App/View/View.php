@@ -8,6 +8,7 @@ use CliffordVickrey\Book2024\App\DataGrid\DataGrid;
 use CliffordVickrey\Book2024\App\Http\Response;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
+use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
 use Webmozart\Assert\Assert;
 
 class View
@@ -36,6 +37,11 @@ class View
         $value = (string) CastingUtilities::toString($value);
 
         return htmlentities($value, \ENT_QUOTES);
+    }
+
+    public function jsonEncode(mixed $value): string
+    {
+        return JsonUtilities::jsonEncode($value);
     }
 
     private function getAssetUri(string $filename): string

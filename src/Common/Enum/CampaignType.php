@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Enum;
 
+use CliffordVickrey\Book2024\Common\Exception\BookRuntimeException;
+use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
+
 enum CampaignType: string
 {
     case joe_biden = 'joe_biden';
@@ -49,5 +52,26 @@ enum CampaignType: string
             self::kamala_harris => 'presKamalaHarris',
             self::donald_trump => 'presDonaldTrump',
         };
+    }
+
+    public function getLaunchDate(): \DateTimeImmutable
+    {
+        $dtStr = match ($this) {
+            CampaignType::joe_biden => '2023-04-25',
+            CampaignType::kamala_harris => '2023-07-21',
+            CampaignType::donald_trump => '2022-11-15',
+        };
+
+        return CastingUtilities::toDateTime($dtStr) ?? throw new BookRuntimeException();
+    }
+
+    public function getDropoutDate(): \DateTimeImmutable
+    {
+        $dtStr = match ($this) {
+            CampaignType::joe_biden => '2024-07-20',
+            CampaignType::kamala_harris, CampaignType::donald_trump => '2024-11-05',
+        };
+
+        return CastingUtilities::toDateTime($dtStr) ?? throw new BookRuntimeException();
     }
 }

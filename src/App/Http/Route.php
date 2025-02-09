@@ -8,6 +8,7 @@ use CliffordVickrey\Book2024\App\Controller\ControllerInterface;
 use CliffordVickrey\Book2024\App\Controller\ErrorController;
 use CliffordVickrey\Book2024\App\Controller\FrequenciesController;
 use CliffordVickrey\Book2024\App\Controller\GraphController;
+use CliffordVickrey\Book2024\App\Controller\GraphDataController;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 
 enum Route: string
@@ -15,6 +16,7 @@ enum Route: string
     case error = 'error';
     case frequencies = 'frequencies';
     case graph = 'graph';
+    case graphData = 'graphData';
 
     public static function fromRequest(Request $request): self
     {
@@ -40,6 +42,7 @@ enum Route: string
             self::error => ErrorController::class,
             self::frequencies => FrequenciesController::class,
             self::graph => GraphController::class,
+            self::graphData => GraphDataController::class,
         };
     }
 }

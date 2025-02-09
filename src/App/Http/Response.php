@@ -13,12 +13,7 @@ use Webmozart\Assert\Assert;
 final class Response extends AbstractCollection
 {
     public const string ATTR_CONTENT = 'content';
-    public const string ATTR_LAYOUT = 'layout';
-
-    public function __construct()
-    {
-        $this->data = [self::ATTR_LAYOUT => true];
-    }
+    public const string ATTR_PARTIAL = 'partial';
 
     public function setObject(object $obj, ?string $key = null): void
     {

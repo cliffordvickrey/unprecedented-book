@@ -69,7 +69,7 @@ call_user_func(function () {
                     foreach ($characteristicsB as $characteristicB) {
                         // donors with two characteristics
                         /** @var DonorCharacteristic $characteristicB */
-                        if ($characteristicB->isMutuallyExclusive($characteristicA)) {
+                        if ($characteristicB->isMutuallyExclusiveOrTautologicalWith($characteristicA)) {
                             continue;
                         }
 

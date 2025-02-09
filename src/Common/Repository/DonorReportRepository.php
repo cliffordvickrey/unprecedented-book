@@ -42,7 +42,7 @@ final readonly class DonorReportRepository implements DonorReportRepositoryInter
             $characteristicB = null;
         }
 
-        if ($characteristicA?->isMutuallyExclusive($characteristicB)) {
+        if ($characteristicA?->isMutuallyExclusiveOrTautologicalWith($characteristicB)) {
             $msg = \sprintf(
                 '%s and %s are mutually exclusive donor categories',
                 $characteristicA->value,

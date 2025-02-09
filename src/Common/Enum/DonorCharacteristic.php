@@ -58,7 +58,7 @@ enum DonorCharacteristic: string
         $cases = self::cases();
 
         if (0 !== \count($characteristics)) {
-            $cases = array_filter($cases, static fn (DonorCharacteristic $case) => !$case->isMutuallyExclusive(
+            $cases = array_filter($cases, static fn (DonorCharacteristic $case) => !$case->isMutuallyExclusiveOrTautologicalWith(
                 ...$characteristics
             ));
         }
@@ -89,12 +89,13 @@ enum DonorCharacteristic: string
         }, $optionGroups);
     }
 
-    public function isMutuallyExclusive(?DonorCharacteristic ...$characteristics): bool
-    {
+    public function isMutuallyExclusiveOrTautologicalWith(
+        DonorCharacteristic|CampaignType|null ...$characteristics,
+    ): bool {
         $characteristics = array_filter($characteristics);
 
         foreach ($characteristics as $characteristic) {
-            if (self::areMutuallyExclusive($this, $characteristic)) {
+            if (self::areMutuallyExclusiveOrTautological($this, $characteristic)) {
                 return true;
             }
         }
@@ -102,9 +103,9 @@ enum DonorCharacteristic: string
         return false;
     }
 
-    public static function areMutuallyExclusive(
+    public static function areMutuallyExclusiveOrTautological(
         DonorCharacteristic $characteristicA,
-        DonorCharacteristic $characteristicB,
+        DonorCharacteristic|CampaignType $characteristicB,
     ): bool {
         /** @phpstan-var array<string, list<DonorCharacteristic>>|null $mutuallyExclusive */
         static $mutuallyExclusive = null;
@@ -128,10 +129,23 @@ enum DonorCharacteristic: string
         $cases = self::cases();
 
         $mutuallyExclusive = [
+            self::cycle_2024_biden->value => [
+                CampaignType::joe_biden->value => true,
+            ],
+            self::cycle_2024_harris->value => [
+                CampaignType::kamala_harris->value => true,
+            ],
             self::cycle_2020_biden->value => [self::cycle_2020_non_biden->value => true],
             self::cycle_2020_non_biden->value => [self::cycle_2020_biden->value => true],
-            self::cycle_2024_trump->value => [self::cycle_2024_non_trump->value => true],
-            self::cycle_2024_non_trump->value => [self::cycle_2024_trump->value => true],
+            self::cycle_2024_trump->value => [
+                self::cycle_2024_non_trump->value => true,
+                CampaignType::donald_trump->value => true,
+            ],
+            self::cycle_2024_non_trump->value => [
+                self::cycle_2024_trump->value => true,
+                CampaignType::donald_trump->value => true,
+            ],
+            self::day_one_launch->value => [self::week_one_launch->value => true],
         ];
 
         foreach ($cases as $case) {
@@ -194,16 +208,11 @@ enum DonorCharacteristic: string
             'coda' => CampaignType::kamala_harris === $campaignType
                 ? " (includes recurring donations inherited from Biden's candidacy)"
                 : '',
+            'launchDate' => $campaignType->getLaunchDate()->format('Y-m-d'),
             'cycle' => (string) $this->getCycle(),
             'months' => (string) DonorProfileCampaignCharacteristicCollectionStrategy::DEFAULT_MONTHLY_THRESHOLD,
             'weeks' => (string) DonorProfileCampaignCharacteristicCollectionStrategy::DEFAULT_WEEKLY_THRESHOLD,
         ];
-
-        $params['launchDate'] = match ($campaignType) {
-            CampaignType::joe_biden => '2023-04-25',
-            CampaignType::kamala_harris => '2023-07-21',
-            CampaignType::donald_trump => '2022-11-15',
-        };
 
         $blurb = match ($this) {
             self::amt_up_to_1 => 'Donors who gave a total of <= $1 to %campaign% for the 2024 election cycle',

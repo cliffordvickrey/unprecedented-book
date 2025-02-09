@@ -6,8 +6,6 @@ use CliffordVickrey\Book2024\App\Http\Response;
 use CliffordVickrey\Book2024\App\View\View;
 use Webmozart\Assert\Assert;
 
-header('Content-Type: text/html; charset=UTF-8');
-
 $response = $response ?? new Response();
 Assert::isInstanceOf($response, Response::class);
 $view = $view ?? new View();

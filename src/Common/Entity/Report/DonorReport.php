@@ -56,7 +56,7 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
                     );
 
                     foreach ($characteristicsB as $characteristicB) {
-                        if ($characteristicA->isMutuallyExclusive($characteristicB)) {
+                        if ($characteristicA->isMutuallyExclusiveOrTautologicalWith($characteristicB, $campaign)) {
                             continue;
                         }
 
@@ -100,7 +100,7 @@ class DonorReport extends Entity implements \ArrayAccess, \Countable, \IteratorA
 
         $characteristics = array_values(array_filter(
             DonorCharacteristic::cases(),
-            static fn (DonorCharacteristic $characteristic) => !$characteristic->isMutuallyExclusive(
+            static fn (DonorCharacteristic $characteristic) => !$characteristic->isMutuallyExclusiveOrTautologicalWith(
                 $characteristicA,
                 $characteristicB
             )
