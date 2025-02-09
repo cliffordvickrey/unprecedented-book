@@ -46,7 +46,11 @@ export function searchForm() {
 
   formElements.forEach((el) =>
     el.addEventListener("change", () => {
-      const form = clearButton.closest("form");
+      if (el.getAttribute("data-js-enabled")) {
+        return;
+      }
+
+      const form = el.closest("form");
 
       if (form) {
         form.submit();

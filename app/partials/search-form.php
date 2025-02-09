@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use CliffordVickrey\Book2024\App\DTO\DonorProfileQuery;
+use CliffordVickrey\Book2024\App\DTO\GraphType;
 use CliffordVickrey\Book2024\App\Http\Response;
 use CliffordVickrey\Book2024\App\Http\Route;
 use CliffordVickrey\Book2024\App\View\View;
@@ -142,6 +143,34 @@ $route = $response->getObject(Route::class);
                         <label class="btn btn-outline-primary" for="app-action-graph">Graph</label>
                     </div>
                 </div>
+                <?php if (Route::graph === $route): ?>
+                    <div class="col-12 pt-1">
+                        <div class="btn-group" role="group" aria-label="Graph Types">
+                            <input type="radio" class="btn-check" name="graph_type" id="app-graph-type-amount"
+                                   autocomplete="off"
+                                   data-js-enabled="1"
+                                   value="<?= GraphType::amount->value; ?>"<?= GraphType::amount === $query->graphType ? ' checked' : ''; ?>>
+                            <label class="btn btn-outline-primary"
+                                   for="app-graph-type-amount"><?= GraphType::amount->getTitle(); ?></label>
+                        </div>
+                        <div class="btn-group" role="group" aria-label="Graph Types">
+                            <input type="radio" class="btn-check" name="graph_type" id="app-graph-type-donors"
+                                   autocomplete="off"
+                                   data-js-enabled="1"
+                                   value="<?= GraphType::donors->value; ?>"<?= GraphType::donors === $query->graphType ? ' checked' : ''; ?>>
+                            <label class="btn btn-outline-primary"
+                                   for="app-graph-type-donors"><?= GraphType::donors->getTitle(); ?></label>
+                        </div>
+                        <div class="btn-group" role="group" aria-label="Graph Types">
+                            <input type="radio" class="btn-check" name="graph_type" id="app-graph-type-receipts"
+                                   autocomplete="off"
+                                   data-js-enabled="1"
+                                   value="<?= GraphType::receipts->value; ?>"<?= GraphType::receipts === $query->graphType ? ' checked' : ''; ?>>
+                            <label class="btn btn-outline-primary"
+                                   for="app-graph-type-receipts"><?= GraphType::receipts->getTitle(); ?></label>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>

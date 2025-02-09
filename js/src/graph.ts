@@ -45,9 +45,22 @@ async function fetchGraphData(): Promise<GraphData> {
   };
 }
 
-async function drawGraph() {
+function getContainer(): HTMLDivElement {
+  return <HTMLDivElement>document.getElementById("app-graph");
+}
+
+function getRadioButtons(): NodeListOf<HTMLInputElement> {
+  return <NodeListOf<HTMLInputElement>>(
+    document.querySelectorAll("#app-search-form input[name=graph_type]")
+  );
+}
+
+async function drawGraph(): Promise<void> {
+  const container = getContainer();
+  container.innerHTML =
+    '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+
   const graphData = await fetchGraphData();
-  const container = <HTMLDivElement>document.getElementById("app-graph");
   draw(container, graphData);
 }
 
@@ -138,12 +151,29 @@ function draw(container: HTMLElement, graphData: GraphData): void {
     throw new Error("Could not create SVG node");
   }
 
+  container.innerHTML = "";
   container.append(node);
 }
 
+function refreshGraph(): void {
+  const radioButtons = getRadioButtons();
+
+  radioButtons.forEach((radioButton) => (radioButton.disabled = true));
+
+  const enableRadioButtons = () =>
+    radioButtons.forEach((radioButton) => (radioButton.disabled = false));
+
+  drawGraph().then(enableRadioButtons, () => {
+    enableRadioButtons();
+    getContainer().innerHTML =
+      '<span class="text-danger">There was an error</span>';
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
-  drawGraph().then(
-    () => console.log("Graph drawn"),
-    () => console.error("Ruh roh"),
+  refreshGraph();
+
+  getRadioButtons().forEach((radioButton) =>
+    radioButton.addEventListener("change", refreshGraph),
   );
 });

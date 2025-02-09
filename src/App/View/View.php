@@ -18,7 +18,7 @@ class View
     private const string NUMBER_FORMATTER_PERCENT = 'numberFormatterPercent';
     private const string WEBPACK_CACHE_GROUP_KEY = 'defaultVendors';
 
-    /** @var array<string, string> */
+    /** @var array<string, list<string>> */
     private array $assetUris = [];
     /** @var list<string> */
     private array $enqueuedScripts = [];
@@ -28,8 +28,19 @@ class View
 
     public function emitCss(string $name): string
     {
+        return implode(\PHP_EOL, array_map($this->emitLinkTag(...), $this->getAssetUris("$name.css")));
+    }
+
+    private function emitLinkTag(string $filename): string
+    {
         /** @noinspection HtmlUnknownTarget */
-        return \sprintf('<link href="%s" rel="stylesheet">', $this->htmlEncode($this->getAssetUri("$name.css")));
+        return \sprintf('<link href="%s" rel="stylesheet">', $this->htmlEncode($filename));
+    }
+
+    private function emitScriptTag(string $filename): string
+    {
+        /** @noinspection HtmlUnknownTarget */
+        return \sprintf('<script src="%s"></script>', $this->htmlEncode($filename));
     }
 
     public function htmlEncode(mixed $value): string
@@ -44,7 +55,10 @@ class View
         return JsonUtilities::jsonEncode($value);
     }
 
-    private function getAssetUri(string $filename): string
+    /**
+     * @return list<string>
+     */
+    private function getAssetUris(string $filename): array
     {
         if (isset($this->assetUris[$filename])) {
             return $this->assetUris[$filename];
@@ -59,7 +73,13 @@ class View
             $parts = explode('.', $basename);
             array_pop($parts);
 
-            $this->assetUris[\sprintf('%s.%s', implode('.', $parts), $ext)] = "dist/$basename.$ext";
+            $key = \sprintf('%s.%s', implode('.', $parts), $ext);
+
+            if (!isset($this->assetUris[$key])) {
+                $this->assetUris[$key] = [];
+            }
+
+            $this->assetUris[$key][] = "dist/$basename.$ext";
         }
 
         return $this->assetUris[$filename]
@@ -89,8 +109,7 @@ class View
 
     public function emitJs(string $name): string
     {
-        /** @noinspection HtmlUnknownTarget */
-        return \sprintf('<script src="%s"></script>', $this->htmlEncode($this->getAssetUri("$name.js")));
+        return implode(\PHP_EOL, array_map($this->emitScriptTag(...), $this->getAssetUris("$name.js")));
     }
 
     /**
