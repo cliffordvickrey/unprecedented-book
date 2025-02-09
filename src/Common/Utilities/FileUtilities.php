@@ -11,9 +11,9 @@ class FileUtilities
     /**
      * @return list<string>
      */
-    public static function glob(string $dir): array
+    public static function glob(string $dir, bool $withBrace = false): array
     {
-        $files = glob($dir);
+        $files = glob($dir, $withBrace ? \GLOB_BRACE : 0);
         Assert::isArray($files, \sprintf('Could not find files in %s', $dir));
 
         return $files;

@@ -9,5 +9,7 @@ use CliffordVickrey\Book2024\App\Http\Response;
 
 interface ControllerInterface
 {
+    public function __construct();
+
     public function dispatch(Request $request): Response;
 }

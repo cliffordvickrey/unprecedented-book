@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use CliffordVickrey\Book2024\App\DTO\DonorProfileQuery;
 use CliffordVickrey\Book2024\App\Http\Response;
+use CliffordVickrey\Book2024\App\Http\Route;
 use CliffordVickrey\Book2024\App\View\View;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
@@ -15,11 +16,14 @@ Assert::isInstanceOf($response, Response::class);
 $view = $view ?? new View();
 Assert::isInstanceOf($view, View::class);
 
+$view->enqueueJs('index');
+
 $query = $response->getObject(DonorProfileQuery::class);
+$route = $response->getObject(Route::class);
 
 ?>
-<div class="container-fluid gx-0">
-    <form method="get" id="app-search-form">
+<form method="get" id="app-search-form">
+    <div class="container-fluid gx-0">
         <div class="row">
             <div class="col-12">
                 <p class="lead">Use this tool to break down contributing behavior of donor types in the American
@@ -67,6 +71,12 @@ $query = $response->getObject(DonorProfileQuery::class);
                 </div>
             </div>
             <div class="row py-1">
+                <div class="col-12">
+                    <h6 class="fw-bold">Filter <?= $view->htmlEncode($query->campaignType->getDescription()); ?>
+                        Donors</h6>
+                </div>
+            </div>
+            <div class="row py-1">
                 <div class="col-12 col-lg-6">
                     <?= $view->select(
                         id: 'app-state-filter',
@@ -102,13 +112,37 @@ $query = $response->getObject(DonorProfileQuery::class);
                     </div>
                 </div>
             <?php endif; ?>
-        <?php endif; ?>
-    </form>
-    <?php if ($query->campaignType): ?>
-        <div class="row">
-            <div class="col-12">
-                <?= $view->partial('profiles', $response); ?>
+            <div class="row-12 pt-2">
+                <?php if ($query->characteristicA): ?>
+                    <?= $view->partial('blurb', [
+                        CampaignType::class => $query->campaignType,
+                        DonorCharacteristic::class => $query->characteristicA,
+                    ]); ?>
+                <?php endif; ?>
+                <?php if ($query->characteristicB): ?>
+                    <?= $view->partial('blurb', [
+                        CampaignType::class => $query->campaignType,
+                        DonorCharacteristic::class => $query->characteristicB,
+                    ]); ?>
+                <?php endif; ?>
             </div>
-        </div>
-    <?php endif; ?>
-</div>
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="fw-bold">Choose a Report Type</h6>
+                </div>
+            </div>
+            <div class="row pb-3">
+                <div class="col-12">
+                    <div class="btn-group" role="group" aria-label="Report Types">
+                        <input type="radio" class="btn-check" name="action" id="app-action-freq" autocomplete="off"
+                               value="<?= Route::frequencies->value; ?>"<?= Route::frequencies === $route ? ' checked' : ''; ?>>
+                        <label class="btn btn-outline-primary" for="app-action-freq">Frequencies</label>
+                        <input type="radio" class="btn-check" name="action" id="app-action-graph" autocomplete="off"
+                               value="<?= Route::graph->value; ?>"<?= Route::graph === $route ? ' checked' : ''; ?>>
+                        <label class="btn btn-outline-primary" for="app-action-graph">Graph</label>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+</form>

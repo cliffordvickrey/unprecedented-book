@@ -11,3 +11,6 @@ phpunit.xml
 psalm.xml
 vendor
 src/Common/Http/cacert.pem
+js/node_modules
+js/package-lock.json
+public/dist

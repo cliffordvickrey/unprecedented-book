@@ -9,8 +9,6 @@ use CliffordVickrey\Book2024\Common\Exception\BookOutOfBoundsException;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use Iterator;
 
-use function key;
-
 /**
  * @template TKey
  * @template TValue
@@ -28,10 +26,18 @@ abstract class AbstractCollection implements \ArrayAccess, \Countable, \Iterator
         $data = [];
 
         foreach ($this->data as $k => $v) {
-            $data[$k] = \is_object($v) ? (clone $v) : $v;
+            $data[$k] = self::isCloneable($v) ? (clone $v) : $v;
         }
 
         $this->data = $data;
+    }
+
+    /**
+     * @phpstan-assert-if-true object $val
+     */
+    private static function isCloneable(mixed $val): bool
+    {
+        return \is_object($val) && !$val instanceof \BackedEnum;
     }
 
     /**
@@ -107,7 +113,7 @@ abstract class AbstractCollection implements \ArrayAccess, \Countable, \Iterator
 
     public function key(): string|int|null
     {
-        return \key($this->data);
+        return key($this->data);
     }
 
     public function rewind(): void

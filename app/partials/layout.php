@@ -3,15 +3,17 @@
 declare(strict_types=1);
 
 use CliffordVickrey\Book2024\App\Http\Response;
+use CliffordVickrey\Book2024\App\View\View;
 use Webmozart\Assert\Assert;
 
 header('Content-Type: text/html; charset=UTF-8');
 
 $response = $response ?? new Response();
 Assert::isInstanceOf($response, Response::class);
+$view = $view ?? new View();
+Assert::isInstanceOf($view, View::class);
 
 $content = $response->getAttribute(Response::ATTR_CONTENT, '');
-$js = $response->getAttribute(Response::ATTR_JS, false);
 
 ?>
 <!DOCTYPE html>
@@ -27,17 +29,10 @@ $js = $response->getAttribute(Response::ATTR_JS, false);
     <meta content="https://www.cliffordvickrey.com/selfie.jpg" property="og:image"/>
     <meta content="Shows profiles of contributors to 2024 presidential campaigns using data sourced from the FEC API and bulk files."
           name="description"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <title>FEC Reporter 2.0</title>
+    <?= $view->emitCss('index'); ?>
     <style>
-        #app {
-            font-size: .9em;
-        }
 
-        #app td, #app tr {
-            white-space: nowrap;
-        }
     </style>
 </head>
 <body>
@@ -61,38 +56,6 @@ $js = $response->getAttribute(Response::ATTR_JS, false);
         </div>
     </div>
 </div>
-<?php if ($js) { ?>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-            crossorigin="anonymous"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const clearButton = document.querySelector("#app-clear-button");
-            const dropDowns = document.querySelectorAll("#app-search-form select");
-
-            if (null !== clearButton) {
-                clearButton.addEventListener("click", e => {
-                    dropDowns.forEach(dropDown => {
-                        let blankValue = "";
-
-                        if (dropDown.id === "app-state-filter") {
-                            blankValue = "USA";
-                        }
-
-                        dropDown.value = blankValue;
-                    });
-
-                    clearButton.closest("form").submit();
-
-                    e.stopPropagation();
-                    e.preventDefault();
-                    return false;
-                });
-            }
-
-            dropDowns.forEach(dropDown => dropDown.addEventListener("change", () => dropDown.closest("form").submit()));
-        });
-    </script>
-<?php } ?>
+<?= $view->emitEnqueuedScripts(); ?>
 </body>
 </html>

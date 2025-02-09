@@ -12,7 +12,7 @@ use CliffordVickrey\Book2024\Common\Repository\DonorReportRepository;
 use CliffordVickrey\Book2024\Common\Repository\DonorReportRepositoryInterface;
 use Webmozart\Assert\Assert;
 
-final readonly class IndexController implements ControllerInterface
+final readonly class FrequenciesController implements ControllerInterface
 {
     private DonorReportRepositoryInterface $repository;
 
@@ -23,7 +23,7 @@ final readonly class IndexController implements ControllerInterface
 
     public function dispatch(Request $request): Response
     {
-        $response = self::buildResponse();
+        $response = new Response();
 
         $query = self::initQuery($request, $response);
 
@@ -32,15 +32,6 @@ final readonly class IndexController implements ControllerInterface
         }
 
         $this->initGrids($response);
-
-        return $response;
-    }
-
-    private static function buildResponse(): Response
-    {
-        $response = new Response();
-        $response[Response::ATTR_JS] = true;
-        $response[Response::ATTR_PAGE] = 'index';
 
         return $response;
     }

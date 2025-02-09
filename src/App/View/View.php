@@ -7,6 +7,7 @@ namespace CliffordVickrey\Book2024\App\View;
 use CliffordVickrey\Book2024\App\DataGrid\DataGrid;
 use CliffordVickrey\Book2024\App\Http\Response;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
+use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use Webmozart\Assert\Assert;
 
 class View
@@ -14,16 +15,76 @@ class View
     private const string NUMBER_FORMATTER_CURRENCY = 'numberFormatterCurrency';
     private const string NUMBER_FORMATTER_NUMBER = 'numberFormatterNumber';
     private const string NUMBER_FORMATTER_PERCENT = 'numberFormatterPercent';
+    private const string WEBPACK_CACHE_GROUP_KEY = 'defaultVendors';
 
+    /** @var array<string, string> */
+    private array $assetUris = [];
+    /** @var list<string> */
+    private array $enqueuedScripts = [];
+    private ?\IntlDateFormatter $intlDateFormatter = null;
     /** @var array<self::NUMBER_FORMATTER_*, \NumberFormatter> */
     private array $numberFormatters = [];
-    private ?\IntlDateFormatter $intlDateFormatter = null;
+
+    public function emitCss(string $name): string
+    {
+        /** @noinspection HtmlUnknownTarget */
+        return \sprintf('<link href="%s" rel="stylesheet">', $this->htmlEncode($this->getAssetUri("$name.css")));
+    }
 
     public function htmlEncode(mixed $value): string
     {
         $value = (string) CastingUtilities::toString($value);
 
         return htmlentities($value, \ENT_QUOTES);
+    }
+
+    private function getAssetUri(string $filename): string
+    {
+        if (isset($this->assetUris[$filename])) {
+            return $this->assetUris[$filename];
+        }
+
+        $distFilenames = FileUtilities::glob(__DIR__.'/../../../public/dist/*.{js,css}', true);
+
+        foreach ($distFilenames as $distFilename) {
+            $ext = pathinfo($distFilename, \PATHINFO_EXTENSION);
+            $basename = basename($distFilename, ".$ext");
+
+            $parts = explode('.', $basename);
+            array_pop($parts);
+
+            $this->assetUris[\sprintf('%s.%s', implode('.', $parts), $ext)] = "dist/$basename.$ext";
+        }
+
+        return $this->assetUris[$filename]
+            ?? throw new \UnexpectedValueException(\sprintf('Could not resolve %s to a filename', $filename));
+    }
+
+    public function enqueueJs(string $name): void
+    {
+        if (!str_starts_with($name, self::WEBPACK_CACHE_GROUP_KEY)) {
+            $this->enqueueJs(self::WEBPACK_CACHE_GROUP_KEY."-$name");
+        }
+
+        if (!\in_array($name, $this->enqueuedScripts)) {
+            $this->enqueuedScripts[] = $name;
+        }
+    }
+
+    public function emitEnqueuedScripts(): string
+    {
+        return implode(\PHP_EOL, array_map($this->emitJs(...), $this->enqueuedScripts));
+    }
+
+    public function resetState(): void
+    {
+        $this->enqueuedScripts = [];
+    }
+
+    public function emitJs(string $name): string
+    {
+        /** @noinspection HtmlUnknownTarget */
+        return \sprintf('<script src="%s"></script>', $this->htmlEncode($this->getAssetUri("$name.js")));
     }
 
     /**
@@ -111,16 +172,6 @@ class View
         return $this->doFormat($value, self::NUMBER_FORMATTER_CURRENCY);
     }
 
-    public function formatNumber(mixed $value): string
-    {
-        return $this->doFormat($value, self::NUMBER_FORMATTER_NUMBER);
-    }
-
-    public function formatPercent(mixed $value): string
-    {
-        return $this->doFormat($value, self::NUMBER_FORMATTER_PERCENT);
-    }
-
     /**
      * @param self::NUMBER_FORMATTER_* $type
      */
@@ -161,5 +212,15 @@ class View
             default:
                 return new \NumberFormatter('en_US', \NumberFormatter::DECIMAL);
         }
+    }
+
+    public function formatNumber(mixed $value): string
+    {
+        return $this->doFormat($value, self::NUMBER_FORMATTER_NUMBER);
+    }
+
+    public function formatPercent(mixed $value): string
+    {
+        return $this->doFormat($value, self::NUMBER_FORMATTER_PERCENT);
     }
 }
