@@ -47,6 +47,10 @@ abstract class AbstractReport extends Entity implements \ArrayAccess, \Countable
                 $reports[self::inflectForKey($campaign, $state)] = self::build($campaign, $state);
 
                 foreach ($characteristicsA as $characteristicA) {
+                    if ($characteristicA->isMutuallyExclusiveOrTautologicalWith($campaign)) {
+                        continue;
+                    }
+
                     $reports[self::inflectForKey($campaign, $state, $characteristicA)] = self::build(
                         $campaign,
                         $state,
@@ -54,15 +58,13 @@ abstract class AbstractReport extends Entity implements \ArrayAccess, \Countable
                     );
 
                     foreach ($characteristicsB as $characteristicB) {
-                        if ($characteristicA->isMutuallyExclusiveOrTautologicalWith($characteristicB, $campaign)) {
+                        if ($characteristicB->isMutuallyExclusiveOrTautologicalWith($characteristicA, $campaign)) {
                             continue;
                         }
 
                         $key = self::inflectForKey($campaign, $state, $characteristicA, $characteristicB);
 
-                        $report = self::build($campaign, $state, $characteristicA, $characteristicB);
-                        $report->init();
-                        $reports[$key] = $report;
+                        $reports[$key] = self::build($campaign, $state, $characteristicA, $characteristicB);
                     }
                 }
             }
@@ -101,6 +103,7 @@ abstract class AbstractReport extends Entity implements \ArrayAccess, \Countable
         $static->state = $state;
         $static->characteristicA = $characteristicA;
         $static->characteristicB = $characteristicB;
+        $static->init();
 
         return $static;
     }
@@ -132,7 +135,7 @@ abstract class AbstractReport extends Entity implements \ArrayAccess, \Countable
     }
 
     /**
-     * @return TRow
+     * @phpstan-return TRow
      */
     public function offsetGet(mixed $offset): AbstractReportRow
     {

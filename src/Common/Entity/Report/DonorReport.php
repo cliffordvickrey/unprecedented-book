@@ -22,7 +22,8 @@ class DonorReport extends AbstractReport
             DonorCharacteristic::cases(),
             fn (DonorCharacteristic $characteristic) => !$characteristic->isMutuallyExclusiveOrTautologicalWith(
                 $this->characteristicA,
-                $this->characteristicB
+                $this->characteristicB,
+                $this->campaignType
             )
         ));
 

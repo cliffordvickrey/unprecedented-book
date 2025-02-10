@@ -38,6 +38,7 @@ class CampaignReport extends AbstractReport
         if (!$this->hasByDate($date)) {
             $row = new CampaignReportRow();
             $row->date = $date;
+            $this->rows[] = $row;
         } else {
             $row = $this->getByDate($date);
         }

@@ -61,6 +61,7 @@ call_user_func(function () {
                 ReportValue::fromDonorProfileAmount(...),
                 $profile->campaigns[$campaignStr]->donationsByDate
             );
+
             $donorValueToAdd = DonorReportValue::fromDonorProfileAmount($profile->campaigns[$campaignStr]->total);
 
             $campaign = CampaignType::from($campaignStr);
@@ -70,24 +71,29 @@ call_user_func(function () {
 
             foreach ($states as $state) {
                 // all donors
-                $key = DonorReport::inflectForKey($campaign, $state);
+                $key = AbstractReport::inflectForKey($campaign, $state);
                 $campaignReports[$key]->addMultiple($campaignValuesToAdd);
                 $donorReports[$key]->add($donorValueToAdd, $characteristics);
 
                 foreach ($characteristicsA as $characteristicA) {
+                    /** @var DonorCharacteristic $characteristicA */
+                    if ($characteristicA->isMutuallyExclusiveOrTautologicalWith($campaign)) {
+                        continue;
+                    }
+
                     // donors with one characteristic
-                    $key = DonorReport::inflectForKey($campaign, $state, $characteristicA);
+                    $key = AbstractReport::inflectForKey($campaign, $state, $characteristicA);
                     $campaignReports[$key]->addMultiple($campaignValuesToAdd);
                     $donorReports[$key]->add($donorValueToAdd, $characteristics);
 
                     foreach ($characteristicsB as $characteristicB) {
                         // donors with two characteristics
                         /** @var DonorCharacteristic $characteristicB */
-                        if ($characteristicB->isMutuallyExclusiveOrTautologicalWith($characteristicA)) {
+                        if ($characteristicB->isMutuallyExclusiveOrTautologicalWith($characteristicA, $campaign)) {
                             continue;
                         }
 
-                        $key = DonorReport::inflectForKey($campaign, $state, $characteristicA, $characteristicB);
+                        $key = AbstractReport::inflectForKey($campaign, $state, $characteristicA, $characteristicB);
                         $campaignReports[$key]->addMultiple($campaignValuesToAdd);
                         $donorReports[$key]->add($donorValueToAdd, $characteristics);
                     }
@@ -137,6 +143,8 @@ function collectReports(array $reports, string $classStr): array
     return array_reduce($reports, function (array $carry, AbstractReport $report) use ($collectionClassStr): array {
         if ($report instanceof DonorReport) {
             $report->setPercentages();
+        } elseif ($report instanceof CampaignReport) {
+            $report->sort();
         }
 
         $key = $report->getKey();
