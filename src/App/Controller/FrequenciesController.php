@@ -8,15 +8,20 @@ use CliffordVickrey\Book2024\App\DataGrid\Grids\DonorProfileGrid;
 use CliffordVickrey\Book2024\App\DTO\DonorProfileQuery;
 use CliffordVickrey\Book2024\App\Http\Request;
 use CliffordVickrey\Book2024\App\Http\Response;
+use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
 use CliffordVickrey\Book2024\Common\Repository\DonorReportRepository;
-use CliffordVickrey\Book2024\Common\Repository\DonorReportRepositoryInterface;
+use CliffordVickrey\Book2024\Common\Repository\ReportRepositoryInterface;
 use Webmozart\Assert\Assert;
 
 final readonly class FrequenciesController implements ControllerInterface
 {
-    private DonorReportRepositoryInterface $repository;
+    /** @var ReportRepositoryInterface<DonorReport> */
+    private ReportRepositoryInterface $repository;
 
-    public function __construct(?DonorReportRepositoryInterface $repository = null)
+    /**
+     * @param ReportRepositoryInterface<DonorReport>|null $repository
+     */
+    public function __construct(?ReportRepositoryInterface $repository = null)
     {
         $this->repository = $repository ?? new DonorReportRepository();
     }

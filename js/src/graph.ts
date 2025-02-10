@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { formToQueryString } from "./utils";
+import { formToUrl } from "./utils";
 
 interface GraphDataPoint {
   date: Date;
@@ -25,7 +25,7 @@ interface SerializedGraphData {
 
 function getUrl(): string {
   const form = <HTMLFormElement>document.getElementById("app-search-form");
-  return formToQueryString(form, { action: "graphData" });
+  return formToUrl(form, { action: "graphData" });
 }
 
 async function fetchGraphData(): Promise<GraphData> {
@@ -65,7 +65,7 @@ async function drawGraph(): Promise<void> {
 }
 
 function draw(container: HTMLElement, graphData: GraphData): void {
-  const margin = { top: 20, right: 70, bottom: 60, left: 70 }; // Increased the right margin
+  const margin = { top: 20, right: 70, bottom: 60, left: 70 };
   const width = container.clientWidth - margin.left - margin.right;
   const height = 400 - margin.top - margin.bottom;
 
@@ -158,10 +158,14 @@ function draw(container: HTMLElement, graphData: GraphData): void {
 function refreshGraph(): void {
   const radioButtons = getRadioButtons();
 
-  radioButtons.forEach((radioButton) => (radioButton.disabled = true));
+  radioButtons.forEach((radioButton) =>
+    radioButton.setAttribute("data-locked", "1"),
+  );
 
   const enableRadioButtons = () =>
-    radioButtons.forEach((radioButton) => (radioButton.disabled = false));
+    radioButtons.forEach((radioButton) =>
+      radioButton.removeAttribute("data-locked"),
+    );
 
   drawGraph().then(enableRadioButtons, () => {
     enableRadioButtons();
@@ -174,6 +178,15 @@ window.addEventListener("DOMContentLoaded", () => {
   refreshGraph();
 
   getRadioButtons().forEach((radioButton) =>
-    radioButton.addEventListener("change", refreshGraph),
+    radioButton.addEventListener("change", (e) => {
+      if (!radioButton.getAttribute("data-locked")) {
+        refreshGraph();
+        return true;
+      }
+
+      e.stopPropagation();
+      e.preventDefault();
+      return false;
+    }),
   );
 });

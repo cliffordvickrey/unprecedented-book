@@ -22,9 +22,6 @@ function queryString(object: any) {
   return new URLSearchParams(object).toString();
 }
 
-export function formToQueryString(
-  form: HTMLFormElement,
-  extras: object = {},
-): any {
+export function formToUrl(form: HTMLFormElement, extras: object = {}): any {
   return "./?" + queryString({ ...formToObject(form), ...extras });
 }

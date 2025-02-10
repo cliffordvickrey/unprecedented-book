@@ -12,6 +12,8 @@ class DonorProfileCampaign extends Entity implements \Countable
 {
     public CampaignType $campaignType;
     public bool $dayOneLaunch = false;
+    /** @var array<string, DonorProfileAmount> */
+    public array $donationsByDate = [];
     public int $maxConsecutiveMonthlyDonationCount = 0;
     public int $maxConsecutiveWeeklyDonationCount = 0;
     public bool $priorDonor = false;

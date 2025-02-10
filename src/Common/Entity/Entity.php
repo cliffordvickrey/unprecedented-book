@@ -8,6 +8,12 @@ use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2016;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2020;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2024;
+use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReportRow;
+use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReportRow;
+use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportRow;
 use CliffordVickrey\Book2024\Common\Hydrator\EntityHydrator;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
@@ -40,7 +46,11 @@ abstract class Entity implements \JsonSerializable
 
         $staticClass = static::class;
 
-        if (DonorProfileCycle::class === static::class) {
+        if (AbstractReport::class === $staticClass) {
+            $staticClass = isset($value['totals']) ? DonorReport::class : CampaignReport::class;
+        } elseif (AbstractReportRow::class === $staticClass) {
+            $staticClass = isset($value['characteristic']) ? DonorReportRow::class : CampaignReportRow::class;
+        } elseif (DonorProfileCycle::class === $staticClass) {
             $cycle = CastingUtilities::toInt($value['cycle'] ?? null);
 
             $staticClass = match ($cycle) {

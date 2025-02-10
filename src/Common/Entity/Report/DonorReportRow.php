@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Entity\Report;
 
-use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
 
 /**
@@ -16,7 +15,7 @@ use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
  *     percent: float
  * }
  */
-class DonorReportRow extends Entity
+class DonorReportRow extends AbstractReportRow
 {
     public DonorCharacteristic $characteristic;
     public DonorReportValue $value;

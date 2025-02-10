@@ -81,6 +81,9 @@ class DonorProfile extends Entity implements \Countable
     public function acceptAnalyses(array $analyses): void
     {
         array_walk($analyses, $this->addReceiptAnalysis(...));
+
+        array_walk($this->campaigns, static fn (DonorProfileCampaign $campaign) => ksort($campaign->donationsByDate));
+
         $this->setMaxConsecutiveDonationCounts();
     }
 
@@ -145,11 +148,11 @@ class DonorProfile extends Entity implements \Countable
             $laggedWeekOrMonth = $weekOrMonth;
         }
 
-        foreach ($maxConsecutiveDonationCounts as $key => $maxConsecutiveMonthlyDonationCount) {
+        foreach ($maxConsecutiveDonationCounts as $key => $maxConsecutiveDonationCount) {
             if ($monthly) {
-                $this->campaigns[$key]->maxConsecutiveMonthlyDonationCount = $maxConsecutiveMonthlyDonationCount;
+                $this->campaigns[$key]->maxConsecutiveMonthlyDonationCount = $maxConsecutiveDonationCount;
             } else {
-                $this->campaigns[$key]->maxConsecutiveWeeklyDonationCount = $maxConsecutiveMonthlyDonationCount;
+                $this->campaigns[$key]->maxConsecutiveWeeklyDonationCount = $maxConsecutiveDonationCount;
             }
         }
     }
@@ -221,6 +224,15 @@ class DonorProfile extends Entity implements \Countable
 
         ++$campaign->total->receipts;
         $campaign->total->amount += $amount;
+
+        $dateStr = $date->format('Y-m-d');
+
+        if (!isset($campaign->donationsByDate[$dateStr])) {
+            $campaign->donationsByDate[$dateStr] = new DonorProfileAmount();
+        }
+
+        ++$campaign->donationsByDate[$dateStr]->receipts;
+        $campaign->donationsByDate[$dateStr]->amount += $amount;
 
         if ($isWeekOneLaunch) {
             $campaign->weekOneLaunch = true;

@@ -4,12 +4,19 @@
 declare(strict_types=1);
 
 use CliffordVickrey\Book2024\Common\Entity\Combined\DonorPanel;
+use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReportCollection;
+use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReportCollection;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportCollection;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportValue;
+use CliffordVickrey\Book2024\Common\Entity\Report\ReportValue;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
 use CliffordVickrey\Book2024\Common\Enum\State;
+use CliffordVickrey\Book2024\Common\Exception\BookUnexpectedValueException;
+use CliffordVickrey\Book2024\Common\Repository\CampaignReportRepository;
 use CliffordVickrey\Book2024\Common\Repository\DonorPanelRepository;
 use CliffordVickrey\Book2024\Common\Repository\DonorReportRepository;
 use CliffordVickrey\Book2024\Common\Service\DonorProfileService;
@@ -23,7 +30,8 @@ call_user_func(function () {
     $donorPanelRepository = new DonorPanelRepository();
     $profiler = new DonorProfileService();
 
-    $reports = DonorReport::collectNew();
+    $campaignReports = CampaignReport::collectNew();
+    $donorReports = DonorReport::collectNew();
 
     $panels = $donorPanelRepository->get();
 
@@ -49,7 +57,11 @@ call_user_func(function () {
         $oldState = $profile->state;
 
         foreach ($characteristicsByCampaign as $campaignStr => $characteristics) {
-            $valueToAdd = DonorReportValue::fromDonorProfileAmount($profile->campaigns[$campaignStr]->total);
+            $campaignValuesToAdd = array_map(
+                ReportValue::fromDonorProfileAmount(...),
+                $profile->campaigns[$campaignStr]->donationsByDate
+            );
+            $donorValueToAdd = DonorReportValue::fromDonorProfileAmount($profile->campaigns[$campaignStr]->total);
 
             $campaign = CampaignType::from($campaignStr);
 
@@ -59,12 +71,14 @@ call_user_func(function () {
             foreach ($states as $state) {
                 // all donors
                 $key = DonorReport::inflectForKey($campaign, $state);
-                $reports[$key]->add($valueToAdd, $characteristics);
+                $campaignReports[$key]->addMultiple($campaignValuesToAdd);
+                $donorReports[$key]->add($donorValueToAdd, $characteristics);
 
                 foreach ($characteristicsA as $characteristicA) {
                     // donors with one characteristic
                     $key = DonorReport::inflectForKey($campaign, $state, $characteristicA);
-                    $reports[$key]->add($valueToAdd, $characteristics);
+                    $campaignReports[$key]->addMultiple($campaignValuesToAdd);
+                    $donorReports[$key]->add($donorValueToAdd, $characteristics);
 
                     foreach ($characteristicsB as $characteristicB) {
                         // donors with two characteristics
@@ -74,7 +88,8 @@ call_user_func(function () {
                         }
 
                         $key = DonorReport::inflectForKey($campaign, $state, $characteristicA, $characteristicB);
-                        $reports[$key]->add($valueToAdd, $characteristics);
+                        $campaignReports[$key]->addMultiple($campaignValuesToAdd);
+                        $donorReports[$key]->add($donorValueToAdd, $characteristics);
                     }
                 }
             }
@@ -83,9 +98,46 @@ call_user_func(function () {
 
     // ...reduce them to collections (stored in each file)
     printf('Saving...%s', \PHP_EOL);
+    $campaignReportCollections = collectReports($campaignReports, CampaignReport::class);
+    $donorReportCollections = collectReports($donorReports, DonorReport::class);
 
-    $collections = array_reduce($reports, function (array $carry, DonorReport $report): array {
-        $report->setPercentages();
+    // ...and save 'em
+    $campaignReportRepository = new CampaignReportRepository();
+    $campaignReportRepository->deleteAll();
+    array_walk(
+        $campaignReportCollections,
+        static fn (AbstractReportCollection $collection) => $campaignReportRepository->saveCollection($collection)
+    );
+
+    $donorReportRepository = new DonorReportRepository();
+    $donorReportRepository->deleteAll();
+    array_walk(
+        $donorReportCollections,
+        static fn (AbstractReportCollection $collection) => $donorReportRepository->saveCollection($collection)
+    );
+});
+
+/**
+ * @param array<string, TReport> $reports
+ * @param class-string<TReport>  $classStr
+ *
+ * @return array<string, AbstractReportCollection<TReport>>
+ *
+ * @template TReport of AbstractReport
+ */
+function collectReports(array $reports, string $classStr): array
+{
+    /** @phpstan-var AbstractReportCollection<TReport> $collectionClassStr */
+    $collectionClassStr = match ($classStr) { // @phpstan-ignore-line
+        CampaignReport::class => CampaignReportCollection::class,
+        DonorReport::class => DonorReportCollection::class,
+        default => throw new BookUnexpectedValueException(),
+    };
+
+    return array_reduce($reports, function (array $carry, AbstractReport $report) use ($collectionClassStr): array {
+        if ($report instanceof DonorReport) {
+            $report->setPercentages();
+        }
 
         $key = $report->getKey();
 
@@ -93,20 +145,12 @@ call_user_func(function () {
         array_pop($parts);
         $key = implode('-', $parts);
 
-        /** @var array<string, DonorReportCollection> $carry */
-        $reports = $carry[$key] ?? new DonorReportCollection();
+        /** @var array<string, AbstractReportCollection<TReport>> $carry */
+        $reports = $carry[$key] ?? new $collectionClassStr();
 
-        $reports->donorReports[$report->characteristicB->value ?? DonorReport::ALL] = $report;
+        $reports->reports[$report->characteristicB->value ?? AbstractReport::ALL] = $report;
         $carry[$key] = $reports;
 
         return $carry;
     }, []);
-
-    // ...and save 'em
-    $donorReportRepository = new DonorReportRepository();
-    $donorReportRepository->deleteAll();
-    array_walk(
-        $collections,
-        static fn (DonorReportCollection $reports) => $donorReportRepository->saveCollection($reports)
-    );
-});
+}

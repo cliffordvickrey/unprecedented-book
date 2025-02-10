@@ -12,6 +12,9 @@ use CliffordVickrey\Book2024\Common\Entity\FecBulk\Committee;
 use CliffordVickrey\Book2024\Common\Entity\FecBulk\LeadershipPacLinkage;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Campaign\DonorProfileCampaign;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
+use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfileAmount;
+use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReportRow;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportRow;
 use CliffordVickrey\Book2024\Common\Entity\ValueObject\CommitteeTotals;
@@ -26,6 +29,7 @@ final class ClassAliases
         'Committee' => Committee::class,
         'CommitteeTotals' => CommitteeTotals::class,
         'DonorPanel' => DonorPanel::class,
+        'DonorProfileAmount' => DonorProfileAmount::class,
         'DonorProfileCampaign' => DonorProfileCampaign::class,
         'DonorProfileCycle' => DonorProfileCycle::class,
         'DonorReport' => DonorReport::class,
@@ -33,5 +37,7 @@ final class ClassAliases
         'ImputedCommitteeTotals' => ImputedCommitteeTotals::class,
         'LeadershipPacLinkage' => LeadershipPacLinkage::class,
         'ReceiptInPanel' => ReceiptInPanel::class,
+        'TReport' => AbstractReport::class,
+        'TRow' => AbstractReportRow::class,
     ];
 }
