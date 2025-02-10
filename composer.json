@@ -10,6 +10,7 @@
     "ext-bcmath": "*",
     "ext-iconv": "*",
     "ext-intl": "*",
+    "ext-zlib": "*",
     "guzzlehttp/guzzle": "^7.4",
     "php": ">=8.3",
     "webmozart/assert": "^1.11"

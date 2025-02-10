@@ -18,20 +18,27 @@ use CliffordVickrey\Book2024\Common\Exception\BookUnexpectedValueException;
 use CliffordVickrey\Book2024\Common\Exception\ReportDoesNotExistException;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
+use CliffordVickrey\Book2024\Common\Utilities\ZipUtilities;
 use Webmozart\Assert\Assert;
 
 /**
  * @implements ReportRepositoryInterface<TReport>
  *
  * @template TReport of AbstractReport
+ *
+ * @phpstan-import-type CompressionLevel from ZipUtilities
  */
 abstract readonly class AbstractReportRepository implements ReportRepositoryInterface
 {
     private string $path;
 
+    /**
+     * @phpstan-param CompressionLevel|null $compressionLevel
+     */
     public function __construct(
         string $path = __DIR__.'/../../../web-data/',
         private bool $prettyPrint = false,
+        private ?int $compressionLevel = ZipUtilities::DEFAULT_COMPRESSION_LEVEL,
     ) {
         $this->path = $path.$this->getSubFolder();
     }
@@ -48,7 +55,7 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
 
         Assert::string($subFolder);
 
-        return strtolower($subFolder);
+        return strtolower($subFolder).(null !== $this->compressionLevel ? '-gz' : '');
     }
 
     /**
@@ -124,7 +131,12 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
             array_pop($parts);
         }
 
-        return \sprintf('%s/%s.json', $this->path, implode(\DIRECTORY_SEPARATOR, $parts));
+        return \sprintf('%s/%s.%s', $this->path, implode(\DIRECTORY_SEPARATOR, $parts), $this->getExtension());
+    }
+
+    private function getExtension(): string
+    {
+        return null === $this->compressionLevel ? 'json' : 'gz';
     }
 
     /**
@@ -133,6 +145,10 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
     private function unmarshallCollection(string $json): AbstractReportCollection
     {
         $classStr = $this->getCollectionClassStr();
+
+        if (null !== $this->compressionLevel) {
+            $json = ZipUtilities::gzUnCompress($classStr);
+        }
 
         $json = JsonUtilities::jsonDecode($json);
 
@@ -179,7 +195,13 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
      */
     private function marshalCollection(AbstractReportCollection $reports): string
     {
-        return JsonUtilities::jsonEncode($reports, $this->prettyPrint);
+        $json = JsonUtilities::jsonEncode($reports, $this->prettyPrint);
+
+        if (null !== $this->compressionLevel) {
+            $json = ZipUtilities::gzCompress($json, $this->compressionLevel);
+        }
+
+        return $json;
     }
 
     public function deleteAll(): void

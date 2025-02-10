@@ -28,7 +28,7 @@ abstract class AbstractReport extends Entity implements \ArrayAccess, \Countable
     /** @var list<TRow> */
     public array $rows = [];
     /** @var array<string, TRow>|null */
-    private ?array $indexedRows = null;
+    protected ?array $indexedRows = null;
 
     /**
      * @return array<string, static>
@@ -232,5 +232,27 @@ abstract class AbstractReport extends Entity implements \ArrayAccess, \Countable
         $self->rows = array_values(array_filter($self->rows, $filter));
 
         return $self;
+    }
+
+    /**
+     * @phpstan-param TRow $row
+     */
+    public function setByIndex(string $index, AbstractReportRow $row): void
+    {
+        $indexed = $this->indexedRows ?? $this->mapByIndex();
+
+        if (!isset($indexed[$index])) {
+            $this->rows[] = $row;
+        }
+
+        $indexed[$index] = $row;
+        $this->indexedRows = $indexed;
+    }
+
+    public function sortByIndex(): void
+    {
+        $indexed = $this->mapByIndex();
+        ksort($indexed);
+        $this->rows = array_values($indexed);
     }
 }

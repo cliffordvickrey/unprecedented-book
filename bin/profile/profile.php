@@ -103,33 +103,57 @@ call_user_func(function () {
     }
 
     // ...reduce them to collections (stored in each file)
-    printf('Saving...%s', \PHP_EOL);
-    $campaignReportCollections = collectReports($campaignReports, CampaignReport::class);
-    $donorReportCollections = collectReports($donorReports, DonorReport::class);
+    printf('Collecting...%s', \PHP_EOL);
+    $collections = [
+        ...collectReports($campaignReports, CampaignReport::class),
+        ...collectReports($donorReports, DonorReport::class),
+    ];
 
-    // ...and save 'em
-    $campaignReportRepository = new CampaignReportRepository();
-    $campaignReportRepository->deleteAll();
-    array_walk(
-        $campaignReportCollections,
-        static fn (AbstractReportCollection $collection) => $campaignReportRepository->saveCollection($collection)
-    );
-
-    $donorReportRepository = new DonorReportRepository();
-    $donorReportRepository->deleteAll();
-    array_walk(
-        $donorReportCollections,
-        static fn (AbstractReportCollection $collection) => $donorReportRepository->saveCollection($collection)
-    );
+    // and save 'em
+    array_walk($collections, saveCollection(...));
 });
+
+function saveCollection(CampaignReportCollection|DonorReportCollection $collection): void
+{
+    /** @phpstan-var CampaignReportRepository $campaignRepositoryCompressed */
+    static $campaignRepositoryCompressed = new CampaignReportRepository();
+    /** @phpstan-var CampaignReportRepository $campaignRepositoryUnCompressed */
+    static $campaignRepositoryUnCompressed = new CampaignReportRepository(compressionLevel: null);
+    /** @phpstan-var DonorReportRepository $donorRepositoryCompressed */
+    static $donorRepositoryCompressed = new DonorReportRepository();
+    /** @phpstan-var DonorReportRepository $donorRepositoryUnCompressed */
+    static $donorRepositoryUnCompressed = new DonorReportRepository(compressionLevel: null);
+    /** @phpstan-var bool $hasDeleted */
+    static $hasDeleted = false;
+
+    if (!$hasDeleted) {
+        printf('Deleting old files...%s', \PHP_EOL);
+        $campaignRepositoryCompressed->deleteAll();
+        $campaignRepositoryUnCompressed->deleteAll();
+        $donorRepositoryCompressed->deleteAll();
+        $donorRepositoryUnCompressed->deleteAll();
+        $hasDeleted = true;
+        printf('Saving new files...%s', \PHP_EOL);
+    }
+
+    if ($collection instanceof CampaignReportCollection) {
+        $campaignRepositoryCompressed->saveCollection($collection);
+        $campaignRepositoryUnCompressed->saveCollection($collection);
+
+        return;
+    }
+
+    $donorRepositoryCompressed->saveCollection($collection);
+    $donorRepositoryUnCompressed->saveCollection($collection);
+}
 
 /**
  * @param array<string, TReport> $reports
  * @param class-string<TReport>  $classStr
  *
- * @return array<string, AbstractReportCollection<TReport>>
+ * @return list<CampaignReportCollection|DonorReportCollection>
  *
- * @template TReport of AbstractReport
+ * @template TReport of CampaignReport|DonorReport
  */
 function collectReports(array $reports, string $classStr): array
 {
@@ -140,11 +164,11 @@ function collectReports(array $reports, string $classStr): array
         default => throw new BookUnexpectedValueException(),
     };
 
-    return array_reduce($reports, function (array $carry, AbstractReport $report) use ($collectionClassStr): array {
+    $arr = array_reduce($reports, function (array $carry, AbstractReport $report) use ($collectionClassStr): array {
         if ($report instanceof DonorReport) {
             $report->setPercentages();
         } elseif ($report instanceof CampaignReport) {
-            $report->sort();
+            $report->sortByIndex();
         }
 
         $key = $report->getKey();
@@ -161,4 +185,7 @@ function collectReports(array $reports, string $classStr): array
 
         return $carry;
     }, []);
+
+    /** @var array<string, CampaignReportCollection|DonorReportCollection> $arr */
+    return array_values($arr);
 }

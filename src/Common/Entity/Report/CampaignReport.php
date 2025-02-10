@@ -16,11 +16,6 @@ class CampaignReport extends AbstractReport
     {
     }
 
-    public function sort(): void
-    {
-        usort($this->rows, static fn (CampaignReportRow $a, CampaignReportRow $b) => $a->date <=> $b->date);
-    }
-
     /**
      * @param array<string, ReportValue> $values
      */
@@ -38,12 +33,17 @@ class CampaignReport extends AbstractReport
         if (!$this->hasByDate($date)) {
             $row = new CampaignReportRow();
             $row->date = $date;
-            $this->rows[] = $row;
+            $this->set($row);
         } else {
             $row = $this->getByDate($date);
         }
 
         $row->value->add($value);
+    }
+
+    public function set(CampaignReportRow $row): void
+    {
+        $this->setByIndex($row->date->format('Y-m-d'), $row);
     }
 
     public function hasByDate(\DateTimeImmutable $date): bool
