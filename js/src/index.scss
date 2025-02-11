@@ -10,6 +10,16 @@
   }
 }
 
+#app-graph-container {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
 #app-graph {
   min-height: 400px;
+  min-width: 600px;
+  padding-bottom: 20px;
+  padding-top: 20px;
 }

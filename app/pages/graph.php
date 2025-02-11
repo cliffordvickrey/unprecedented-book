@@ -18,4 +18,6 @@ $query = $response->getObject(DonorProfileQuery::class);
 
 ?>
 <?= $view->partial('search-form', $response); ?>
-<div id="app-graph" class="w-100"></div>
+<div id="app-graph-container">
+    <div id="app-graph"></div>
+</div>

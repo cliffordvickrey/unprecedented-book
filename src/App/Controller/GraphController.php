@@ -21,6 +21,10 @@ final class GraphController implements ControllerInterface
         $query = DonorProfileQuery::fromRequest($request);
         $response->setObject($query);
 
+        if (null === $query->campaignType) {
+            $response[Response::ATTR_PARTIAL] = 'frequencies';
+        }
+
         return $response;
     }
 }

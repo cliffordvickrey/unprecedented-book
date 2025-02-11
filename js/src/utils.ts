@@ -25,8 +25,6 @@ function formToObject(form: HTMLFormElement): any {
     }
   });
 
-  console.log(object);
-
   return object;
 }
 

@@ -58,7 +58,7 @@ enum CampaignType: string
     {
         $dtStr = match ($this) {
             CampaignType::joe_biden => '2023-04-25',
-            CampaignType::kamala_harris => '2023-07-21',
+            CampaignType::kamala_harris => '2024-07-21',
             CampaignType::donald_trump => '2022-11-15',
         };
 

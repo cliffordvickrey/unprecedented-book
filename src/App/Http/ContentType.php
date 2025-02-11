@@ -15,7 +15,7 @@ enum ContentType: string
         return match ($this) {
             self::csv => 'text/csv; charset=utf-8',
             self::json => 'application/json; charset=utf-8',
-            self::html => 'html',
+            self::html => 'text/html; charset=utf-8',
         };
     }
 }

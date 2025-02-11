@@ -150,7 +150,7 @@ $route = $response->getObject(Route::class);
                                    autocomplete="off"
                                    data-js-enabled="1"
                                    value="<?= GraphType::amount->value; ?>"<?= GraphType::amount === $query->graphType ? ' checked' : ''; ?>>
-                            <label class="btn btn-outline-primary"
+                            <label class="btn btn-sm btn-outline-primary"
                                    for="app-graph-type-amount"><?= GraphType::amount->getTitle(); ?></label>
                         </div>
                         <div class="btn-group" role="group" aria-label="Graph Types">
@@ -158,7 +158,7 @@ $route = $response->getObject(Route::class);
                                    autocomplete="off"
                                    data-js-enabled="1"
                                    value="<?= GraphType::donors->value; ?>"<?= GraphType::donors === $query->graphType ? ' checked' : ''; ?>>
-                            <label class="btn btn-outline-primary"
+                            <label class="btn btn-sm btn-outline-primary"
                                    for="app-graph-type-donors"><?= GraphType::donors->getTitle(); ?></label>
                         </div>
                         <div class="btn-group" role="group" aria-label="Graph Types">
@@ -166,7 +166,7 @@ $route = $response->getObject(Route::class);
                                    autocomplete="off"
                                    data-js-enabled="1"
                                    value="<?= GraphType::receipts->value; ?>"<?= GraphType::receipts === $query->graphType ? ' checked' : ''; ?>>
-                            <label class="btn btn-outline-primary"
+                            <label class="btn btn-sm btn-outline-primary"
                                    for="app-graph-type-receipts"><?= GraphType::receipts->getTitle(); ?></label>
                         </div>
                     </div>
