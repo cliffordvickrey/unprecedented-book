@@ -113,7 +113,9 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
             throw new ReportDoesNotExistException(\sprintf('Report "%s" does not exist', $filename));
         }
 
-        $contents = FileUtilities::getContents($filename);
+        $contents = null !== $this->compressionLevel ?
+            ZipUtilities::gzUnCompressFile($filename)
+            : FileUtilities::getContents($filename);
 
         return $this->unmarshallCollection($contents);
     }
@@ -145,10 +147,6 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
     private function unmarshallCollection(string $json): AbstractReportCollection
     {
         $classStr = $this->getCollectionClassStr();
-
-        if (null !== $this->compressionLevel) {
-            $json = ZipUtilities::gzUnCompress($classStr);
-        }
 
         $json = JsonUtilities::jsonDecode($json);
 

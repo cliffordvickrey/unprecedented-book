@@ -24,11 +24,18 @@ class ZipUtilities
         return $compressed;
     }
 
-    public static function gzUnCompress(string $str): string
+    public static function gzUnCompressFile(string $filename): string
     {
-        $deCompressed = gzuncompress($str);
-        Assert::string($deCompressed);
+        $ptr = gzopen($filename, 'r');
+        Assert::resource($ptr);
 
-        return $deCompressed;
+        $gz = gzread($ptr, FileUtilities::fileSize($filename));
+        Assert::string($gz);
+        gzclose($ptr);
+
+        $unCompressed = gzuncompress($gz);
+        Assert::string($unCompressed);
+
+        return $unCompressed;
     }
 }

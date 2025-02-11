@@ -19,6 +19,14 @@ class FileUtilities
         return $files;
     }
 
+    public static function fileSize(string $filename): int
+    {
+        $fileSize = filesize($filename);
+        Assert::integer($fileSize);
+
+        return $fileSize;
+    }
+
     public static function saveContents(string $filename, string $contents): void
     {
         self::ensureFileDirectory($filename);
