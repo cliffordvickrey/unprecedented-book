@@ -14,11 +14,45 @@ final class Response extends AbstractCollection
 {
     public const string ATTR_CONTENT = 'content';
     public const string ATTR_PARTIAL = 'partial';
+    public const string ATTR_RESOURCE = 'resource';
 
     public function setObject(object $obj, ?string $key = null): void
     {
         $key ??= $obj::class;
         $this[$key] = $obj;
+    }
+
+    /**
+     * @param resource $resource
+     */
+    public function setResource($resource): void
+    {
+        $this[self::ATTR_RESOURCE] = $resource;
+    }
+
+    /**
+     * @return resource
+     */
+    public function getResource()
+    {
+        $resource = $this->getResourceNullable();
+        Assert::notNull($resource);
+
+        return $resource;
+    }
+
+    /**
+     * @return resource|null
+     */
+    public function getResourceNullable()
+    {
+        $attrib = $this->get(self::ATTR_RESOURCE);
+
+        if (\is_resource($attrib)) {
+            return $attrib;
+        }
+
+        return null;
     }
 
     /**

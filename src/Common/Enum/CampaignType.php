@@ -69,7 +69,7 @@ enum CampaignType: string
     {
         $dtStr = match ($this) {
             CampaignType::joe_biden => '2024-07-20',
-            CampaignType::kamala_harris, CampaignType::donald_trump => '2024-11-05',
+            CampaignType::kamala_harris, CampaignType::donald_trump => '2024-10-16', // @todo rest of election
         };
 
         return CastingUtilities::toDateTime($dtStr) ?? throw new BookRuntimeException();

@@ -45,7 +45,9 @@ call_user_func(function () {
     $contentType = $response->getObjectNullable(ContentType::class) ?? ContentType::html;
     $isHtml = ContentType::html === $contentType;
 
-    if (ContentType::json === $contentType) {
+    if ($response->getResourceNullable()) {
+        $response[Response::ATTR_PARTIAL] = 'resource';
+    } elseif (ContentType::json === $contentType) {
         $response[Response::ATTR_PARTIAL] = 'json';
     }
 

@@ -2,7 +2,7 @@
 <?php
 
 /**
- * Split the national ZCTA geojson file into states.
+ * Split the national ZCTA GeoJSON file into states.
  */
 
 declare(strict_types=1);
