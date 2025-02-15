@@ -6,6 +6,7 @@ module.exports = {
     entry: {
         graph: './src/graph.ts',
         index: './src/index.ts',
+        map: './src/map.ts',
     },
     output: {
         filename: '[name].[contenthash].js',

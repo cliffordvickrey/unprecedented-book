@@ -18,6 +18,12 @@ class View
     private const string NUMBER_FORMATTER_PERCENT = 'numberFormatterPercent';
     private const string WEBPACK_CACHE_GROUP_KEY = 'defaultVendors';
 
+    /** @var array<string, string> */
+    private static array $sharedVendors = [
+        'graph' => 'graph-map',
+        'map' => 'graph-map',
+    ];
+
     /** @var array<string, list<string>> */
     private array $assetUris = [];
     /** @var list<string> */
@@ -29,30 +35,6 @@ class View
     public function emitCss(string $name): string
     {
         return implode(\PHP_EOL, array_map($this->emitLinkTag(...), $this->getAssetUris("$name.css")));
-    }
-
-    private function emitLinkTag(string $filename): string
-    {
-        /** @noinspection HtmlUnknownTarget */
-        return \sprintf('<link href="%s" rel="stylesheet">', $this->htmlEncode($filename));
-    }
-
-    private function emitScriptTag(string $filename): string
-    {
-        /** @noinspection HtmlUnknownTarget */
-        return \sprintf('<script src="%s"></script>', $this->htmlEncode($filename));
-    }
-
-    public function htmlEncode(mixed $value): string
-    {
-        $value = (string) CastingUtilities::toString($value);
-
-        return htmlentities($value, \ENT_QUOTES);
-    }
-
-    public function jsonEncode(mixed $value): string
-    {
-        return JsonUtilities::jsonEncode($value);
     }
 
     /**
@@ -86,10 +68,16 @@ class View
             ?? throw new \UnexpectedValueException(\sprintf('Could not resolve %s to a filename', $filename));
     }
 
+    public function jsonEncode(mixed $value): string
+    {
+        return JsonUtilities::jsonEncode($value);
+    }
+
     public function enqueueJs(string $name): void
     {
         if (!str_starts_with($name, self::WEBPACK_CACHE_GROUP_KEY)) {
-            $this->enqueueJs(self::WEBPACK_CACHE_GROUP_KEY."-$name");
+            $vendorBundle = self::$sharedVendors[$name] ?? $name;
+            $this->enqueueJs(self::WEBPACK_CACHE_GROUP_KEY."-$vendorBundle");
         }
 
         if (!\in_array($name, $this->enqueuedScripts)) {
@@ -247,5 +235,24 @@ class View
     public function formatPercent(mixed $value): string
     {
         return $this->doFormat($value, self::NUMBER_FORMATTER_PERCENT);
+    }
+
+    private function emitLinkTag(string $filename): string
+    {
+        /** @noinspection HtmlUnknownTarget */
+        return \sprintf('<link href="%s" rel="stylesheet">', $this->htmlEncode($filename));
+    }
+
+    public function htmlEncode(mixed $value): string
+    {
+        $value = (string) CastingUtilities::toString($value);
+
+        return htmlentities($value, \ENT_QUOTES);
+    }
+
+    private function emitScriptTag(string $filename): string
+    {
+        /** @noinspection HtmlUnknownTarget */
+        return \sprintf('<script src="%s"></script>', $this->htmlEncode($filename));
     }
 }

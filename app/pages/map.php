@@ -11,10 +11,10 @@ Assert::isInstanceOf($response, Response::class);
 $view = $view ?? new View();
 Assert::isInstanceOf($view, View::class);
 
-$view->enqueueJs('graph');
+$view->enqueueJs('map');
 
 ?>
 <?= $view->partial('search-form', $response); ?>
-<div id="app-graph-container" class="app-d3-container">
-    <div id="app-graph" class="app-d3-plot"></div>
+<div id="app-map-container" class="app-d3-container">
+    <div id="app-map" class="app-d3-plot"></div>
 </div>

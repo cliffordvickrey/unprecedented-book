@@ -13,12 +13,8 @@ use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use Webmozart\Assert\Assert;
 
-class GeoJsonController implements ControllerInterface
+class GeoJsonController extends AbstractController
 {
-    public function __construct()
-    {
-    }
-
     public function dispatch(Request $request): Response
     {
         $state = self::getState($request);

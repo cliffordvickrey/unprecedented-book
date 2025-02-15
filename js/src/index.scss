@@ -2,24 +2,22 @@
 
 #app {
   font-size: .9em;
-}
 
-#app {
   tr, td {
     white-space: nowrap;
   }
-}
 
-#app-graph-container {
-  overflow-x: auto;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-  width: 100%;
-}
+  .app-d3-container {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
 
-#app-graph {
-  min-height: 400px;
-  min-width: 600px;
-  padding-bottom: 20px;
-  padding-top: 20px;
+  .app-d3-plot {
+    min-height: 400px;
+    min-width: 600px;
+    padding-bottom: 20px;
+    padding-top: 20px;
+  }
 }

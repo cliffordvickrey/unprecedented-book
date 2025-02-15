@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use CliffordVickrey\Book2024\App\Http\Response;
 use CliffordVickrey\Book2024\App\View\View;
+use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use Webmozart\Assert\Assert;
 
 $response = $response ?? new Response();
@@ -19,13 +20,7 @@ $label = $response->getAttribute('label', '');
 $options = $hasBlank ? ['' => ''] : [];
 
 $options += $response->getAttribute('options', []);
-$value = isset($response['value']) ? $response['value'] : null;
-
-if (is_scalar($value)) {
-    $value = (string) $value;
-} else {
-    $value = '';
-}
+$value = (string) CastingUtilities::toString(isset($response['value']) ? $response['value'] : null);
 
 $renderOption = function (int|string $key, mixed $optionValue) use ($value, $view): void {
     $selected = $key === $value ? ' selected="selected"' : ''; ?>

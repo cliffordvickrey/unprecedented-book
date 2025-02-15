@@ -141,6 +141,9 @@ $route = $response->getObject(Route::class);
                         <input type="radio" class="btn-check" name="action" id="app-action-graph" autocomplete="off"
                                value="<?= Route::graph->value; ?>"<?= Route::graph === $route ? ' checked' : ''; ?>>
                         <label class="btn btn-outline-primary" for="app-action-graph">Graph</label>
+                        <input type="radio" class="btn-check" name="action" id="app-action-map" autocomplete="off"
+                               value="<?= Route::map->value; ?>"<?= Route::map === $route ? ' checked' : ''; ?>>
+                        <label class="btn btn-outline-primary" for="app-action-map">Map</label>
                     </div>
                 </div>
                 <?php if (Route::graph === $route): ?>
