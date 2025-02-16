@@ -9,6 +9,8 @@ namespace CliffordVickrey\Book2024\Common\Utilities;
  */
 class MathUtilities
 {
+    private const float EARTH_RADIUS = 6371000.0;
+
     /**
      * @param int<0, max> $precision
      */
@@ -126,5 +128,23 @@ class MathUtilities
             'lat' => $midPointLatRadians,
             'lon' => $midPointLonRadians,
         ]);
+    }
+
+    public static function haversineDistance(float $lat1, float $lon1, float $lat2, float $lon2): int
+    {
+        [$lat1Radians, $lon1Radians, $lat2Radians, $lon2Radians] = array_map(deg2rad(...), [
+            $lat1,
+            $lon1,
+            $lat2,
+            $lon2,
+        ]);
+
+        $deltaLatRadians = $lat2Radians - $lat1Radians;
+        $deltaLonRadians = $lon2Radians - $lon1Radians;
+
+        $angle = 2 * asin(sqrt(sin($deltaLatRadians / 2) ** 2 + cos($lat1Radians) * cos($lat2Radians)
+                * sin($deltaLonRadians / 2) ** 2));
+
+        return (int) ($angle * self::EARTH_RADIUS);
     }
 }

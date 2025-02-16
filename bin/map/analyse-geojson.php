@@ -6,6 +6,7 @@ declare(strict_types=1);
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
+use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 use Webmozart\Assert\Assert;
 
 ini_set('memory_limit', '-1');
@@ -86,12 +87,14 @@ call_user_func(function () {
         $lat2 = max($lats);
         $lon2 = max($lons);
 
+        $diameter = MathUtilities::haversineDistance($lat1, $lon1, $lat2, $lon2);
         $midpoint = MathUtilities::midpoint($lat1, $lon1, $lat2, $lon2);
 
         printf('%s%s', str_repeat('-', 80), \PHP_EOL);
+        printf('Diameter of %s is %s meters%s', $state, StringUtilities::numberFormat($diameter), \PHP_EOL);
         printf('Midpoint of %s is [%g, %g]%s', $state, $midpoint['lat'], $midpoint['lon'], \PHP_EOL);
 
-        return ['state' => $state, 'midpoint' => $midpoint];
+        return ['state' => $state, 'diameter' => $diameter, 'midpoint' => $midpoint];
     }, $geoJsonFiles);
 
     $geoJsonMetaJson = JsonUtilities::jsonEncode($geoJsonMeta, true);
