@@ -11,6 +11,7 @@
     "ext-iconv": "*",
     "ext-intl": "*",
     "ext-zlib": "*",
+    "fakerphp/faker": "^v1.24.1",
     "guzzlehttp/guzzle": "^7.4",
     "php": ">=8.3",
     "webmozart/assert": "^1.11"
@@ -18,7 +19,6 @@
   "require-dev": {
     "phpstan/phpstan": "^2.0",
     "phpunit/phpunit": "^11.5.2",
-    "fakerphp/faker": "^v1.24.1",
     "friendsofphp/php-cs-fixer": "^3.64"
   },
   "license": "MIT",
