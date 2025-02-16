@@ -110,7 +110,9 @@ async function plot(): Promise<void> {
   const state = getState();
 
   try {
-    getGeoJsonMeta(state);
+    if (state !== "USA") {
+      getGeoJsonMeta(state);
+    }
   } catch (err: unknown) {
     if (err instanceof Error) {
       container.innerText = err.message;
