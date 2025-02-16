@@ -1,0 +1,394 @@
+[
+    {
+        "state": "AK",
+        "midpoint": {
+            "lat": 63.362256,
+            "lon": -161.165269
+        }
+    },
+    {
+        "state": "AL",
+        "midpoint": {
+            "lat": 32.62816,
+            "lon": -86.74555
+        }
+    },
+    {
+        "state": "AR",
+        "midpoint": {
+            "lat": 34.780138,
+            "lon": -92.182615
+        }
+    },
+    {
+        "state": "AS",
+        "midpoint": {
+            "lat": -12.711645,
+            "lon": -170.248865
+        }
+    },
+    {
+        "state": "AZ",
+        "midpoint": {
+            "lat": 34.335322,
+            "lon": -111.949199
+        }
+    },
+    {
+        "state": "CA",
+        "midpoint": {
+            "lat": 37.382797,
+            "lon": -119.595395
+        }
+    },
+    {
+        "state": "CO",
+        "midpoint": {
+            "lat": 39.025491,
+            "lon": -105.752494
+        }
+    },
+    {
+        "state": "CT",
+        "midpoint": {
+            "lat": 41.51941,
+            "lon": -72.765412
+        }
+    },
+    {
+        "state": "DC",
+        "midpoint": {
+            "lat": 38.893425,
+            "lon": -77.014728
+        }
+    },
+    {
+        "state": "DE",
+        "midpoint": {
+            "lat": 39.126807,
+            "lon": -75.42251
+        }
+    },
+    {
+        "state": "FL",
+        "midpoint": {
+            "lat": 27.814002,
+            "lon": -83.946565
+        }
+    },
+    {
+        "state": "GA",
+        "midpoint": {
+            "lat": 32.704148,
+            "lon": -83.284829
+        }
+    },
+    {
+        "state": "GU",
+        "midpoint": {
+            "lat": 13.450204,
+            "lon": 144.787201
+        }
+    },
+    {
+        "state": "HI",
+        "midpoint": {
+            "lat": 20.589299,
+            "lon": -157.324483
+        }
+    },
+    {
+        "state": "IA",
+        "midpoint": {
+            "lat": 41.997077,
+            "lon": -93.545164
+        }
+    },
+    {
+        "state": "ID",
+        "midpoint": {
+            "lat": 45.492268,
+            "lon": -114.304841
+        }
+    },
+    {
+        "state": "IL",
+        "midpoint": {
+            "lat": 39.75668,
+            "lon": -89.584955
+        }
+    },
+    {
+        "state": "IN",
+        "midpoint": {
+            "lat": 39.778468,
+            "lon": -86.452286
+        }
+    },
+    {
+        "state": "KS",
+        "midpoint": {
+            "lat": 38.585729,
+            "lon": -98.399729
+        }
+    },
+    {
+        "state": "KY",
+        "midpoint": {
+            "lat": 37.826318,
+            "lon": -85.755951
+        }
+    },
+    {
+        "state": "LA",
+        "midpoint": {
+            "lat": 31.012374,
+            "lon": -91.577218
+        }
+    },
+    {
+        "state": "MA",
+        "midpoint": {
+            "lat": 42.076168,
+            "lon": -71.741568
+        }
+    },
+    {
+        "state": "MD",
+        "midpoint": {
+            "lat": 38.844723,
+            "lon": -77.296342
+        }
+    },
+    {
+        "state": "ME",
+        "midpoint": {
+            "lat": 45.187267,
+            "lon": -69.071689
+        }
+    },
+    {
+        "state": "MI",
+        "midpoint": {
+            "lat": 44.657924,
+            "lon": -86.615434
+        }
+    },
+    {
+        "state": "MN",
+        "midpoint": {
+            "lat": 46.486953,
+            "lon": -93.576481
+        }
+    },
+    {
+        "state": "MO",
+        "midpoint": {
+            "lat": 38.350905,
+            "lon": -92.504721
+        }
+    },
+    {
+        "state": "MP",
+        "midpoint": {
+            "lat": 14.700578,
+            "lon": 145.474832
+        }
+    },
+    {
+        "state": "MS",
+        "midpoint": {
+            "lat": 32.597513,
+            "lon": -89.920904
+        }
+    },
+    {
+        "state": "MT",
+        "midpoint": {
+            "lat": 46.851688,
+            "lon": -110.036158
+        }
+    },
+    {
+        "state": "NC",
+        "midpoint": {
+            "lat": 35.296018,
+            "lon": -79.966395
+        }
+    },
+    {
+        "state": "ND",
+        "midpoint": {
+            "lat": 47.344942,
+            "lon": -100.357582
+        }
+    },
+    {
+        "state": "NE",
+        "midpoint": {
+            "lat": 41.670329,
+            "lon": -99.794412
+        }
+    },
+    {
+        "state": "NH",
+        "midpoint": {
+            "lat": 44.026249,
+            "lon": -71.605695
+        }
+    },
+    {
+        "state": "NJ",
+        "midpoint": {
+            "lat": 40.145954,
+            "lon": -74.741515
+        }
+    },
+    {
+        "state": "NM",
+        "midpoint": {
+            "lat": 34.20753,
+            "lon": -106.26882
+        }
+    },
+    {
+        "state": "NV",
+        "midpoint": {
+            "lat": 38.735345,
+            "lon": -117.193174
+        }
+    },
+    {
+        "state": "NY",
+        "midpoint": {
+            "lat": 42.823915,
+            "lon": -75.953538
+        }
+    },
+    {
+        "state": "OH",
+        "midpoint": {
+            "lat": 40.211539,
+            "lon": -82.806011
+        }
+    },
+    {
+        "state": "OK",
+        "midpoint": {
+            "lat": 35.384641,
+            "lon": -98.806445
+        }
+    },
+    {
+        "state": "OR",
+        "midpoint": {
+            "lat": 44.100649,
+            "lon": -120.667152
+        }
+    },
+    {
+        "state": "PA",
+        "midpoint": {
+            "lat": 41.03261,
+            "lon": -77.700117
+        }
+    },
+    {
+        "state": "PR",
+        "midpoint": {
+            "lat": 18.218751,
+            "lon": -66.585415
+        }
+    },
+    {
+        "state": "RI",
+        "midpoint": {
+            "lat": 41.583165,
+            "lon": -71.494178
+        }
+    },
+    {
+        "state": "SC",
+        "midpoint": {
+            "lat": 33.656622,
+            "lon": -80.992202
+        }
+    },
+    {
+        "state": "SD",
+        "midpoint": {
+            "lat": 44.421905,
+            "lon": -100.542832
+        }
+    },
+    {
+        "state": "TN",
+        "midpoint": {
+            "lat": 35.857296,
+            "lon": -86.023208
+        }
+    },
+    {
+        "state": "TX",
+        "midpoint": {
+            "lat": 31.335867,
+            "lon": -100.449314
+        }
+    },
+    {
+        "state": "UT",
+        "midpoint": {
+            "lat": 39.467458,
+            "lon": -111.729977
+        }
+    },
+    {
+        "state": "VA",
+        "midpoint": {
+            "lat": 38.037601,
+            "lon": -79.545446
+        }
+    },
+    {
+        "state": "VI",
+        "midpoint": {
+            "lat": 18.038021,
+            "lon": -64.811299
+        }
+    },
+    {
+        "state": "VT",
+        "midpoint": {
+            "lat": 43.875924,
+            "lon": -72.470104
+        }
+    },
+    {
+        "state": "WA",
+        "midpoint": {
+            "lat": 47.341729,
+            "lon": -120.886481
+        }
+    },
+    {
+        "state": "WI",
+        "midpoint": {
+            "lat": 44.826758,
+            "lon": -89.967776
+        }
+    },
+    {
+        "state": "WV",
+        "midpoint": {
+            "lat": 38.937434,
+            "lon": -80.242111
+        }
+    },
+    {
+        "state": "WY",
+        "midpoint": {
+            "lat": 42.834051,
+            "lon": -107.706022
+        }
+    }
+]
