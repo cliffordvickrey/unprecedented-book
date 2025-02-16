@@ -15,6 +15,7 @@ use Webmozart\Assert\Assert;
 call_user_func(function () {
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Cache-Control: post-check=0, pre-check=0', false);
+    header('Pragma: no-cache');
 
     chdir(__DIR__);
 
@@ -38,6 +39,8 @@ call_user_func(function () {
 
         $response = new Response();
         $response->setObject(Route::error);
+
+        http_response_code(500);
     }
 
     $content = null;
@@ -52,6 +55,15 @@ call_user_func(function () {
     }
 
     header('Content-Type: '.$contentType->toHeaderValue());
+
+    if ($response->getAttributeNullable(Response::ATTR_CACHEABLE, false)) {
+        $cacheHeaders = ['Cache-Control', 'Expires', 'Pragma'];
+        array_walk($cacheHeaders, static fn ($header) => header_remove($header));
+
+        header('Cache-Control: max-age=31536000, public');
+        header('Pragma: cache');
+        header('Expires: '.gmdate('D, d M Y H:i:s', time() + 31536000).' GMT');
+    }
 
     if ($isHtml) {
         ob_start();

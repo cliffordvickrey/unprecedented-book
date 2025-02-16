@@ -12,6 +12,7 @@ use Webmozart\Assert\Assert;
  */
 final class Response extends AbstractCollection
 {
+    public const string ATTR_CACHEABLE = 'cacheable';
     public const string ATTR_CONTENT = 'content';
     public const string ATTR_PARTIAL = 'partial';
     public const string ATTR_RESOURCE = 'resource';

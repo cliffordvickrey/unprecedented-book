@@ -33,6 +33,7 @@ class GeoJsonController extends AbstractController
     private static function getResponse(State $state): Response
     {
         $response = new Response();
+        $response[Response::ATTR_CACHEABLE] = true;
         $response->setObject(ContentType::json);
         $response->setResource(self::getResource($state));
 
