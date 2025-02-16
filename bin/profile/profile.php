@@ -60,7 +60,7 @@ call_user_func(function () {
             $states[] = State::USA;
         }
 
-        if ($oldState !== $profile->state) {
+        if ($oldState && $oldState !== $profile->state) {
             printf('Profiling donors in %s...%s', $profile->state->getDescription(), \PHP_EOL);
 
             if (State::USA !== $oldState) {
