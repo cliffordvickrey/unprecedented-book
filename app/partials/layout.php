@@ -45,10 +45,11 @@ $content = $response->getAttribute(Response::ATTR_CONTENT, '');
                         <?= $content; ?>
                         <!-- /content -->
                     </div>
-                    <div class="card-footer">
-                        <small>Copyright &copy; 2025 Clifford Vickrey. All rights
-                            reserved, all wrongs <em>avenged</em></small>
-                    </div>
+                    <footer class="card-footer" id="app-footer">
+                        <a href="https://github.com/cliffordvickrey/unprecedented-book">Source code</a>
+                        |
+                        Copyright &copy; 2025 Clifford Vickrey. All rights reserved, all wrongs <em>avenged</em>
+                    </footer>
                 </div>
             </div>
         </div>

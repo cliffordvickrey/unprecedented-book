@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { formToUrl } from "./utils";
+import { formToUrl, queryString } from "./utils";
 import { rewind } from "@turf/turf";
 import geoJsonMetaByState from "../../web-data/geojson-meta/geojson-meta.json";
 
@@ -82,8 +82,7 @@ function getMapDataUrl(): string {
 }
 
 function getGeoJsonUrl(): string {
-  const form = <HTMLFormElement>document.getElementById("app-search-form");
-  return formToUrl(form, { action: "geoJson" });
+  return "./?" + queryString({ action: "geoJson", state: getState() });
 }
 
 function getState(): string {
