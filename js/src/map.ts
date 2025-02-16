@@ -264,7 +264,6 @@ function drawMap(
     .attr("height", legendHeight)
     .style("fill", "url(#legendGradient)");
 
-  // Add axis scale
   const legendScale = d3
     .scaleLinear()
     .domain([0, maxValue as number])

@@ -11,6 +11,8 @@ use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReportCollection;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportCollection;
+use CliffordVickrey\Book2024\Common\Entity\Report\MapReport;
+use CliffordVickrey\Book2024\Common\Entity\Report\MapReportCollection;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
 use CliffordVickrey\Book2024\Common\Enum\State;
@@ -160,8 +162,9 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
     {
         // @phpstan-ignore-next-line Stan isn't clever enough to determine subtype here
         return match ($this->getClassStr()) {
-            DonorReport::class => DonorReportCollection::class,
             CampaignReport::class => CampaignReportCollection::class,
+            DonorReport::class => DonorReportCollection::class,
+            MapReport::class => MapReportCollection::class,
             default => throw new BookUnexpectedValueException(),
         };
     }
