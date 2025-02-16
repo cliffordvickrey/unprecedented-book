@@ -1,0 +1,562 @@
+[
+    {
+        "state": "AK",
+        "diameter": 3148747,
+        "midpoint": {
+            "lat": 63.362256,
+            "lon": -161.165269
+        },
+        "minZcta": "99501",
+        "maxZcta": "99929"
+    },
+    {
+        "state": "AL",
+        "diameter": 627277,
+        "midpoint": {
+            "lat": 32.62816,
+            "lon": -86.74555
+        },
+        "minZcta": "35004",
+        "maxZcta": "36925"
+    },
+    {
+        "state": "AR",
+        "diameter": 599925,
+        "midpoint": {
+            "lat": 34.780138,
+            "lon": -92.182615
+        },
+        "minZcta": "71601",
+        "maxZcta": "72959"
+    },
+    {
+        "state": "AS",
+        "diameter": 411932,
+        "midpoint": {
+            "lat": -12.711645,
+            "lon": -170.248865
+        },
+        "minZcta": "96799",
+        "maxZcta": "96799"
+    },
+    {
+        "state": "AZ",
+        "diameter": 856118,
+        "midpoint": {
+            "lat": 34.335322,
+            "lon": -111.949199
+        },
+        "minZcta": "84784",
+        "maxZcta": "86556"
+    },
+    {
+        "state": "CA",
+        "diameter": 1389679,
+        "midpoint": {
+            "lat": 37.382797,
+            "lon": -119.595395
+        },
+        "minZcta": "90001",
+        "maxZcta": "96161"
+    },
+    {
+        "state": "CO",
+        "diameter": 780944,
+        "midpoint": {
+            "lat": 39.025491,
+            "lon": -105.752494
+        },
+        "minZcta": "80002",
+        "maxZcta": "81657"
+    },
+    {
+        "state": "CT",
+        "diameter": 200682,
+        "midpoint": {
+            "lat": 41.51941,
+            "lon": -72.765412
+        },
+        "minZcta": "06001",
+        "maxZcta": "06907"
+    },
+    {
+        "state": "DC",
+        "diameter": 29039,
+        "midpoint": {
+            "lat": 38.893425,
+            "lon": -77.014728
+        },
+        "minZcta": "20001",
+        "maxZcta": "20064"
+    },
+    {
+        "state": "DE",
+        "diameter": 170872,
+        "midpoint": {
+            "lat": 39.126807,
+            "lon": -75.42251
+        },
+        "minZcta": "19701",
+        "maxZcta": "21875"
+    },
+    {
+        "state": "FL",
+        "diameter": 1037927,
+        "midpoint": {
+            "lat": 27.814002,
+            "lon": -83.946565
+        },
+        "minZcta": "32003",
+        "maxZcta": "34997"
+    },
+    {
+        "state": "GA",
+        "diameter": 682389,
+        "midpoint": {
+            "lat": 32.704148,
+            "lon": -83.284829
+        },
+        "minZcta": "30002",
+        "maxZcta": "39897"
+    },
+    {
+        "state": "GU",
+        "diameter": 58278,
+        "midpoint": {
+            "lat": 13.450204,
+            "lon": 144.787201
+        },
+        "minZcta": "96910",
+        "maxZcta": "96929"
+    },
+    {
+        "state": "HI",
+        "diameter": 636590,
+        "midpoint": {
+            "lat": 20.589299,
+            "lon": -157.324483
+        },
+        "minZcta": "96701",
+        "maxZcta": "96863"
+    },
+    {
+        "state": "IA",
+        "diameter": 651245,
+        "midpoint": {
+            "lat": 41.997077,
+            "lon": -93.545164
+        },
+        "minZcta": "50001",
+        "maxZcta": "61230"
+    },
+    {
+        "state": "ID",
+        "diameter": 945204,
+        "midpoint": {
+            "lat": 45.492268,
+            "lon": -114.304841
+        },
+        "minZcta": "83201",
+        "maxZcta": "99403"
+    },
+    {
+        "state": "IL",
+        "diameter": 704949,
+        "midpoint": {
+            "lat": 39.75668,
+            "lon": -89.584955
+        },
+        "minZcta": "60002",
+        "maxZcta": "62999"
+    },
+    {
+        "state": "IN",
+        "diameter": 529657,
+        "midpoint": {
+            "lat": 39.778468,
+            "lon": -86.452286
+        },
+        "minZcta": "45390",
+        "maxZcta": "47997"
+    },
+    {
+        "state": "KS",
+        "diameter": 732996,
+        "midpoint": {
+            "lat": 38.585729,
+            "lon": -98.399729
+        },
+        "minZcta": "66002",
+        "maxZcta": "67954"
+    },
+    {
+        "state": "KY",
+        "diameter": 721873,
+        "midpoint": {
+            "lat": 37.826318,
+            "lon": -85.755951
+        },
+        "minZcta": "38257",
+        "maxZcta": "47142"
+    },
+    {
+        "state": "LA",
+        "diameter": 659252,
+        "midpoint": {
+            "lat": 31.012374,
+            "lon": -91.577218
+        },
+        "minZcta": "70001",
+        "maxZcta": "71497"
+    },
+    {
+        "state": "MA",
+        "diameter": 347702,
+        "midpoint": {
+            "lat": 42.076168,
+            "lon": -71.741568
+        },
+        "minZcta": "01001",
+        "maxZcta": "02914"
+    },
+    {
+        "state": "MD",
+        "diameter": 433348,
+        "midpoint": {
+            "lat": 38.844723,
+            "lon": -77.296342
+        },
+        "minZcta": "19964",
+        "maxZcta": "21930"
+    },
+    {
+        "state": "ME",
+        "diameter": 582991,
+        "midpoint": {
+            "lat": 45.187267,
+            "lon": -69.071689
+        },
+        "minZcta": "03901",
+        "maxZcta": "04992"
+    },
+    {
+        "state": "MI",
+        "diameter": 902113,
+        "midpoint": {
+            "lat": 44.657924,
+            "lon": -86.615434
+        },
+        "minZcta": "48001",
+        "maxZcta": "49971"
+    },
+    {
+        "state": "MN",
+        "diameter": 886074,
+        "midpoint": {
+            "lat": 46.486953,
+            "lon": -93.576481
+        },
+        "minZcta": "55001",
+        "maxZcta": "56763"
+    },
+    {
+        "state": "MO",
+        "diameter": 771214,
+        "midpoint": {
+            "lat": 38.350905,
+            "lon": -92.504721
+        },
+        "minZcta": "63005",
+        "maxZcta": "65897"
+    },
+    {
+        "state": "MP",
+        "diameter": 151722,
+        "midpoint": {
+            "lat": 14.700578,
+            "lon": 145.474832
+        },
+        "minZcta": "96950",
+        "maxZcta": "96952"
+    },
+    {
+        "state": "MS",
+        "diameter": 631532,
+        "midpoint": {
+            "lat": 32.597513,
+            "lon": -89.920904
+        },
+        "minZcta": "38601",
+        "maxZcta": "39776"
+    },
+    {
+        "state": "MT",
+        "diameter": 1087097,
+        "midpoint": {
+            "lat": 46.851688,
+            "lon": -110.036158
+        },
+        "minZcta": "59001",
+        "maxZcta": "59937"
+    },
+    {
+        "state": "NC",
+        "diameter": 860519,
+        "midpoint": {
+            "lat": 35.296018,
+            "lon": -79.966395
+        },
+        "minZcta": "27006",
+        "maxZcta": "28909"
+    },
+    {
+        "state": "ND",
+        "diameter": 696521,
+        "midpoint": {
+            "lat": 47.344942,
+            "lon": -100.357582
+        },
+        "minZcta": "56520",
+        "maxZcta": "58856"
+    },
+    {
+        "state": "NE",
+        "diameter": 816297,
+        "midpoint": {
+            "lat": 41.670329,
+            "lon": -99.794412
+        },
+        "minZcta": "51510",
+        "maxZcta": "69367"
+    },
+    {
+        "state": "NH",
+        "diameter": 333247,
+        "midpoint": {
+            "lat": 44.026249,
+            "lon": -71.605695
+        },
+        "minZcta": "03031",
+        "maxZcta": "03897"
+    },
+    {
+        "state": "NJ",
+        "diameter": 304939,
+        "midpoint": {
+            "lat": 40.145954,
+            "lon": -74.741515
+        },
+        "minZcta": "07001",
+        "maxZcta": "08904"
+    },
+    {
+        "state": "NM",
+        "diameter": 860994,
+        "midpoint": {
+            "lat": 34.20753,
+            "lon": -106.26882
+        },
+        "minZcta": "79821",
+        "maxZcta": "88439"
+    },
+    {
+        "state": "NV",
+        "diameter": 971918,
+        "midpoint": {
+            "lat": 38.735345,
+            "lon": -117.193174
+        },
+        "minZcta": "89001",
+        "maxZcta": "89883"
+    },
+    {
+        "state": "NY",
+        "diameter": 817391,
+        "midpoint": {
+            "lat": 42.823915,
+            "lon": -75.953538
+        },
+        "minZcta": "06390",
+        "maxZcta": "14905"
+    },
+    {
+        "state": "OH",
+        "diameter": 548710,
+        "midpoint": {
+            "lat": 40.211539,
+            "lon": -82.806011
+        },
+        "minZcta": "43001",
+        "maxZcta": "47060"
+    },
+    {
+        "state": "OK",
+        "diameter": 863678,
+        "midpoint": {
+            "lat": 35.384641,
+            "lon": -98.806445
+        },
+        "minZcta": "73001",
+        "maxZcta": "74966"
+    },
+    {
+        "state": "OR",
+        "diameter": 814186,
+        "midpoint": {
+            "lat": 44.100649,
+            "lon": -120.667152
+        },
+        "minZcta": "97001",
+        "maxZcta": "97920"
+    },
+    {
+        "state": "PA",
+        "diameter": 570897,
+        "midpoint": {
+            "lat": 41.03261,
+            "lon": -77.700117
+        },
+        "minZcta": "15001",
+        "maxZcta": "26060"
+    },
+    {
+        "state": "PR",
+        "diameter": 295508,
+        "midpoint": {
+            "lat": 18.218751,
+            "lon": -66.585415
+        },
+        "minZcta": "00601",
+        "maxZcta": "00987"
+    },
+    {
+        "state": "RI",
+        "diameter": 114987,
+        "midpoint": {
+            "lat": 41.583165,
+            "lon": -71.494178
+        },
+        "minZcta": "02802",
+        "maxZcta": "02921"
+    },
+    {
+        "state": "SC",
+        "diameter": 567535,
+        "midpoint": {
+            "lat": 33.656622,
+            "lon": -80.992202
+        },
+        "minZcta": "29001",
+        "maxZcta": "29945"
+    },
+    {
+        "state": "SD",
+        "diameter": 765565,
+        "midpoint": {
+            "lat": 44.421905,
+            "lon": -100.542832
+        },
+        "minZcta": "57001",
+        "maxZcta": "59319"
+    },
+    {
+        "state": "TN",
+        "diameter": 805089,
+        "midpoint": {
+            "lat": 35.857296,
+            "lon": -86.023208
+        },
+        "minZcta": "30750",
+        "maxZcta": "38589"
+    },
+    {
+        "state": "TX",
+        "diameter": 1719554,
+        "midpoint": {
+            "lat": 31.335867,
+            "lon": -100.449314
+        },
+        "minZcta": "71854",
+        "maxZcta": "79938"
+    },
+    {
+        "state": "UT",
+        "diameter": 723036,
+        "midpoint": {
+            "lat": 39.467458,
+            "lon": -111.729977
+        },
+        "minZcta": "84001",
+        "maxZcta": "84790"
+    },
+    {
+        "state": "VA",
+        "diameter": 810960,
+        "midpoint": {
+            "lat": 38.037601,
+            "lon": -79.545446
+        },
+        "minZcta": "20105",
+        "maxZcta": "37620"
+    },
+    {
+        "state": "VI",
+        "diameter": 95979,
+        "midpoint": {
+            "lat": 18.038021,
+            "lon": -64.811299
+        },
+        "minZcta": "00802",
+        "maxZcta": "00851"
+    },
+    {
+        "state": "VT",
+        "diameter": 299706,
+        "midpoint": {
+            "lat": 43.875924,
+            "lon": -72.470104
+        },
+        "minZcta": "05001",
+        "maxZcta": "05907"
+    },
+    {
+        "state": "WA",
+        "diameter": 712193,
+        "midpoint": {
+            "lat": 47.341729,
+            "lon": -120.886481
+        },
+        "minZcta": "83822",
+        "maxZcta": "99402"
+    },
+    {
+        "state": "WI",
+        "diameter": 700103,
+        "midpoint": {
+            "lat": 44.826758,
+            "lon": -89.967776
+        },
+        "minZcta": "53001",
+        "maxZcta": "54986"
+    },
+    {
+        "state": "WV",
+        "diameter": 573530,
+        "midpoint": {
+            "lat": 38.937434,
+            "lon": -80.242111
+        },
+        "minZcta": "24131",
+        "maxZcta": "41503"
+    },
+    {
+        "state": "WY",
+        "diameter": 787628,
+        "midpoint": {
+            "lat": 42.834051,
+            "lon": -107.706022
+        },
+        "minZcta": "82001",
+        "maxZcta": "83128"
+    }
+]
