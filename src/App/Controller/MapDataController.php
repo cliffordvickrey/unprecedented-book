@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\App\Controller;
 
 use CliffordVickrey\Book2024\App\DTO\DonorProfileQuery;
+use CliffordVickrey\Book2024\App\DTO\GraphColor;
 use CliffordVickrey\Book2024\App\DTO\MapData;
 use CliffordVickrey\Book2024\App\DTO\MapDataPoint;
 use CliffordVickrey\Book2024\App\Http\ContentType;
@@ -36,8 +37,8 @@ final class MapDataController extends AbstractController
 
     private function buildMapData(DonorProfileQuery $query): MapData
     {
-        $mapData = new MapData($query->graphType);
         $campaignType = $query->campaignType;
+        $mapData = new MapData($query->graphType, GraphColor::fromCampaign($campaignType));
 
         if (!$campaignType) {
             return $mapData;

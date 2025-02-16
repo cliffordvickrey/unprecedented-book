@@ -18,10 +18,10 @@ class View
     private const string NUMBER_FORMATTER_PERCENT = 'numberFormatterPercent';
     private const string WEBPACK_CACHE_GROUP_KEY = 'defaultVendors';
 
-    /** @var array<string, string> */
+    /** @var array<string, list<string>> */
     private static array $sharedVendors = [
-        'graph' => 'graph-map',
-        'map' => 'graph-map',
+        'graph' => ['graph-map'],
+        'map' => ['graph-map', 'map'],
     ];
 
     /** @var array<string, list<string>> */
@@ -76,8 +76,12 @@ class View
     public function enqueueJs(string $name): void
     {
         if (!str_starts_with($name, self::WEBPACK_CACHE_GROUP_KEY)) {
-            $vendorBundle = self::$sharedVendors[$name] ?? $name;
-            $this->enqueueJs(self::WEBPACK_CACHE_GROUP_KEY."-$vendorBundle");
+            $vendorBundles = self::$sharedVendors[$name] ?? [$name];
+
+            array_walk(
+                $vendorBundles,
+                fn (string $vendorBundle) => $this->enqueueJs(self::WEBPACK_CACHE_GROUP_KEY."-$vendorBundle")
+            );
         }
 
         if (!\in_array($name, $this->enqueuedScripts)) {

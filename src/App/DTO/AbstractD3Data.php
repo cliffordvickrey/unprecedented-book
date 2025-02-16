@@ -13,13 +13,16 @@ use CliffordVickrey\Book2024\App\Contract\AbstractCollection;
  */
 abstract class AbstractD3Data extends AbstractCollection implements \JsonSerializable
 {
-    public function __construct(public GraphType $graphType = GraphType::amount)
-    {
+    public function __construct(
+        public GraphType $graphType = GraphType::amount,
+        public GraphColor $color = GraphColor::blue,
+    ) {
     }
 
     /**
      * @return array{
      *     title: string,
+     *     color: string,
      *     isDollarAmount: bool,
      *     dataPoints: list<TDataPoint>
      * }
@@ -28,6 +31,7 @@ abstract class AbstractD3Data extends AbstractCollection implements \JsonSeriali
     {
         return [
             'title' => $this->graphType->getTitle(),
+            'color' => $this->color->value,
             'isDollarAmount' => $this->graphType->isDollarAmount(),
             'dataPoints' => array_values($this->data),
         ];

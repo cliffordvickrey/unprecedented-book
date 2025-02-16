@@ -1,6 +1,11 @@
 import * as d3 from "d3";
 import { formToUrl } from "./utils";
 
+enum GraphColor {
+  blue = "blue",
+  red = "red",
+}
+
 interface GraphDataPoint {
   date: Date;
   value: number;
@@ -8,6 +13,7 @@ interface GraphDataPoint {
 
 interface GraphData {
   title: string;
+  color: GraphColor;
   isDollarAmount: boolean;
   dataPoints: GraphDataPoint[];
 }
@@ -19,6 +25,7 @@ interface SerializedDataPoint {
 
 interface SerializedGraphData {
   title: string;
+  color: GraphColor;
   isDollarAmount: boolean;
   dataPoints: SerializedDataPoint[];
 }
@@ -40,6 +47,7 @@ async function fetchGraphData(): Promise<GraphData> {
 
   return {
     title: rawData.title,
+    color: rawData.color,
     isDollarAmount: rawData.isDollarAmount,
     dataPoints: dataPoints,
   };
@@ -62,6 +70,15 @@ async function drawGraph(): Promise<void> {
 
   const graphData = await fetchGraphData();
   draw(container, graphData);
+}
+
+function color(type: GraphColor): string {
+  switch (type) {
+    case GraphColor.blue:
+      return "steelblue";
+    case GraphColor.red:
+      return "firebrick";
+  }
 }
 
 function draw(container: HTMLElement, graphData: GraphData): void {
@@ -133,7 +150,7 @@ function draw(container: HTMLElement, graphData: GraphData): void {
   g.append("path")
     .datum(graphData.dataPoints)
     .attr("fill", "none")
-    .attr("stroke", "steelblue")
+    .attr("stroke", color(graphData.color))
     .attr("stroke-width", 2)
     .attr("d", line);
 

@@ -1,7 +1,7 @@
-import { formToUrl } from "./utils";
 import * as d3 from "d3";
+import { formToUrl } from "./utils";
+import { rewind } from "@turf/turf";
 import geoJsonMetaByState from "../../web-data/geojson-meta/geojson-meta.json";
-import { rewind } from "@turf/rewind";
 
 interface Coordinates {
   lat: number;
@@ -14,6 +14,11 @@ interface GeoJsonMeta {
   state: string;
 }
 
+enum GraphColor {
+  blue = "blue",
+  red = "red",
+}
+
 interface MapDataPoint {
   jurisdiction: string;
   value: number;
@@ -21,6 +26,7 @@ interface MapDataPoint {
 
 interface MapData {
   title: string;
+  color: GraphColor;
   isDollarAmount: boolean;
   dataPoints: MapDataPoint[];
 }
@@ -120,6 +126,15 @@ function getGeoProjection(state: string): d3.GeoProjection {
     .scale(scale);
 }
 
+function sequentialColors(color: GraphColor): d3.ScaleSequential<string> {
+  switch (color) {
+    case GraphColor.blue:
+      return d3.scaleSequential<string>(d3.interpolateBlues);
+    case GraphColor.red:
+      return d3.scaleSequential<string>(d3.interpolateReds);
+  }
+}
+
 function drawMap(
   container: HTMLElement,
   state: string,
@@ -132,9 +147,10 @@ function drawMap(
 
   const maxValue = d3.max(mapData.dataPoints, (d) => d.value);
 
-  const colorScale = d3
-    .scaleSequential(d3.interpolateBlues)
-    .domain([0, maxValue === undefined ? 0 : maxValue]);
+  const colorScale = sequentialColors(mapData.color).domain([
+    0,
+    maxValue === undefined ? 0 : maxValue,
+  ]);
 
   const margin = { top: 20, right: 70, bottom: 20, left: 70 };
   const width = container.clientWidth - margin.left - margin.right;
@@ -187,11 +203,7 @@ function drawMap(
         return "none";
       }
 
-      const value = valueMap.get(key);
-
-      if (undefined === value) {
-        return "none";
-      }
+      const value = valueMap.get(key) as number;
 
       return colorScale(value);
     })

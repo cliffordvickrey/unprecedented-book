@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\App\Controller;
 
 use CliffordVickrey\Book2024\App\DTO\DonorProfileQuery;
+use CliffordVickrey\Book2024\App\DTO\GraphColor;
 use CliffordVickrey\Book2024\App\DTO\GraphData;
 use CliffordVickrey\Book2024\App\DTO\GraphDataPoint;
 use CliffordVickrey\Book2024\App\DTO\GraphType;
@@ -48,8 +49,8 @@ final class GraphDataController implements ControllerInterface
 
     private function buildGraphData(DonorProfileQuery $query): GraphData
     {
-        $graphData = new GraphData($query->graphType);
         $campaignType = $query->campaignType;
+        $graphData = new GraphData($query->graphType, GraphColor::fromCampaign($campaignType));
 
         if (!$campaignType) {
             return $graphData;
