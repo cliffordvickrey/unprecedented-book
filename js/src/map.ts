@@ -113,7 +113,7 @@ async function plot(): Promise<void> {
     getGeoJsonMeta(state);
   } catch (err: unknown) {
     if (err instanceof Error) {
-      container.innerHTML = err.message;
+      container.innerText = err.message;
     } else {
       console.error(err);
     }
