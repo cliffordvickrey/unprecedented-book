@@ -18,9 +18,9 @@ enum GraphType: string
     public function getTitle(): string
     {
         return match ($this) {
-            self::donors => 'Daily Unique Donors',
-            self::receipts => 'Daily Receipts',
-            self::amount => 'Daily Receipt Amounts',
+            self::donors => 'Unique Donors',
+            self::receipts => 'Receipts',
+            self::amount => 'Receipt Amounts',
         };
     }
 }

@@ -146,7 +146,7 @@ $route = $response->getObject(Route::class);
                         <label class="btn btn-outline-primary" for="app-action-map">Map</label>
                     </div>
                 </div>
-                <?php if (Route::graph === $route): ?>
+                <?php if (Route::graph === $route || Route::map === $route): ?>
                     <div class="col-12 pt-1">
                         <div class="btn-group" role="group" aria-label="Graph Types">
                             <input type="radio" class="btn-check" name="graph_type" id="app-graph-type-amount"

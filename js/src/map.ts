@@ -35,6 +35,7 @@ function scaleDiameter(diameter: number): number {
   const hardCodedScales: Map<string, number> = new Map([
     ["AK", 1000],
     ["DC", 120000],
+    ["ME", 6000],
     ["RI", 30000],
     ["TX", 3500],
   ]);
@@ -69,7 +70,7 @@ function getGeoJsonMeta(state: string): GeoJsonMeta {
   const geoJsonMeta = geoJsonMetaByState.find((meta) => meta.state === state);
 
   if (undefined === geoJsonMeta) {
-    throw new Error("Invalid state: " + state);
+    throw new Error("Map information is not available for this state");
   }
 
   return geoJsonMeta;
@@ -104,9 +105,26 @@ async function getGeoData(): Promise<any> {
   return await response.json();
 }
 
-async function refreshMap(): Promise<void> {
+async function plot(): Promise<void> {
+  const container = getContainer();
+  const state = getState();
+
+  try {
+    getGeoJsonMeta(state);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      container.innerHTML = err.message;
+    } else {
+      console.error(err);
+    }
+
+    return;
+  }
+
+  container.innerHTML =
+    '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
   const results = await Promise.all([getGeoData(), getMapData()]);
-  drawMap(getContainer(), getState(), results[0], results[1]);
+  drawMap(container, getState(), results[0], results[1]);
 }
 
 function getGeoProjection(state: string): d3.GeoProjection {
@@ -210,6 +228,68 @@ function drawMap(
     .attr("stroke", "black")
     .attr("stroke-width", 0.5);
 
+  // region legend/axis
+  const legendHeight = 20;
+  const legendWidth = 300;
+
+  const legendSvg = svg
+    .append("g")
+    .attr("class", "legend")
+    .attr(
+      "transform",
+      `translate(${margin.left}, ${
+        height + margin.top + margin.bottom - legendHeight
+      })`,
+    );
+
+  const legendGradient = legendSvg
+    .append("defs")
+    .append("linearGradient")
+    .attr("id", "legendGradient");
+
+  legendGradient
+    .append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", colorScale(0));
+
+  legendGradient
+    .append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", colorScale(maxValue === undefined ? 0 : maxValue));
+
+  legendSvg
+    .append("rect")
+    .attr("width", legendWidth)
+    .attr("height", legendHeight)
+    .style("fill", "url(#legendGradient)");
+
+  // Add axis scale
+  const legendScale = d3
+    .scaleLinear()
+    .domain([0, maxValue as number])
+    .range([0, legendWidth]);
+
+  const legendAxis = d3
+    .axisBottom(legendScale)
+    .ticks(5)
+    .tickFormat(d3.format(".2s"));
+
+  legendSvg
+    .append("g")
+    .attr("transform", `translate(0, ${legendHeight})`)
+    .call(legendAxis);
+
+  svg
+    .append("text")
+    .attr("class", "map-title")
+    .attr("x", width / 2 + margin.left)
+    .attr("y", height + margin.top + margin.bottom - 5)
+    .attr("text-anchor", "middle")
+    .style("font-size", "16px")
+    .style("font-weight", "bold")
+    .text(mapData.title);
+  // endregion
+
   const node = svg.node();
 
   if (null === node) {
@@ -220,11 +300,44 @@ function drawMap(
   container.append(node);
 }
 
+function getRadioButtons(): NodeListOf<HTMLInputElement> {
+  return <NodeListOf<HTMLInputElement>>(
+    document.querySelectorAll("#app-search-form input[name=graph_type]")
+  );
+}
+
+function refreshMap(): void {
+  const radioButtons = getRadioButtons();
+
+  radioButtons.forEach((radioButton) =>
+    radioButton.setAttribute("data-locked", "1"),
+  );
+
+  const enableRadioButtons = () =>
+    radioButtons.forEach((radioButton) =>
+      radioButton.removeAttribute("data-locked"),
+    );
+
+  plot().then(enableRadioButtons, () => {
+    enableRadioButtons();
+    getContainer().innerHTML =
+      '<span class="text-danger">There was an error</span>';
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
-  refreshMap().then(
-    () => console.log("Map drawn successfully!"),
-    (err) => {
-      throw err;
-    },
+  refreshMap();
+
+  getRadioButtons().forEach((radioButton) =>
+    radioButton.addEventListener("change", (e) => {
+      if (!radioButton.getAttribute("data-locked")) {
+        refreshMap();
+        return true;
+      }
+
+      e.stopPropagation();
+      e.preventDefault();
+      return false;
+    }),
   );
 });
