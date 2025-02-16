@@ -34,7 +34,19 @@ call_user_func(function () {
 
         $features = array_filter($features, is_array(...));
 
+        $zctas = [];
+
         foreach ($features as $feature) {
+            $properties = $feature['properties'] ?? null;
+
+            if (is_array($properties)) {
+                $zcta = $properties['ZCTA5CE20'] ?? null;
+
+                if (is_numeric($zcta)) {
+                    $zctas[] = (int) $zcta;
+                }
+            }
+
             $geometry = $feature['geometry'] ?? null;
 
             if (!is_array($geometry)) {
@@ -77,6 +89,7 @@ call_user_func(function () {
         }
 
         Assert::notEmpty($coors);
+        Assert::notEmpty($zctas);
 
         $lats = array_map(static fn ($c) => $c['lat'], $coors);
         $lons = array_map(static fn ($c) => $c['lon'], $coors);
@@ -94,12 +107,18 @@ call_user_func(function () {
         printf('Diameter of %s is %s meters%s', $state, StringUtilities::numberFormat($diameter), \PHP_EOL);
         printf('Midpoint of %s is [%g, %g]%s', $state, $midpoint['lat'], $midpoint['lon'], \PHP_EOL);
 
-        return ['state' => $state, 'diameter' => $diameter, 'midpoint' => $midpoint];
+        return [
+            'state' => $state,
+            'diameter' => $diameter,
+            'midpoint' => $midpoint,
+            'minZcta' => sprintf('%05d', min($zctas)),
+            'maxZcta' => sprintf('%05d', max($zctas)),
+        ];
     }, $geoJsonFiles);
 
     $geoJsonMetaJson = JsonUtilities::jsonEncode($geoJsonMeta, true);
 
-    FileUtilities::saveContents(__DIR__.'/../../js/src/geojson-meta.json', $geoJsonMetaJson);
+    FileUtilities::saveContents(__DIR__.'/../../web-data/geojson-meta/geojson-meta.json', $geoJsonMetaJson);
 });
 
 /**

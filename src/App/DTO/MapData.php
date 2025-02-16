@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\App\DTO;
 
 /**
- * @extends AbstractD3Data<GraphDataPoint>
+ * @extends AbstractD3Data<MapDataPoint>
  */
-final class GraphData extends AbstractD3Data
+final class MapData extends AbstractD3Data
 {
 }

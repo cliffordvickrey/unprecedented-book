@@ -11,6 +11,7 @@ use CliffordVickrey\Book2024\App\Controller\GeoJsonController;
 use CliffordVickrey\Book2024\App\Controller\GraphController;
 use CliffordVickrey\Book2024\App\Controller\GraphDataController;
 use CliffordVickrey\Book2024\App\Controller\MapController;
+use CliffordVickrey\Book2024\App\Controller\MapDataController;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 
 enum Route: string
@@ -21,6 +22,7 @@ enum Route: string
     case graph = 'graph';
     case graphData = 'graphData';
     case map = 'map';
+    case mapData = 'mapData';
 
     public static function fromRequest(Request $request): self
     {
@@ -49,6 +51,7 @@ enum Route: string
             self::graph => GraphController::class,
             self::graphData => GraphDataController::class,
             self::map => MapController::class,
+            self::mapData => MapDataController::class,
         };
     }
 }

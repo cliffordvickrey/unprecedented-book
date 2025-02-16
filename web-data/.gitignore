@@ -1,2 +1,4 @@
 *
 !.gitignore
+!/geojson-meta/
+!/geojson-meta/*
