@@ -14,6 +14,7 @@ use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReportRow;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportRow;
+use CliffordVickrey\Book2024\Common\Entity\Report\MapReportRow;
 use CliffordVickrey\Book2024\Common\Hydrator\EntityHydrator;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
@@ -49,7 +50,11 @@ abstract class Entity implements \JsonSerializable
         if (AbstractReport::class === $staticClass) {
             $staticClass = isset($value['totals']) ? DonorReport::class : CampaignReport::class;
         } elseif (AbstractReportRow::class === $staticClass) {
-            $staticClass = isset($value['characteristic']) ? DonorReportRow::class : CampaignReportRow::class;
+            $staticClass = match (true) {
+                isset($value['characteristic']) => DonorReportRow::class,
+                isset($value['jurisdiction']) => MapReportRow::class,
+                default => CampaignReportRow::class,
+            };
         } elseif (DonorProfileCycle::class === $staticClass) {
             $cycle = CastingUtilities::toInt($value['cycle'] ?? null);
 

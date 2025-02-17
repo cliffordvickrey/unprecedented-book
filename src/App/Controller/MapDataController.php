@@ -6,19 +6,29 @@ namespace CliffordVickrey\Book2024\App\Controller;
 
 use CliffordVickrey\Book2024\App\DTO\DonorProfileQuery;
 use CliffordVickrey\Book2024\App\DTO\GraphColor;
+use CliffordVickrey\Book2024\App\DTO\GraphType;
 use CliffordVickrey\Book2024\App\DTO\MapData;
 use CliffordVickrey\Book2024\App\DTO\MapDataPoint;
 use CliffordVickrey\Book2024\App\Http\ContentType;
 use CliffordVickrey\Book2024\App\Http\Request;
 use CliffordVickrey\Book2024\App\Http\Response;
-use CliffordVickrey\Book2024\Common\Enum\State;
-use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
-use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
-use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
-use Faker\Factory;
+use CliffordVickrey\Book2024\Common\Entity\Report\MapReport;
+use CliffordVickrey\Book2024\Common\Repository\MapReportRepository;
+use CliffordVickrey\Book2024\Common\Repository\ReportRepositoryInterface;
 
-final class MapDataController extends AbstractController
+final class MapDataController implements ControllerInterface
 {
+    /** @var ReportRepositoryInterface<MapReport> */
+    private ReportRepositoryInterface $repository;
+
+    /**
+     * @param ReportRepositoryInterface<MapReport>|null $repository
+     */
+    public function __construct(?ReportRepositoryInterface $repository = null)
+    {
+        $this->repository = $repository ?? new MapReportRepository();
+    }
+
     public function dispatch(Request $request): Response
     {
         $query = DonorProfileQuery::fromRequest($request);
@@ -44,52 +54,25 @@ final class MapDataController extends AbstractController
             return $mapData;
         }
 
-        $jurisdictions = self::getJurisdictions($query->state);
+        $report = $this->repository->get(
+            campaignType: $campaignType,
+            state: $query->state,
+            characteristicA: $query->characteristicA,
+            characteristicB: $query->characteristicB
+        );
 
-        $isDollarAmount = $query->graphType->isDollarAmount();
+        foreach ($report as $row) {
+            $valueObj = $row->value;
 
-        $faker = Factory::create();
+            $value = match ($query->graphType) {
+                GraphType::amount => $valueObj->amount,
+                GraphType::donors => $valueObj->donors,
+                GraphType::receipts => $valueObj->receipts,
+            };
 
-        foreach ($jurisdictions as $jurisdiction) {
-            $amt = $faker->randomFloat(2, 0, 1000000);
-
-            if (!$isDollarAmount) {
-                $amt = (int) $amt;
-            }
-
-            $mapData[] = new MapDataPoint($jurisdiction, $amt);
+            $mapData[] = new MapDataPoint($row->jurisdiction, $value);
         }
 
         return $mapData;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private static function getJurisdictions(State $state): array
-    {
-        if (State::USA === $state) {
-            return array_values(State::getDescriptions());
-        }
-
-        $contents = FileUtilities::getContents(__DIR__.'/../../../web-data/geojson-meta/geojson-meta.json');
-        /** @var list<array{state: string, minZcta: numeric-string, maxZcta: numeric-string}> $geoJsonMeta */
-        $geoJsonMeta = JsonUtilities::jsonDecode($contents);
-
-        $geoJsonMetaInState = array_filter($geoJsonMeta, fn ($meta) => $meta['state'] === $state->value);
-
-        if (0 === \count($geoJsonMetaInState)) {
-            return [];
-        }
-
-        $zctas = array_pop($geoJsonMetaInState);
-
-        $min = (int) CastingUtilities::toInt($zctas['minZcta']);
-        $max = (int) CastingUtilities::toInt($zctas['maxZcta']);
-
-        return array_map(
-            fn ($jurisdiction) => \sprintf('%05d', $jurisdiction),
-            range($min, $max)
-        );
     }
 }

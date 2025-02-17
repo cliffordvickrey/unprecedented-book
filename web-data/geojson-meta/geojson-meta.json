@@ -1,6 +1,7 @@
 [
     {
         "state": "AK",
+        "stateName": "ALASKA",
         "diameter": 3148747,
         "midpoint": {
             "lat": 63.362256,
@@ -11,6 +12,7 @@
     },
     {
         "state": "AL",
+        "stateName": "ALABAMA",
         "diameter": 627277,
         "midpoint": {
             "lat": 32.62816,
@@ -21,6 +23,7 @@
     },
     {
         "state": "AR",
+        "stateName": "ARKANSAS",
         "diameter": 599925,
         "midpoint": {
             "lat": 34.780138,
@@ -31,6 +34,7 @@
     },
     {
         "state": "AS",
+        "stateName": "AMERICAN SAMOA",
         "diameter": 411932,
         "midpoint": {
             "lat": -12.711645,
@@ -41,6 +45,7 @@
     },
     {
         "state": "AZ",
+        "stateName": "ARIZONA",
         "diameter": 856118,
         "midpoint": {
             "lat": 34.335322,
@@ -51,6 +56,7 @@
     },
     {
         "state": "CA",
+        "stateName": "CALIFORNIA",
         "diameter": 1389679,
         "midpoint": {
             "lat": 37.382797,
@@ -61,6 +67,7 @@
     },
     {
         "state": "CO",
+        "stateName": "COLORADO",
         "diameter": 780944,
         "midpoint": {
             "lat": 39.025491,
@@ -71,6 +78,7 @@
     },
     {
         "state": "CT",
+        "stateName": "CONNECTICUT",
         "diameter": 200682,
         "midpoint": {
             "lat": 41.51941,
@@ -81,6 +89,7 @@
     },
     {
         "state": "DC",
+        "stateName": "DISTRICT OF COLUMBIA",
         "diameter": 29039,
         "midpoint": {
             "lat": 38.893425,
@@ -91,6 +100,7 @@
     },
     {
         "state": "DE",
+        "stateName": "DELAWARE",
         "diameter": 170872,
         "midpoint": {
             "lat": 39.126807,
@@ -101,6 +111,7 @@
     },
     {
         "state": "FL",
+        "stateName": "FLORIDA",
         "diameter": 1037927,
         "midpoint": {
             "lat": 27.814002,
@@ -111,6 +122,7 @@
     },
     {
         "state": "GA",
+        "stateName": "GEORGIA",
         "diameter": 682389,
         "midpoint": {
             "lat": 32.704148,
@@ -121,6 +133,7 @@
     },
     {
         "state": "GU",
+        "stateName": "GUAM",
         "diameter": 58278,
         "midpoint": {
             "lat": 13.450204,
@@ -131,6 +144,7 @@
     },
     {
         "state": "HI",
+        "stateName": "HAWAII",
         "diameter": 636590,
         "midpoint": {
             "lat": 20.589299,
@@ -141,6 +155,7 @@
     },
     {
         "state": "IA",
+        "stateName": "IOWA",
         "diameter": 651245,
         "midpoint": {
             "lat": 41.997077,
@@ -151,6 +166,7 @@
     },
     {
         "state": "ID",
+        "stateName": "IDAHO",
         "diameter": 945204,
         "midpoint": {
             "lat": 45.492268,
@@ -161,6 +177,7 @@
     },
     {
         "state": "IL",
+        "stateName": "ILLINOIS",
         "diameter": 704949,
         "midpoint": {
             "lat": 39.75668,
@@ -171,6 +188,7 @@
     },
     {
         "state": "IN",
+        "stateName": "INDIANA",
         "diameter": 529657,
         "midpoint": {
             "lat": 39.778468,
@@ -181,6 +199,7 @@
     },
     {
         "state": "KS",
+        "stateName": "KANSAS",
         "diameter": 732996,
         "midpoint": {
             "lat": 38.585729,
@@ -191,6 +210,7 @@
     },
     {
         "state": "KY",
+        "stateName": "KENTUCKY",
         "diameter": 721873,
         "midpoint": {
             "lat": 37.826318,
@@ -201,6 +221,7 @@
     },
     {
         "state": "LA",
+        "stateName": "LOUISIANA",
         "diameter": 659252,
         "midpoint": {
             "lat": 31.012374,
@@ -211,6 +232,7 @@
     },
     {
         "state": "MA",
+        "stateName": "MASSACHUSETTS",
         "diameter": 347702,
         "midpoint": {
             "lat": 42.076168,
@@ -221,6 +243,7 @@
     },
     {
         "state": "MD",
+        "stateName": "MARYLAND",
         "diameter": 433348,
         "midpoint": {
             "lat": 38.844723,
@@ -231,6 +254,7 @@
     },
     {
         "state": "ME",
+        "stateName": "MAINE",
         "diameter": 582991,
         "midpoint": {
             "lat": 45.187267,
@@ -241,6 +265,7 @@
     },
     {
         "state": "MI",
+        "stateName": "MICHIGAN",
         "diameter": 902113,
         "midpoint": {
             "lat": 44.657924,
@@ -251,6 +276,7 @@
     },
     {
         "state": "MN",
+        "stateName": "MINNESOTA",
         "diameter": 886074,
         "midpoint": {
             "lat": 46.486953,
@@ -261,6 +287,7 @@
     },
     {
         "state": "MO",
+        "stateName": "MISSOURI",
         "diameter": 771214,
         "midpoint": {
             "lat": 38.350905,
@@ -271,6 +298,7 @@
     },
     {
         "state": "MP",
+        "stateName": "NORTHERN MARIANA ISLANDS",
         "diameter": 151722,
         "midpoint": {
             "lat": 14.700578,
@@ -281,6 +309,7 @@
     },
     {
         "state": "MS",
+        "stateName": "MISSISSIPPI",
         "diameter": 631532,
         "midpoint": {
             "lat": 32.597513,
@@ -291,6 +320,7 @@
     },
     {
         "state": "MT",
+        "stateName": "MONTANA",
         "diameter": 1087097,
         "midpoint": {
             "lat": 46.851688,
@@ -301,6 +331,7 @@
     },
     {
         "state": "NC",
+        "stateName": "NORTH CAROLINA",
         "diameter": 860519,
         "midpoint": {
             "lat": 35.296018,
@@ -311,6 +342,7 @@
     },
     {
         "state": "ND",
+        "stateName": "NORTH DAKOTA",
         "diameter": 696521,
         "midpoint": {
             "lat": 47.344942,
@@ -321,6 +353,7 @@
     },
     {
         "state": "NE",
+        "stateName": "NEBRASKA",
         "diameter": 816297,
         "midpoint": {
             "lat": 41.670329,
@@ -331,6 +364,7 @@
     },
     {
         "state": "NH",
+        "stateName": "NEW HAMPSHIRE",
         "diameter": 333247,
         "midpoint": {
             "lat": 44.026249,
@@ -341,6 +375,7 @@
     },
     {
         "state": "NJ",
+        "stateName": "NEW JERSEY",
         "diameter": 304939,
         "midpoint": {
             "lat": 40.145954,
@@ -351,6 +386,7 @@
     },
     {
         "state": "NM",
+        "stateName": "NEW MEXICO",
         "diameter": 860994,
         "midpoint": {
             "lat": 34.20753,
@@ -361,6 +397,7 @@
     },
     {
         "state": "NV",
+        "stateName": "NEVADA",
         "diameter": 971918,
         "midpoint": {
             "lat": 38.735345,
@@ -371,6 +408,7 @@
     },
     {
         "state": "NY",
+        "stateName": "NEW YORK",
         "diameter": 817391,
         "midpoint": {
             "lat": 42.823915,
@@ -381,6 +419,7 @@
     },
     {
         "state": "OH",
+        "stateName": "OHIO",
         "diameter": 548710,
         "midpoint": {
             "lat": 40.211539,
@@ -391,6 +430,7 @@
     },
     {
         "state": "OK",
+        "stateName": "OKLAHOMA",
         "diameter": 863678,
         "midpoint": {
             "lat": 35.384641,
@@ -401,6 +441,7 @@
     },
     {
         "state": "OR",
+        "stateName": "OREGON",
         "diameter": 814186,
         "midpoint": {
             "lat": 44.100649,
@@ -411,6 +452,7 @@
     },
     {
         "state": "PA",
+        "stateName": "PENNSYLVANIA",
         "diameter": 570897,
         "midpoint": {
             "lat": 41.03261,
@@ -421,6 +463,7 @@
     },
     {
         "state": "PR",
+        "stateName": "PUERTO RICO",
         "diameter": 295508,
         "midpoint": {
             "lat": 18.218751,
@@ -431,6 +474,7 @@
     },
     {
         "state": "RI",
+        "stateName": "RHODE ISLAND",
         "diameter": 114987,
         "midpoint": {
             "lat": 41.583165,
@@ -441,6 +485,7 @@
     },
     {
         "state": "SC",
+        "stateName": "SOUTH CAROLINA",
         "diameter": 567535,
         "midpoint": {
             "lat": 33.656622,
@@ -451,6 +496,7 @@
     },
     {
         "state": "SD",
+        "stateName": "SOUTH DAKOTA",
         "diameter": 765565,
         "midpoint": {
             "lat": 44.421905,
@@ -461,6 +507,7 @@
     },
     {
         "state": "TN",
+        "stateName": "TENNESSEE",
         "diameter": 805089,
         "midpoint": {
             "lat": 35.857296,
@@ -471,6 +518,7 @@
     },
     {
         "state": "TX",
+        "stateName": "TEXAS",
         "diameter": 1719554,
         "midpoint": {
             "lat": 31.335867,
@@ -481,6 +529,7 @@
     },
     {
         "state": "UT",
+        "stateName": "UTAH",
         "diameter": 723036,
         "midpoint": {
             "lat": 39.467458,
@@ -491,6 +540,7 @@
     },
     {
         "state": "VA",
+        "stateName": "VIRGINIA",
         "diameter": 810960,
         "midpoint": {
             "lat": 38.037601,
@@ -501,6 +551,7 @@
     },
     {
         "state": "VI",
+        "stateName": "VIRGIN ISLANDS",
         "diameter": 95979,
         "midpoint": {
             "lat": 18.038021,
@@ -511,6 +562,7 @@
     },
     {
         "state": "VT",
+        "stateName": "VERMONT",
         "diameter": 299706,
         "midpoint": {
             "lat": 43.875924,
@@ -521,6 +573,7 @@
     },
     {
         "state": "WA",
+        "stateName": "WASHINGTON",
         "diameter": 712193,
         "midpoint": {
             "lat": 47.341729,
@@ -531,6 +584,7 @@
     },
     {
         "state": "WI",
+        "stateName": "WISCONSIN",
         "diameter": 700103,
         "midpoint": {
             "lat": 44.826758,
@@ -541,6 +595,7 @@
     },
     {
         "state": "WV",
+        "stateName": "WEST VIRGINIA",
         "diameter": 573530,
         "midpoint": {
             "lat": 38.937434,
@@ -551,6 +606,7 @@
     },
     {
         "state": "WY",
+        "stateName": "WYOMING",
         "diameter": 787628,
         "midpoint": {
             "lat": 42.834051,

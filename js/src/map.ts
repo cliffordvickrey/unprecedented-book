@@ -12,6 +12,7 @@ interface GeoJsonMeta {
   diameter: number;
   midpoint: Coordinates;
   state: string;
+  stateName: string;
 }
 
 enum GraphColor {
@@ -30,6 +31,17 @@ interface MapData {
   isDollarAmount: boolean;
   dataPoints: MapDataPoint[];
 }
+
+const geoJsonMetaMap = new Map<string, GeoJsonMeta>(
+  geoJsonMetaByState.map((geoJsonMeta) => [geoJsonMeta.state, geoJsonMeta]),
+);
+
+const stateNameMap = new Map<string, string>(
+  geoJsonMetaByState.map((geoJsonMeta) => [
+    geoJsonMeta.stateName,
+    geoJsonMeta.state,
+  ]),
+);
 
 function scaleDiameter(diameter: number): number {
   const hardCodedScales: Map<string, number> = new Map([
@@ -67,13 +79,11 @@ function scaleDiameter(diameter: number): number {
 }
 
 function getGeoJsonMeta(state: string): GeoJsonMeta {
-  const geoJsonMeta = geoJsonMetaByState.find((meta) => meta.state === state);
-
-  if (undefined === geoJsonMeta) {
+  if (!geoJsonMetaMap.has(state)) {
     throw new Error("Map information is not available for this state");
   }
 
-  return geoJsonMeta;
+  return geoJsonMetaMap.get(state) as GeoJsonMeta;
 }
 
 function getMapDataUrl(): string {
@@ -210,7 +220,7 @@ function drawMap(
 
       if (d.properties.hasOwnProperty("name")) {
         // state name
-        key = d.properties.name.toUpperCase();
+        key = stateNameMap.get(d.properties.name.toUpperCase()) as string;
       } else if (d.properties.hasOwnProperty("ZCTA5CE20")) {
         // 2020 Census ZCTA
         key = d.properties.ZCTA5CE20;

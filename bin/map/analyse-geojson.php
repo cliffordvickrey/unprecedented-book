@@ -3,6 +3,7 @@
 
 declare(strict_types=1);
 
+use CliffordVickrey\Book2024\Common\Enum\State;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\MathUtilities;
@@ -109,6 +110,7 @@ call_user_func(function () {
 
         return [
             'state' => $state,
+            'stateName' => State::from($state)->getDescription(),
             'diameter' => $diameter,
             'midpoint' => $midpoint,
             'minZcta' => sprintf('%05d', min($zctas)),
