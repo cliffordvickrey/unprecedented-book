@@ -33,6 +33,8 @@ call_user_func(function () {
         $response = $controller->dispatch($request);
         $response->setObject($route);
     } catch (Throwable $ex) {
+        throw $ex;
+
         error_log((string) $ex);
 
         $view->resetState();

@@ -14,6 +14,7 @@ use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReportRow;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReportRow;
+use CliffordVickrey\Book2024\Common\Entity\Report\MapReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\MapReportRow;
 use CliffordVickrey\Book2024\Common\Hydrator\EntityHydrator;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
@@ -49,6 +50,15 @@ abstract class Entity implements \JsonSerializable
 
         if (AbstractReport::class === $staticClass) {
             $staticClass = isset($value['totals']) ? DonorReport::class : CampaignReport::class;
+
+            if ($staticClass === CampaignReport::class) {
+                // @todo fix
+                $staticClass = \str_contains(
+                    JsonUtilities::jsonEncode($value),
+                    'jurisdiction'
+                ) ? MapReport::class : CampaignReport::class;
+            }
+
         } elseif (AbstractReportRow::class === $staticClass) {
             $staticClass = match (true) {
                 isset($value['characteristic']) => DonorReportRow::class,

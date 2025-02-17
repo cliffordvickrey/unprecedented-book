@@ -24,6 +24,7 @@ abstract class AbstractD3Data extends AbstractCollection implements \JsonSeriali
      *     title: string,
      *     color: string,
      *     isDollarAmount: bool,
+     *     isPercent: bool,
      *     dataPoints: list<TDataPoint>
      * }
      */
@@ -33,6 +34,7 @@ abstract class AbstractD3Data extends AbstractCollection implements \JsonSeriali
             'title' => $this->graphType->getTitle(),
             'color' => $this->color->value,
             'isDollarAmount' => $this->graphType->isDollarAmount(),
+            'isPercent' => GraphType::percent === $this->graphType,
             'dataPoints' => array_values($this->data),
         ];
     }

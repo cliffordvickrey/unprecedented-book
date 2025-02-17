@@ -29,6 +29,7 @@ interface MapData {
   title: string;
   color: GraphColor;
   isDollarAmount: boolean;
+  isPercent: boolean;
   dataPoints: MapDataPoint[];
 }
 
@@ -176,10 +177,32 @@ function drawMap(
 
   const maxValue = d3.max(mapData.dataPoints, (d) => d.value);
 
-  const colorScale = sequentialColors(mapData.color).domain([
-    0,
-    maxValue === undefined ? 0 : maxValue,
-  ]);
+  let colorScale: d3.ScaleSequential<string> | d3.ScaleLinear<number, string>;
+
+  if (mapData.isPercent) {
+    let color1: string;
+    let color2: string;
+
+    switch (mapData.color) {
+      case GraphColor.blue:
+        color1 = "red";
+        color2 = "blue";
+        break;
+      default:
+        color1 = "blue";
+        color2 = "red";
+        break;
+    }
+
+    colorScale = d3
+      .scaleSequential(d3.interpolateRgb(color1, color2))
+      .domain([0, 100]);
+  } else {
+    colorScale = sequentialColors(mapData.color).domain([
+      0,
+      maxValue === undefined ? 0 : maxValue,
+    ]);
+  }
 
   const margin = { top: 20, right: 70, bottom: 20, left: 70 };
   const width = container.clientWidth - margin.left - margin.right;

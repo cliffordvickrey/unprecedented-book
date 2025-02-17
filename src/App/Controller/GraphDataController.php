@@ -72,7 +72,7 @@ final class GraphDataController implements ControllerInterface
             $value = match ($query->graphType) {
                 GraphType::amount => $valueObj->amount,
                 GraphType::donors => $valueObj->donors,
-                GraphType::receipts => $valueObj->receipts,
+                default => $valueObj->receipts,
             };
 
             $graphData[] = new GraphDataPoint($dt, $value);

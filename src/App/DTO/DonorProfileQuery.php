@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CliffordVickrey\Book2024\App\DTO;
 
 use CliffordVickrey\Book2024\App\Http\Request;
+use CliffordVickrey\Book2024\App\Http\Route;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\DonorCharacteristic;
 use CliffordVickrey\Book2024\Common\Enum\State;
@@ -58,7 +59,14 @@ class DonorProfileQuery
             $characteristicB = null;
         }
 
-        $graphType = self::initEnum(GraphType::class, $request) ?? GraphType::amount;
+        $route = Route::fromRequest($request);
+        $defaultGraphType = Route::map === $route ? GraphType::percent : GraphType::amount;
+
+        $graphType = self::initEnum(GraphType::class, $request) ?? $defaultGraphType;
+
+        if (Route::map !== $route && Route::mapData !== $route && GraphType::percent === $graphType) {
+            $graphType = GraphType::amount;
+        }
 
         return new self(
             campaignType: $campaignType,

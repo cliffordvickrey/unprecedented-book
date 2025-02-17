@@ -6,6 +6,7 @@ namespace CliffordVickrey\Book2024\App\DTO;
 
 enum GraphType: string
 {
+    case percent = 'percent';
     case donors = 'donors';
     case receipts = 'receipts';
     case amount = 'amount';
@@ -18,6 +19,7 @@ enum GraphType: string
     public function getTitle(): string
     {
         return match ($this) {
+            self::percent => '% Versus Opponent',
             self::donors => 'Unique Donors',
             self::receipts => 'Receipts',
             self::amount => 'Receipt Amounts',

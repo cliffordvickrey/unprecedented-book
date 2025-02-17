@@ -148,6 +148,16 @@ $route = $response->getObject(Route::class);
                 </div>
                 <?php if (Route::graph === $route || Route::map === $route): ?>
                     <div class="col-12 pt-1">
+                        <?php if (Route::map === $route): ?>
+                            <div class="btn-group" role="group" aria-label="Graph Types">
+                                <input type="radio" class="btn-check" name="graph_type" id="app-graph-type-percent"
+                                       autocomplete="off"
+                                       data-js-enabled="1"
+                                       value="<?= GraphType::percent->value; ?>"<?= GraphType::percent === $query->graphType ? ' checked' : ''; ?>>
+                                <label class="btn btn-sm btn-outline-primary"
+                                       for="app-graph-type-percent"><?= GraphType::percent->getTitle(); ?></label>
+                            </div>
+                        <?php endif; ?>
                         <div class="btn-group" role="group" aria-label="Graph Types">
                             <input type="radio" class="btn-check" name="graph_type" id="app-graph-type-amount"
                                    autocomplete="off"
