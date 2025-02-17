@@ -24,17 +24,17 @@ class MapReport extends AbstractReport
 
     public function hasByJurisdiction(string $jurisdiction): bool
     {
-        return $this->hasIndex($jurisdiction);
+        return $this->hasIndex('j'.$jurisdiction);
     }
 
     public function set(MapReportRow $row): void
     {
-        $this->setByIndex($row->jurisdiction, $row);
+        $this->setByIndex('j'.$row->jurisdiction, $row);
     }
 
     public function getByJurisdiction(string $jurisdiction): MapReportRow
     {
-        return $this->getByIndex($jurisdiction);
+        return $this->getByIndex('j'.$jurisdiction);
     }
 
     protected function init(): void
@@ -43,6 +43,6 @@ class MapReport extends AbstractReport
 
     protected function getRowIndex(AbstractReportRow $row): string
     {
-        return $row->jurisdiction;
+        return 'j'.$row->jurisdiction;
     }
 }
