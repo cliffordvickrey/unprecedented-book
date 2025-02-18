@@ -49,15 +49,11 @@ abstract class Entity implements \JsonSerializable
         $staticClass = static::class;
 
         if (AbstractReport::class === $staticClass) {
-            $staticClass = isset($value['totals']) ? DonorReport::class : CampaignReport::class;
-
-            if (CampaignReport::class === $staticClass) {
-                // @todo fix
-                $staticClass = str_contains(
-                    JsonUtilities::jsonEncode($value),
-                    'jurisdiction'
-                ) ? MapReport::class : CampaignReport::class;
-            }
+            $staticClass = match (true) {
+                isset($value['totals']) => DonorReport::class,
+                isset($value['map']) => MapReport::class,
+                default => CampaignReport::class,
+            };
         } elseif (AbstractReportRow::class === $staticClass) {
             $staticClass = match (true) {
                 isset($value['characteristic']) => DonorReportRow::class,

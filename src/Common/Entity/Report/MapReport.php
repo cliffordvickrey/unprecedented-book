@@ -9,6 +9,8 @@ namespace CliffordVickrey\Book2024\Common\Entity\Report;
  */
 class MapReport extends AbstractReport
 {
+    public bool $map = true;
+
     public function add(ReportValue $value, string $jurisdiction): void
     {
         if (!$this->hasByJurisdiction($jurisdiction)) {
