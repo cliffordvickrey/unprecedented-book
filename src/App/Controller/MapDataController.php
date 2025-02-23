@@ -12,6 +12,7 @@ use CliffordVickrey\Book2024\App\DTO\MapDataPoint;
 use CliffordVickrey\Book2024\App\Http\ContentType;
 use CliffordVickrey\Book2024\App\Http\Request;
 use CliffordVickrey\Book2024\App\Http\Response;
+use CliffordVickrey\Book2024\Common\Cache\Cache;
 use CliffordVickrey\Book2024\Common\Entity\Report\MapReport;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Repository\MapReportRepository;
@@ -27,7 +28,7 @@ final class MapDataController implements ControllerInterface
      */
     public function __construct(?ReportRepositoryInterface $repository = null)
     {
-        $this->repository = $repository ?? new MapReportRepository();
+        $this->repository = $repository ?? new MapReportRepository(cache: new Cache());
     }
 
     public function dispatch(Request $request): Response

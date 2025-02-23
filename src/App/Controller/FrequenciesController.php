@@ -8,6 +8,7 @@ use CliffordVickrey\Book2024\App\DataGrid\Grids\DonorProfileGrid;
 use CliffordVickrey\Book2024\App\DTO\DonorProfileQuery;
 use CliffordVickrey\Book2024\App\Http\Request;
 use CliffordVickrey\Book2024\App\Http\Response;
+use CliffordVickrey\Book2024\Common\Cache\Cache;
 use CliffordVickrey\Book2024\Common\Entity\Report\DonorReport;
 use CliffordVickrey\Book2024\Common\Repository\DonorReportRepository;
 use CliffordVickrey\Book2024\Common\Repository\ReportRepositoryInterface;
@@ -23,7 +24,7 @@ final readonly class FrequenciesController implements ControllerInterface
      */
     public function __construct(?ReportRepositoryInterface $repository = null)
     {
-        $this->repository = $repository ?? new DonorReportRepository();
+        $this->repository = $repository ?? new DonorReportRepository(cache: new Cache());
     }
 
     public function dispatch(Request $request): Response

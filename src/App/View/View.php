@@ -6,8 +6,8 @@ namespace CliffordVickrey\Book2024\App\View;
 
 use CliffordVickrey\Book2024\App\DataGrid\DataGrid;
 use CliffordVickrey\Book2024\App\Http\Response;
+use CliffordVickrey\Book2024\Common\Cache\CacheInterface;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
-use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use CliffordVickrey\Book2024\Common\Utilities\JsonUtilities;
 use Webmozart\Assert\Assert;
 
@@ -24,13 +24,16 @@ class View
         'map' => ['graph-map', 'map'],
     ];
 
-    /** @var array<string, list<string>> */
-    private array $assetUris = [];
+    private ?AssetUris $assetUris = null;
     /** @var list<string> */
     private array $enqueuedScripts = [];
     private ?\IntlDateFormatter $intlDateFormatter = null;
     /** @var array<self::NUMBER_FORMATTER_*, \NumberFormatter> */
     private array $numberFormatters = [];
+
+    public function __construct(private readonly ?CacheInterface $cache = null)
+    {
+    }
 
     public function emitCss(string $name): string
     {
@@ -42,30 +45,26 @@ class View
      */
     private function getAssetUris(string $filename): array
     {
-        if (isset($this->assetUris[$filename])) {
-            return $this->assetUris[$filename];
-        }
-
-        $distFilenames = FileUtilities::glob(__DIR__.'/../../../public/dist/*.{js,css}', true);
-
-        foreach ($distFilenames as $distFilename) {
-            $ext = pathinfo($distFilename, \PATHINFO_EXTENSION);
-            $basename = basename($distFilename, ".$ext");
-
-            $parts = explode('.', $basename);
-            array_pop($parts);
-
-            $key = \sprintf('%s.%s', implode('.', $parts), $ext);
-
-            if (!isset($this->assetUris[$key])) {
-                $this->assetUris[$key] = [];
-            }
-
-            $this->assetUris[$key][] = "dist/$basename.$ext";
+        if (null === $this->assetUris) {
+            $this->assetUris = $this->buildAssetUris();
         }
 
         return $this->assetUris[$filename]
             ?? throw new \UnexpectedValueException(\sprintf('Could not resolve %s to a filename', $filename));
+    }
+
+    private function buildAssetUris(): AssetUris
+    {
+        $assetUris = $this->cache?->get(AssetUris::class);
+
+        if ($assetUris) {
+            return $assetUris;
+        }
+
+        $assetUris = AssetUris::build();
+        $this->cache?->set($assetUris);
+
+        return $assetUris;
     }
 
     public function jsonEncode(mixed $value): string

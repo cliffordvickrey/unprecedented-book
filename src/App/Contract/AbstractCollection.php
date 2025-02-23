@@ -10,7 +10,7 @@ use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use Iterator;
 
 /**
- * @template TKey
+ * @template TKey of array-key
  * @template TValue
  *
  * @implements ArrayAccess<TKey, TValue>
@@ -76,7 +76,7 @@ abstract class AbstractCollection implements \ArrayAccess, \Countable, \Iterator
      *
      * @return TValue
      */
-    public function offsetGet(mixed $offset): mixed
+    public function &offsetGet(mixed $offset): mixed
     {
         $normalizedOffset = self::normalizeOffset($offset);
 

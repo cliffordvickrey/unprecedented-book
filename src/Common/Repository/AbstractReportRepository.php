@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Repository;
 
+use CliffordVickrey\Book2024\Common\Cache\CacheInterface;
 use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReportCollection;
 use CliffordVickrey\Book2024\Common\Entity\Report\AbstractReportRow;
@@ -41,6 +42,7 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
         string $path = __DIR__.'/../../../web-data/',
         private bool $prettyPrint = false,
         private ?int $compressionLevel = ZipUtilities::DEFAULT_COMPRESSION_LEVEL,
+        private ?CacheInterface $cache = null,
     ) {
         $this->path = $path.$this->getSubFolder();
     }
@@ -73,6 +75,39 @@ abstract readonly class AbstractReportRepository implements ReportRepositoryInte
     ): AbstractReport {
         self::validateCharacteristics($characteristicA, $characteristicB);
 
+        if (null === $this->cache) {
+            return $this->doGet($campaignType, $state, $characteristicA, $characteristicB);
+        }
+
+        $params = array_filter([
+            'campaignType' => $campaignType->value,
+            'state' => $state->value,
+            'characteristicA' => $characteristicA?->value,
+            'characteristicB' => $characteristicB?->value,
+        ]);
+
+        $report = $this->cache->get($this->getClassStr(), $params);
+
+        if ($report) {
+            return $report;
+        }
+
+        $report = $this->doGet($campaignType, $state, $characteristicA, $characteristicB);
+        $ttl = $characteristicA ? 3600 : 0;
+        $this->cache->set($report, $params, $ttl);
+
+        return $report;
+    }
+
+    /**
+     * @phpstan-return TReport
+     */
+    private function doGet(
+        CampaignType $campaignType = CampaignType::donald_trump,
+        State $state = State::USA,
+        ?DonorCharacteristic $characteristicA = null,
+        ?DonorCharacteristic $characteristicB = null,
+    ): AbstractReport {
         return $this->getCollection($campaignType, $state, $characteristicA)->getByCharacteristic($characteristicB);
     }
 

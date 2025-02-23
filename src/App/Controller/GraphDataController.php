@@ -12,6 +12,7 @@ use CliffordVickrey\Book2024\App\DTO\GraphType;
 use CliffordVickrey\Book2024\App\Http\ContentType;
 use CliffordVickrey\Book2024\App\Http\Request;
 use CliffordVickrey\Book2024\App\Http\Response;
+use CliffordVickrey\Book2024\Common\Cache\Cache;
 use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReport;
 use CliffordVickrey\Book2024\Common\Entity\Report\CampaignReportRow;
 use CliffordVickrey\Book2024\Common\Repository\CampaignReportRepository;
@@ -28,7 +29,7 @@ final class GraphDataController implements ControllerInterface
      */
     public function __construct(?ReportRepositoryInterface $repository = null)
     {
-        $this->repository = $repository ?? new CampaignReportRepository();
+        $this->repository = $repository ?? new CampaignReportRepository(cache: new Cache());
     }
 
     public function dispatch(Request $request): Response

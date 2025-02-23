@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\App\Http;
 
+use CliffordVickrey\Book2024\App\Controller\CacheController;
 use CliffordVickrey\Book2024\App\Controller\ControllerInterface;
 use CliffordVickrey\Book2024\App\Controller\ErrorController;
 use CliffordVickrey\Book2024\App\Controller\FrequenciesController;
@@ -16,6 +17,7 @@ use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 
 enum Route: string
 {
+    case cache = 'cache';
     case error = 'error';
     case frequencies = 'frequencies';
     case geoJson = 'geoJson';
@@ -45,6 +47,7 @@ enum Route: string
     public function getControllerClassStr(): string
     {
         return match ($this) {
+            self::cache => CacheController::class,
             self::error => ErrorController::class,
             self::frequencies => FrequenciesController::class,
             self::geoJson => GeoJsonController::class,

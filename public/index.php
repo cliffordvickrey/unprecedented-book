@@ -10,6 +10,7 @@ use CliffordVickrey\Book2024\App\Http\Request;
 use CliffordVickrey\Book2024\App\Http\Response;
 use CliffordVickrey\Book2024\App\Http\Route;
 use CliffordVickrey\Book2024\App\View\View;
+use CliffordVickrey\Book2024\Common\Cache\Cache;
 use Webmozart\Assert\Assert;
 
 call_user_func(function () {
@@ -22,7 +23,7 @@ call_user_func(function () {
     require_once __DIR__.'/../vendor/autoload.php';
 
     set_error_handler(ErrorHandler::handleError(...));
-    $view = new View();
+    $view = new View(new Cache(100));
 
     try {
         $request = Request::fromSuperGlobals();
