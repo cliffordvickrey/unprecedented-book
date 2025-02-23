@@ -81,7 +81,7 @@ readonly class Cache implements CacheInterface
 
     public function stat(): array
     {
-        $info = apcu_sma_info() ?: [];
+        $info = apcu_sma_info(true) ?: [];
 
         $extract = static fn (string $key): int => (int) CastingUtilities::toInt($info[$key] ?? 0);
 
