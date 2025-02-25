@@ -19,9 +19,13 @@ use Webmozart\Assert\Assert;
 
 class DonorProfile extends Entity implements \Countable
 {
+    private const int FLAG_DEMOCRAT_2024 = 1;
+    private const int FLAG_REPUBLICAN_2024 = 2;
+
     public int $id = 0;
     public string $name = '';
     public State $state = State::USA;
+    public int $flags = 0;
     /** @var array<string, DonorProfileCampaign> */
     public array $campaigns = [];
     /** @var array<int, DonorProfileCycle> */
@@ -44,6 +48,7 @@ class DonorProfile extends Entity implements \Countable
         $this->id = 0;
         $this->name = '';
         $this->state = State::USA;
+        $this->flags = 0;
 
         $this->campaigns = $this->buildCampaigns();
 
@@ -157,6 +162,11 @@ class DonorProfile extends Entity implements \Countable
         }
     }
 
+    public function count(): int
+    {
+        return array_sum(array_map(\count(...), $this->campaigns));
+    }
+
     private function addReceiptAnalysis(ReceiptAnalysis $analysis): void
     {
         $priorDonor = $analysis->cycle < 2024
@@ -185,11 +195,23 @@ class DonorProfile extends Entity implements \Countable
         }
 
         if ($analysis->prop) {
-            $this->addAmountForCycle($analysis->cycle, $analysis->prop, $analysis->amount);
+            $candState = State::tryFrom((string) $analysis->candidate?->getInfo($analysis->cycle)?->CAND_OFFICE_ST);
+            $this->addAmountForCycle(
+                $analysis->cycle,
+                $analysis->prop,
+                $analysis->amount,
+                $analysis->committee->slug,
+                $candState
+            );
         }
 
         if ($analysis->pacType) {
-            $this->addPacTypeForCycle($analysis->cycle, $analysis->pacType, $analysis->amount);
+            $this->addPacTypeForCycle(
+                $analysis->cycle,
+                $analysis->pacType,
+                $analysis->amount,
+                $analysis->committee->slug
+            );
         }
     }
 
@@ -241,20 +263,73 @@ class DonorProfile extends Entity implements \Countable
         if ($isDayOneLaunch) {
             $campaign->dayOneLaunch = true;
         }
+
+        if ($dateStr > '2024-07-20') {
+            $campaign->afterBidenDropout = true;
+        } else {
+            $campaign->beforeBidenDropout = true;
+        }
+
+        if (
+            (
+                CampaignType::donald_trump === $campaignType
+                && !($this->flags & self::FLAG_REPUBLICAN_2024)
+                && $this->flags & self::FLAG_DEMOCRAT_2024
+            )
+            || (
+                CampaignType::donald_trump !== $campaignType
+                && !($this->flags & self::FLAG_DEMOCRAT_2024)
+                && $this->flags & self::FLAG_REPUBLICAN_2024
+            )
+        ) {
+            $campaign->priorOpponentDonor = true;
+        }
+
+        if (CampaignType::donald_trump === $campaignType && !($this->flags & self::FLAG_REPUBLICAN_2024)) {
+            $this->flags |= self::FLAG_REPUBLICAN_2024;
+        } elseif (CampaignType::donald_trump !== $campaignType && !($this->flags & self::FLAG_DEMOCRAT_2024)) {
+            $this->flags |= self::FLAG_DEMOCRAT_2024;
+        }
     }
 
-    private function addAmountForCycle(int $cycle, string $prop, float $amount): void
-    {
-        $this->cycles[$cycle]->add($prop, $amount);
+    private function addAmountForCycle(
+        int $cycle,
+        string $prop,
+        float $amount,
+        string $committeeSlug,
+        ?State $candidateState = null,
+    ): void {
+        /** @phpstan-var array<string, bool> $nonPresProps */
+        static $nonPresProps = [
+            'houseDemocratic' => true,
+            'houseRepublican' => true,
+            'houseThirdParty' => true,
+            'senateDemocratic' => true,
+            'senateRepublican' => true,
+            'senateThirdParty' => true,
+        ];
+
+        $donorState = State::USA === $this->state ? null : $this->state;
+
+        if (State::USA === $candidateState) {
+            $candidateState = null;
+        }
+
+        if (
+            $donorState
+            && $candidateState
+            && isset($nonPresProps[$prop])
+            && $donorState !== $candidateState
+        ) {
+            $outOfStateProp = str_starts_with($prop, 'house') ? 'outOfStateHouse' : 'outOfStateSenate';
+            $this->cycles[$cycle]->add($outOfStateProp, $amount, $committeeSlug);
+        }
+
+        $this->cycles[$cycle]->add($prop, $amount, $committeeSlug);
     }
 
-    private function addPacTypeForCycle(int $cycle, PacType $pacType, float $amount): void
+    private function addPacTypeForCycle(int $cycle, PacType $pacType, float $amount, string $committeeSlug): void
     {
-        $this->addAmountForCycle($cycle, $pacType->value, $amount);
-    }
-
-    public function count(): int
-    {
-        return array_sum(array_map(\count(...), $this->campaigns));
+        $this->addAmountForCycle($cycle, $pacType->value, $amount, $committeeSlug);
     }
 }

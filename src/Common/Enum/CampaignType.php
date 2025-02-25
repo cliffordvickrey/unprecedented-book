@@ -45,6 +45,14 @@ enum CampaignType: string
         };
     }
 
+    public function getOpponent(): string
+    {
+        return match ($this) {
+            self::joe_biden, self::kamala_harris => 'Donald Trump',
+            self::donald_trump => 'Joe Biden or Kamala Harris',
+        };
+    }
+
     public function toProp(): string
     {
         return match ($this) {

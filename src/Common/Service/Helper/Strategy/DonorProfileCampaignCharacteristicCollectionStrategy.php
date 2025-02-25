@@ -50,6 +50,18 @@ final readonly class DonorProfileCampaignCharacteristicCollectionStrategy implem
             $characteristics[] = DonorCharacteristic::weekly;
         }
 
+        if ($entity->priorOpponentDonor) {
+            $characteristics[] = DonorCharacteristic::prior_opponent;
+        }
+
+        if ($entity->beforeBidenDropout) {
+            $characteristics[] = DonorCharacteristic::pre_biden_dropout;
+        }
+
+        if ($entity->afterBidenDropout) {
+            $characteristics[] = DonorCharacteristic::post_biden_dropout;
+        }
+
         return $characteristics;
     }
 

@@ -7,11 +7,13 @@ namespace CliffordVickrey\Book2024\Common\Entity\Profile;
 use CliffordVickrey\Book2024\Common\Entity\Entity;
 use CliffordVickrey\Book2024\Common\Utilities\StringUtilities;
 
-class DonorProfileAmount extends Entity implements \Stringable
+class DonorProfileAmount extends Entity implements \Countable, \Stringable
 {
     public float $amount = 0.0;
     /** @var int<0, max> */
     public int $receipts = 0;
+    /** @var array<string, bool> */
+    public array $slugs = [];
 
     public function __toString(): string
     {
@@ -22,5 +24,10 @@ class DonorProfileAmount extends Entity implements \Stringable
             StringUtilities::numberFormat($this->receipts),
             1 === $this->receipts ? '' : 's'
         );
+    }
+
+    public function count(): int
+    {
+        return \count($this->slugs);
     }
 }

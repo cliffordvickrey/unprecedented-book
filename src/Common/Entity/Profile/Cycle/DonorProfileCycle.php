@@ -20,6 +20,10 @@ abstract class DonorProfileCycle extends Entity
     public DonorProfileAmount $houseThirdParty;
     #[RecipientAttribute(description: 'Hybrid (Carey) PAC(s)')]
     public DonorProfileAmount $hybridPac;
+    #[RecipientAttribute(description: 'Out-of-state House candidate(s)')]
+    public DonorProfileAmount $outOfStateHouse;
+    #[RecipientAttribute(description: 'Out-of-state Senate candidate(s)')]
+    public DonorProfileAmount $outOfStateSenate;
     #[RecipientAttribute(description: 'Party Committee(s)')]
     public DonorProfileAmount $partyCommittee;
     #[RecipientAttribute(party: PartyType::democratic, description: 'Other Democratic Presidential candidate(s)')]
@@ -44,12 +48,13 @@ abstract class DonorProfileCycle extends Entity
     #[RecipientAttribute(description: 'Traditional PAC(s)')]
     public DonorProfileAmount $traditionalPac;
 
-    public function add(string $prop, float $amount): void
+    public function add(string $prop, float $amount, string $committeeSlug): void
     {
         /** @var DonorProfileAmount $amt */
         $amt = $this->{$prop};
         ++$amt->receipts;
         $amt->amount += $amount;
+        $amt->slugs[$committeeSlug] = true;
     }
 
     public function getElectionDate(): \DateTimeImmutable

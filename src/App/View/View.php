@@ -45,9 +45,7 @@ class View
      */
     private function getAssetUris(string $filename): array
     {
-        if (null === $this->assetUris) {
-            $this->assetUris = $this->buildAssetUris();
-        }
+        $this->assetUris ??= $this->buildAssetUris();
 
         return $this->assetUris[$filename]
             ?? throw new \UnexpectedValueException(\sprintf('Could not resolve %s to a filename', $filename));
@@ -61,7 +59,7 @@ class View
             return $assetUris;
         }
 
-        $assetUris = AssetUris::build();
+        $assetUris = AssetUris::collect();
         $this->cache?->set($assetUris);
 
         return $assetUris;

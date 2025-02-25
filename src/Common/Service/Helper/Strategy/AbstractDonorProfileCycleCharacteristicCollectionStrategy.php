@@ -18,6 +18,8 @@ use CliffordVickrey\Book2024\Common\Service\DTO\RecipientAttributeCollection;
  */
 abstract class AbstractDonorProfileCycleCharacteristicCollectionStrategy implements DonorProfileCharacteristicCollectionStrategyInterface
 {
+    public const int MIN_OUT_OF_STATE_COMMITTEES = 4;
+
     /** @var array<string, list<string>> */
     private array $presidentialPropertiesByParty = [];
 
@@ -38,6 +40,12 @@ abstract class AbstractDonorProfileCycleCharacteristicCollectionStrategy impleme
 
         if ($entity->houseRepublican->receipts || $entity->senateRepublican->receipts) {
             $arr[] = 'cycle_%d_gop_non_pres';
+        }
+
+        $outOfStateCampaigns = \count($entity->outOfStateHouse) + \count($entity->outOfStateSenate);
+
+        if ($outOfStateCampaigns >= self::MIN_OUT_OF_STATE_COMMITTEES) {
+            $arr[] = 'cycle_%d_out_of_state';
         }
 
         if ($entity->partyCommittee->receipts) {

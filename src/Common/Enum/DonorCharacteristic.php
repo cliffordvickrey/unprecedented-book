@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Enum;
 
+use CliffordVickrey\Book2024\Common\Service\Helper\Strategy\AbstractDonorProfileCycleCharacteristicCollectionStrategy;
 use CliffordVickrey\Book2024\Common\Service\Helper\Strategy\DonorProfileCampaignCharacteristicCollectionStrategy;
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 
@@ -19,6 +20,9 @@ enum DonorCharacteristic: string
     case week_one_launch = 'week_one_launch';
     case weekly = 'weekly';
     case monthly = 'monthly';
+    case prior_opponent = 'prior_opposition';
+    case pre_biden_dropout = 'pre_biden_dropout';
+    case post_biden_dropout = 'post_biden_dropout';
     case cycle_2016_clinton = 'cycle_2016_clinton';
     case cycle_2016_sanders = 'cycle_2016_sanders';
     case cycle_2016_trump = 'cycle_2016_trump';
@@ -28,6 +32,7 @@ enum DonorCharacteristic: string
     case cycle_2016_gop_non_pres = 'cycle_2016_gop_non_pres';
     case cycle_2016_party_elite = 'cycle_2016_party_elite';
     case cycle_2016_super_pac = 'cycle_2016_super_pac';
+    case cycle_2016_out_of_state = 'cycle_2016_out_of_state';
     case cycle_2020_trump = 'cycle_2020_trump';
     case cycle_2020_biden = 'cycle_2020_biden';
     case cycle_2020_progressive = 'cycle_2020_progressive';
@@ -36,6 +41,7 @@ enum DonorCharacteristic: string
     case cycle_2020_gop_non_pres = 'cycle_2020_gop_non_pres';
     case cycle_2020_party_elite = 'cycle_2020_party_elite';
     case cycle_2020_super_pac = 'cycle_2020_super_pac';
+    case cycle_2020_out_of_state = 'cycle_2020_out_of_state';
     case cycle_2024_biden = 'cycle_2024_biden';
     case cycle_2024_harris = 'cycle_2024_harris';
     case cycle_2024_trump = 'cycle_2024_trump';
@@ -47,6 +53,7 @@ enum DonorCharacteristic: string
     case cycle_2024_gop_non_pres = 'cycle_2024_gop_non_pres';
     case cycle_2024_party_elite = 'cycle_2024_party_elite';
     case cycle_2024_super_pac = 'cycle_2024_super_pac';
+    case cycle_2024_out_of_state = 'cycle_2024_out_of_state';
 
     /**
      * @return array<string, array<string, string>>
@@ -146,6 +153,14 @@ enum DonorCharacteristic: string
                 CampaignType::donald_trump->value => true,
             ],
             self::day_one_launch->value => [self::week_one_launch->value => true],
+            self::pre_biden_dropout->value => [
+                CampaignType::joe_biden->value => true,
+                CampaignType::kamala_harris->value => true,
+            ],
+            self::post_biden_dropout->value => [
+                CampaignType::joe_biden->value => true,
+                CampaignType::kamala_harris->value => true,
+            ],
         ];
 
         foreach ($cases as $case) {
@@ -176,6 +191,9 @@ enum DonorCharacteristic: string
             self::week_one_launch => 'Week One Launch Donors',
             self::weekly => 'Weekly Donors',
             self::monthly => 'Monthly Donors',
+            self::prior_opponent => 'Gave to opponent prior to contribution',
+            self::pre_biden_dropout => 'Gave before Biden withdrew from the race',
+            self::post_biden_dropout => 'Gave after Biden withdrew from the race',
             self::cycle_2016_clinton => 'Clinton Donors',
             self::cycle_2016_sanders => 'Sanders Donors',
             self::cycle_2016_trump, self::cycle_2020_trump, self::cycle_2024_trump => 'Trump Donors',
@@ -185,6 +203,7 @@ enum DonorCharacteristic: string
             self::cycle_2016_gop_non_pres, self::cycle_2020_gop_non_pres, self::cycle_2024_gop_non_pres => 'Republican House/Senate Donors',
             self::cycle_2016_party_elite, self::cycle_2020_party_elite, self::cycle_2024_party_elite => 'Party Committee Donors',
             self::cycle_2016_super_pac, self::cycle_2020_super_pac, self::cycle_2024_super_pac => 'Super PAC Donors',
+            self::cycle_2016_out_of_state, self::cycle_2020_out_of_state, self::cycle_2024_out_of_state => 'Out-of-State House/Senate Donors',
             self::cycle_2020_biden, self::cycle_2024_biden => 'Biden Donors',
             self::cycle_2020_progressive => 'Progressive Donors',
             self::cycle_2020_non_biden => 'Non Biden Donors',
@@ -208,9 +227,11 @@ enum DonorCharacteristic: string
             'coda' => CampaignType::kamala_harris === $campaignType
                 ? " (includes recurring donations inherited from Biden's candidacy)"
                 : '',
-            'launchDate' => $campaignType->getLaunchDate()->format('Y-m-d'),
             'cycle' => (string) $this->getCycle(),
+            'launchDate' => $campaignType->getLaunchDate()->format('Y-m-d'),
             'months' => (string) DonorProfileCampaignCharacteristicCollectionStrategy::DEFAULT_MONTHLY_THRESHOLD,
+            'opponent' => $campaignType->getOpponent(),
+            'outOfStateCommittees' => (string) AbstractDonorProfileCycleCharacteristicCollectionStrategy::MIN_OUT_OF_STATE_COMMITTEES,
             'weeks' => (string) DonorProfileCampaignCharacteristicCollectionStrategy::DEFAULT_WEEKLY_THRESHOLD,
         ];
 
@@ -225,6 +246,9 @@ enum DonorCharacteristic: string
             self::week_one_launch => 'Donors who contributed to %campaign% within a week after %launchDate%',
             self::weekly => 'Donors who contributed to %campaign% for %weeks% or more consecutive weeks%coda%',
             self::monthly => 'Donors who contributed to %campaign% for %months% or more consecutive months%coda%',
+            self::prior_opponent => 'Donors who contributed to %opponent% prior to contribution to %campaign%',
+            self::pre_biden_dropout => 'Donors who contributed to %campaign% before Biden withdrew from the race',
+            self::post_biden_dropout => 'Donors who contributed to %campaign% after Biden withdrew from the race',
             self::cycle_2016_clinton => 'Donors who contributed to Hillary Clinton in the %cycle% election cycle',
             self::cycle_2016_sanders => 'Donors who contributed to Bernie Sanders in the %cycle% election cycle',
             self::cycle_2016_trump, self::cycle_2020_trump, self::cycle_2024_trump => 'Donors who contributed to Donald Trump in the %cycle% election cycle',
@@ -234,6 +258,7 @@ enum DonorCharacteristic: string
             self::cycle_2016_gop_non_pres, self::cycle_2020_gop_non_pres, self::cycle_2024_gop_non_pres => 'Donors who contributed to a Republican House or Senate campaign in the %cycle% election cycle',
             self::cycle_2016_party_elite, self::cycle_2020_party_elite, self::cycle_2024_party_elite => 'Donors who contributed to a party committee (FEC committee types X, Y, and Z) in the %cycle% election cycle',
             self::cycle_2016_super_pac, self::cycle_2020_super_pac, self::cycle_2024_super_pac => 'Donors who contributed to a super PAC (independent expenditure committee; FEC committee type O) in the %cycle% election cycle',
+            self::cycle_2016_out_of_state, self::cycle_2020_out_of_state, self::cycle_2024_out_of_state => 'Donors who contributed to %outOfStateCommittees% or more House/Senate campaigns outside their home state in the %cycle% election cycle',
             self::cycle_2020_biden, self::cycle_2024_biden => 'Donors who contributed to Joe Biden in the %cycle% election cycle',
             self::cycle_2020_progressive => 'Donors who contributed to either Bernie Sanders or Elizabeth Warren in the %cycle% election cycle',
             self::cycle_2020_non_biden => 'Donors who did NOT contribute to Joe Biden in the %cycle% election cycle',

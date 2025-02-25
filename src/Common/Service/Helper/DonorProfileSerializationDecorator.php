@@ -101,6 +101,18 @@ final readonly class DonorProfileSerializationDecorator implements \Stringable
             $lines[] = 'Gave to this candidate within the first week of the campaign';
         }
 
+        if ($profileByCampaign->priorOpponentDonor) {
+            $lines[] = 'Gave to an opponent before giving to the campaign';
+        }
+
+        if ($profileByCampaign->beforeBidenDropout) {
+            $lines[] = 'Gave to this candidate before Joe Biden dropped out of the race';
+        }
+
+        if ($profileByCampaign->afterBidenDropout) {
+            $lines[] = 'Gave to this candidate after Joe Biden dropped out of the race';
+        }
+
         return $lines;
     }
 
@@ -127,6 +139,8 @@ final readonly class DonorProfileSerializationDecorator implements \Stringable
     {
         $attr = $this->recipientAttributesByCycle[$cycle][$prop];
 
-        return \sprintf('Gave %s to %s', $amt, $attr->description);
+        $committeePart = \count($amt) > 1 ? \sprintf(' (%d committees)', \count($amt)) : '';
+
+        return \sprintf('Gave %s%s to %s', $amt, $committeePart, $attr->description);
     }
 }

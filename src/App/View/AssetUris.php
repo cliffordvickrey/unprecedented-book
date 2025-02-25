@@ -12,7 +12,7 @@ use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
  */
 class AssetUris extends AbstractCollection
 {
-    public static function build(): self
+    public static function collect(): self
     {
         $distFilenames = FileUtilities::glob(__DIR__.'/../../../public/dist/*.{js,css}', true);
 
