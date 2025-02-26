@@ -57,7 +57,7 @@ $route = $response->getObject(Route::class);
                         case CampaignType::kamala_harris: ?>
                             Donors who gave to <span class="text-info">Kamala Harris</span> (campaign, joint
                             fundraising, and independent expenditure committees that targeted her candidacy) between
-                            2024-07-21 and 2024-10-16.
+                            2024-07-21 and 2024-11-05.
                             <?php break;
                         case CampaignType::joe_biden: ?>
                             Donors who gave to <span class="text-info">Joe Biden</span> (campaign, joint fundraising
@@ -67,7 +67,7 @@ $route = $response->getObject(Route::class);
                         default: ?>
                             Donors who gave to <span class="text-info">Donald Trump</span> (campaign, joint
                             fundraising, and independent expenditure committees that targeted his candidacy) between
-                            2022-11-15 and 2024-10-16.
+                            2022-11-15 and 2024-11-05.
                         <?php endswitch; ?>
                 </div>
             </div>
@@ -95,7 +95,7 @@ $route = $response->getObject(Route::class);
                         id: 'app-characteristic-filter-a',
                         name: sprintf('%s[]', DonorProfileQuery::PARAM_CHARACTERISTIC),
                         label: 'Characteristic',
-                        options: DonorCharacteristic::getDescriptions(),
+                        options: DonorCharacteristic::getDescriptions($query->campaignType),
                         value: $query->characteristicA?->value
                     ); ?>
                 </div>
@@ -107,7 +107,7 @@ $route = $response->getObject(Route::class);
                             id: 'app-characteristic-filter-b',
                             name: sprintf('%s[]', DonorProfileQuery::PARAM_CHARACTERISTIC),
                             label: 'Characteristic',
-                            options: DonorCharacteristic::getDescriptions($query->characteristicA),
+                            options: DonorCharacteristic::getDescriptions($query->campaignType, $query->characteristicA),
                             value: $query->characteristicB?->value
                         ); ?>
                     </div>
