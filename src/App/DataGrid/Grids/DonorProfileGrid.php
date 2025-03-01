@@ -69,6 +69,7 @@ abstract class DonorProfileGrid extends DataGrid
         $col = new DataGridColumn();
         $col->id = 'characteristic';
         $col->title = 'Type of Donor';
+        $col->tooltip = true;
         $col->width = .5;
         $this[] = $col;
 

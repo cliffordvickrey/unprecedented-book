@@ -30,3 +30,13 @@
     }
   }
 }
+
+@media (max-width: 576px) {
+  #app {
+    .app-table {
+      th, td {
+        max-width: 200px !important;
+      }
+    }
+  }
+}

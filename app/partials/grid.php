@@ -21,7 +21,7 @@ $colWidths = $grid->getColWidths();
 $values = $grid->getValues();
 
 ?>
-<div class="table-responsive">
+<div class="app-table table-responsive">
     <table class="table table-sm table-bordered">
         <colgroup>
             <?php foreach ($colWidths as $colWidth): ?>
@@ -90,8 +90,22 @@ $values = $grid->getValues();
                             }
                         }
 
+                        $valueHtml = $view->htmlEncode($formattedValue);
+
                         ?>
-                        <td class="<?= $view->htmlEncode($class); ?>"><?= $view->htmlEncode($formattedValue); ?></td>
+                        <?php if ($col->tooltip): ?>
+                        <td class="<?= $view->htmlEncode($class); ?> text-truncate text-nowrap overflow-hidden">
+                            <a href="#" class="text-truncate overflow-hidden d-md-none" style="max-width: 100%;"
+                               data-bs-toggle="tooltip" data-bs-placement="top" title="<?= $valueHtml; ?>">
+                                <?= $valueHtml; ?>
+                            </a>
+                            <div class="d-none d-md-block"><?= $valueHtml; ?></div>
+                        </td>
+                    <?php else: ?>
+                        <td class="<?= $view->htmlEncode($class); ?>">
+                            <?= $valueHtml; ?>
+                        </td>
+                    <?php endif; ?>
                     <?php endforeach; ?>
                 </tr>
             <?php endforeach;

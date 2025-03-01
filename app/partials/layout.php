@@ -29,9 +29,6 @@ $content = $response->getAttribute(Response::ATTR_CONTENT, '');
           name="description"/>
     <title>FEC Reporter 2.0</title>
     <?= $view->emitCss('index'); ?>
-    <style>
-
-    </style>
 </head>
 <body>
 <div id="app" class="container-fluid my-3">

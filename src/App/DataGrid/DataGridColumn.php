@@ -11,6 +11,7 @@ class DataGridColumn
     public string $id = '';
     public ?DataGridColumnMeta $meta = null;
     public string $title = '';
+    public bool $tooltip = false;
     public ?float $width = null;
 
     public function getClass(): string
