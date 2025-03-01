@@ -49,3 +49,9 @@ export function queryString(object: any): string {
 export function formToUrl(form: HTMLFormElement, extras: object = {}): any {
   return "./?" + queryString({ ...formToObject(form), ...extras });
 }
+
+export function cancelEvent(e: Event): boolean {
+  e.stopPropagation();
+  e.preventDefault();
+  return false;
+}

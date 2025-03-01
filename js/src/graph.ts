@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { formToUrl } from "./utils";
+import { cancelEvent, formToUrl } from "./utils";
 
 enum GraphColor {
   blue = "blue",
@@ -201,9 +201,7 @@ window.addEventListener("DOMContentLoaded", () => {
         return true;
       }
 
-      e.stopPropagation();
-      e.preventDefault();
-      return false;
+      return cancelEvent(e);
     }),
   );
 });

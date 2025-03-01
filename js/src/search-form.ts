@@ -1,10 +1,4 @@
-import { formToUrl } from "./utils";
-
-function cancelEvent(e: MouseEvent): boolean {
-  e.stopPropagation();
-  e.preventDefault();
-  return false;
-}
+import { cancelEvent, formToUrl } from "./utils";
 
 function bindClearButtonAction(
   clearButton: HTMLButtonElement,

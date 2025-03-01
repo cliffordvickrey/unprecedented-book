@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { formToUrl, queryString } from "./utils";
+import { cancelEvent, formToUrl, queryString } from "./utils";
 import { rewind } from "@turf/turf";
 import geoJsonMetaByState from "../../web-data/geojson-meta/geojson-meta.json";
 
@@ -368,9 +368,7 @@ window.addEventListener("DOMContentLoaded", () => {
         return true;
       }
 
-      e.stopPropagation();
-      e.preventDefault();
-      return false;
+      return cancelEvent(e);
     }),
   );
 });
