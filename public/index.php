@@ -11,6 +11,7 @@ use CliffordVickrey\Book2024\App\Http\Response;
 use CliffordVickrey\Book2024\App\Http\Route;
 use CliffordVickrey\Book2024\App\View\View;
 use CliffordVickrey\Book2024\Common\Cache\Cache;
+use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 use Webmozart\Assert\Assert;
 
 call_user_func(function () {
@@ -29,9 +30,21 @@ call_user_func(function () {
         $request = Request::fromSuperGlobals();
         $route = Route::fromRequest($request);
 
-        $controllerClassStr = $route->getControllerClassStr();
-        $controller = new $controllerClassStr();
-        $response = $controller->dispatch($request);
+        $controllerClassStrings = $route->getControllerOrControllers();
+
+        if (is_string($controllerClassStrings)) {
+            $controllerClassStrings = [$controllerClassStrings];
+        }
+
+        $response = null;
+
+        foreach ($controllerClassStrings as $controllerClassString) {
+            $controller = new $controllerClassString();
+            $response = $controller->dispatch($request);
+            $request->setResponse($response);
+        }
+
+        Assert::notNull($response);
         $response->setObject($route);
     } catch (Throwable $ex) {
         error_log((string) $ex);
@@ -53,6 +66,26 @@ call_user_func(function () {
         $response[Response::ATTR_PARTIAL] = 'resource';
     } elseif (ContentType::json === $contentType) {
         $response[Response::ATTR_PARTIAL] = 'json';
+    }
+
+    $filename = $response->getAttributeNullable(Response::ATTR_FILENAME, '');
+
+    if ($filename) {
+        header(sprintf('Content-Disposition: attachment; filename="%s"', rawurlencode($filename)));
+        header(sprintf('Content-Transfer-Encoding: %s', $contentType->getContentTransferEncoding()));
+
+        $resource = $response->getResourceNullable();
+
+        $size = null;
+
+        if ($resource) {
+            $stats = fstat($resource) ?: [];
+            $size = CastingUtilities::toInt($stats['size'] ?? null);
+        }
+
+        if (null !== $size) {
+            header(sprintf('Content-Length: %d', $size));
+        }
     }
 
     header('Content-Type: '.$contentType->toHeaderValue());

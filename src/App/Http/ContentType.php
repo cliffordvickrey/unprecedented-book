@@ -18,4 +18,9 @@ enum ContentType: string
             self::html => 'text/html; charset=utf-8',
         };
     }
+
+    public function getContentTransferEncoding(): string
+    {
+        return '8bit';
+    }
 }

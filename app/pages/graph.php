@@ -18,3 +18,4 @@ $view->enqueueJs('graph');
 <div id="app-graph-container" class="app-d3-container">
     <div id="app-graph" class="app-d3-plot"></div>
 </div>
+<?= $view->partial('export-link', $response); ?>

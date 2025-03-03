@@ -4,6 +4,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
     entry: {
+        export: './src/export.ts',
         graph: './src/graph.ts',
         index: './src/index.ts',
         map: './src/map.ts',

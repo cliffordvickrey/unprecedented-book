@@ -21,6 +21,7 @@ class View
     /** @var array<string, list<string>> */
     private static array $sharedVendors = [
         'graph' => ['graph-map'],
+        'index' => ['index'],
         'map' => ['graph-map', 'map'],
     ];
 
@@ -72,8 +73,11 @@ class View
 
     public function enqueueJs(string $name): void
     {
-        if (!str_starts_with($name, self::WEBPACK_CACHE_GROUP_KEY)) {
-            $vendorBundles = self::$sharedVendors[$name] ?? [$name];
+        if (
+            !str_starts_with($name, self::WEBPACK_CACHE_GROUP_KEY)
+            && isset(self::$sharedVendors[$name])
+        ) {
+            $vendorBundles = self::$sharedVendors[$name];
 
             array_walk(
                 $vendorBundles,

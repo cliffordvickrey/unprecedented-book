@@ -6,8 +6,10 @@ namespace CliffordVickrey\Book2024\App\Http;
 
 use CliffordVickrey\Book2024\Common\Utilities\CastingUtilities;
 
-final readonly class Request
+final class Request
 {
+    private ?Response $response = null;
+
     /**
      * @param array<array-key, mixed> $queryParams
      */
@@ -36,5 +38,15 @@ final readonly class Request
     public function getQueryParam(string $name): mixed
     {
         return $this->queryParams[$name] ?? null;
+    }
+
+    public function setResponse(Response $response): void
+    {
+        $this->response = $response;
+    }
+
+    public function getResponse(): ?Response
+    {
+        return $this->response;
     }
 }

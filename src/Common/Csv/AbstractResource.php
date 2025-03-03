@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CliffordVickrey\Book2024\Common\Csv;
 
+use CliffordVickrey\Book2024\Common\Exception\BookUnexpectedValueException;
 use CliffordVickrey\Book2024\Common\Utilities\FileUtilities;
 use Webmozart\Assert\Assert;
 
@@ -14,6 +15,29 @@ abstract class AbstractResource
 
     public function __construct(protected string $filename, protected string $mode = 'r')
     {
+    }
+
+    /**
+     * @return resource
+     */
+    public function detach()
+    {
+        if ($this->isResourceValid($this->resource)) {
+            $resource = $this->resource;
+            $this->resource = null;
+
+            return $resource;
+        }
+
+        throw new BookUnexpectedValueException('Expected valid, open resource');
+    }
+
+    /**
+     * @phpstan-assert-if-true resource $resource
+     */
+    protected function isResourceValid(mixed $resource): bool
+    {
+        return \is_resource($resource) && 'resource (closed)' !== \gettype($resource);
     }
 
     public function __destruct()
@@ -32,14 +56,6 @@ abstract class AbstractResource
         $this->resource = null;
 
         $this->doClose();
-    }
-
-    /**
-     * @phpstan-assert-if-true resource $resource
-     */
-    protected function isResourceValid(mixed $resource): bool
-    {
-        return \is_resource($resource) && 'resource (closed)' !== \gettype($resource);
     }
 
     protected function doClose(): void

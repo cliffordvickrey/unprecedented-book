@@ -14,6 +14,7 @@ final class Response extends AbstractCollection
 {
     public const string ATTR_CACHEABLE = 'cacheable';
     public const string ATTR_CONTENT = 'content';
+    public const string ATTR_FILENAME = 'filename';
     public const string ATTR_PARTIAL = 'partial';
     public const string ATTR_RESOURCE = 'resource';
 
@@ -21,6 +22,11 @@ final class Response extends AbstractCollection
     {
         $key ??= $obj::class;
         $this[$key] = $obj;
+    }
+
+    public function setFilename(string $filename): void
+    {
+        $this[self::ATTR_FILENAME] = $filename;
     }
 
     /**
