@@ -100,6 +100,8 @@ class DonorProfile extends Entity implements \Countable
 
     private function doSetMaxConsecutiveDonationCounts(bool $monthly = false): void
     {
+        $dropoutThreshold = $monthly ? 18 : 78;
+
         $memo = $monthly ? $this->monthlyReceiptMemo : $this->weeklyReceiptMemo;
 
         if (empty($memo)) {
@@ -140,7 +142,7 @@ class DonorProfile extends Entity implements \Countable
 
             if ('R' === $partyCode) {
                 $key = CampaignType::donald_trump->value;
-            } elseif ($weekOrMonth > 18) {
+            } elseif ($weekOrMonth > $dropoutThreshold) {
                 $key = CampaignType::kamala_harris->value;
             } else {
                 $key = CampaignType::joe_biden->value;
