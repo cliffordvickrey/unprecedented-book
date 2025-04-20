@@ -105,7 +105,6 @@ final readonly class DonorProfileCharacteristicCollector
         $strategy = $this->collectionStrategies[$entity::class] ?? null;
         Assert::notNull($strategy, \sprintf('Unexpected classname, "%s"', $entity::class));
 
-        /** @var DonorProfileCharacteristicCollectionStrategyInterface<TEntity> $strategy */
-        return $strategy;
+        return $strategy; // @phpstan-ignore-line
     }
 }

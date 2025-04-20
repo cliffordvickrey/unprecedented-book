@@ -2,7 +2,7 @@
 <?php
 
 /**
- * Create aggregate objects for zip and county data with COVID-19 and economic data
+ * Create aggregate objects for zip and county data with COVID-19 and economic data.
  */
 
 declare(strict_types=1);
@@ -21,7 +21,7 @@ use Webmozart\Assert\Assert;
 ini_set('memory_limit', '-1');
 
 chdir(__DIR__);
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__.'/../../vendor/autoload.php';
 
 call_user_func(function () {
     // region services
@@ -37,7 +37,8 @@ call_user_func(function () {
     /**
      * Map of counties from the zipcodeR package (https://zipcoder.39n.io/) to county names in the NYT COVID-19
      * datasets. Also, some ZIP codes straddle state (and therefore county) lines; thus zipcodeR reports the wrong
-     * state on occasion. I approximate what the county should be
+     * state on occasion. I approximate what the county should be.
+     *
      * @var array<string, array<string, string>> $countyAliases
      */
     $countyAliases = [
@@ -127,7 +128,8 @@ call_user_func(function () {
     ];
 
     /**
-     * FIPS codes missing in the NYT data
+     * FIPS codes missing in the NYT data.
+     *
      * @var array<string, array<string, int>> $fips
      */
     $fips = [
@@ -139,7 +141,8 @@ call_user_func(function () {
 
     /**
      * The Big Apple, baby! NYT reported COVID-19 data for the NY metro as a hole instead of by county, for some reason.
-     * Here is COVID-19 data by borough
+     * Here is COVID-19 data by borough.
+     *
      * @var list<list<int|string>> $nyBoroughs
      */
     $nyBoroughs = [
@@ -186,7 +189,7 @@ call_user_func(function () {
     ];
 
     /**
-     * Area suffixes; these are dropped when mapping from zipcodeR to the NYT COVID-19 data
+     * Area suffixes; these are dropped when mapping from zipcodeR to the NYT COVID-19 data.
      */
     $areaTypes = [
         'Borough',
@@ -203,7 +206,7 @@ call_user_func(function () {
 
     // region counties
 
-    $regexParts = implode('|', array_map(fn($str) => preg_quote($str, '/'), $areaTypes));
+    $regexParts = implode('|', array_map(fn ($str) => preg_quote($str, '/'), $areaTypes));
     $countyRegexes = [
         sprintf('/\s(%s)$/', $regexParts),
         sprintf('/^(%s)\sof\s/', $regexParts),
@@ -214,7 +217,7 @@ call_user_func(function () {
 
     $stateCodes = array_flip(State::getDescriptions());
 
-    $reader = new CsvReader(__DIR__ . '/../../data/csv/us-counties.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/us-counties.csv');
     $nyBoroughReader = new ArrayIterator($nyBoroughs);
 
     $reader->next();
@@ -265,7 +268,7 @@ call_user_func(function () {
 
     // region COVID-19 masking
 
-    $reader = new CsvReader(__DIR__ . '/../../data/csv/mask-use-by-county.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/mask-use-by-county.csv');
 
     $reader->next();
 
@@ -278,7 +281,7 @@ call_user_func(function () {
         $county = $countiesByFips[$fips] ?? null;
 
         if (null === $county) {
-            printf('Unknown county FIPS: %05d%s', $fips, PHP_EOL);
+            printf('Unknown county FIPS: %05d%s', $fips, \PHP_EOL);
             $reader->next();
             continue;
         }
@@ -302,12 +305,12 @@ call_user_func(function () {
 
     // region save counties
 
-    array_walk($counties, fn(County $county) => $countyRepo->saveAggregate($county));
+    array_walk($counties, fn (County $county) => $countyRepo->saveAggregate($county));
 
     // endregion
 
     // region zips
-    $reader = new CsvReader(__DIR__ . '/../../data/csv/zipcodes.csv');
+    $reader = new CsvReader(__DIR__.'/../../data/csv/zipcodes.csv');
 
     $headers = array_map(strval(...), array_map(CastingUtilities::toString(...), $reader->current()));
 
@@ -355,7 +358,7 @@ call_user_func(function () {
             $slug = slugifyStateAndCounty($stateCode, $countyName);
 
             if (!isset($counties[$slug])) {
-                printf('Invalid county, "%s" (%s)%s', $countyName, $zipCode->state, PHP_EOL);
+                printf('Invalid county, "%s" (%s)%s', $countyName, $zipCode->state, \PHP_EOL);
             }
 
             $zipCode->county = $slug;
