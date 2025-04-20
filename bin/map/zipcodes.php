@@ -140,8 +140,8 @@ call_user_func(function () {
     ];
 
     /**
-     * The Big Apple, baby! NYT reported COVID-19 data for the NY metro as a hole instead of by county, for some reason.
-     * Here is COVID-19 data by borough.
+     * The Big Apple, baby! NYT reported COVID-19 data for the NY metro as a whole instead of by county, for some
+     * reason. Here is COVID-19 data by borough.
      *
      * @var list<list<int|string>> $nyBoroughs
      */
