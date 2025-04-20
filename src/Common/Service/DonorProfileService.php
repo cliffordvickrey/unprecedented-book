@@ -9,6 +9,7 @@ use CliffordVickrey\Book2024\Common\Entity\Combined\ReceiptInPanel;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\RecipientAttribute;
 use CliffordVickrey\Book2024\Common\Entity\Profile\DonorProfile;
+use CliffordVickrey\Book2024\Common\Enum\CampaignType;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CandidateOffice;
 use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeDesignation;
 use CliffordVickrey\Book2024\Common\Enum\PacType;
@@ -380,5 +381,15 @@ class DonorProfileService implements DonorProfileServiceInterface
         }
 
         return new DonorCharacteristicCollection($this->characteristicCollector->collectCharacteristics($profile));
+    }
+
+    public function getCampaignCommitteeSlugs(CampaignType $campaignType): array
+    {
+        $attribute = $this->getRecipientAttribute(2024, $campaignType->toProp());
+
+        return array_map(
+            fn (string $committeeId) => $this->committeeAggregateRepository->getByCommitteeId($committeeId)->slug,
+            $attribute->committeeIds
+        );
     }
 }

@@ -140,6 +140,7 @@ class StringUtilities
         // 1. remove non-alphanumeric characters (except spaces and hyphens)
         $slug = preg_replace('/[^\p{L}\p{N}\s-]/u', '', $str);
         Assert::string($slug);
+        $slug = str_replace('~', '', $slug);
 
         // 2. strip out numeric digits
         if ($noNumbers) {
