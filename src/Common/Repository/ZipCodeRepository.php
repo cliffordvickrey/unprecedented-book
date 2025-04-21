@@ -25,4 +25,19 @@ class ZipCodeRepository extends AggregateRepository implements ZipCodeRepository
     {
         return $this->getAggregate(ZipCode::slugifyZip($zip));
     }
+
+    public function hasZip(int|string $zip): bool
+    {
+        try {
+            $this->getByZip($zip);
+        } catch (\InvalidArgumentException $ex) {
+            if (str_starts_with($ex->getMessage(), 'File does not exist')) {
+                return false;
+            }
+
+            throw $ex;
+        }
+
+        return true;
+    }
 }

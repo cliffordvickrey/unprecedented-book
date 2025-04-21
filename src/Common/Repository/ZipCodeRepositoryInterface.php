@@ -11,5 +11,7 @@ use CliffordVickrey\Book2024\Common\Entity\Geo\ZipCode;
  */
 interface ZipCodeRepositoryInterface extends AggregateRepositoryInterface
 {
+    public function hasZip(string|int $zip): bool;
+
     public function getByZip(string|int $zip): ZipCode;
 }

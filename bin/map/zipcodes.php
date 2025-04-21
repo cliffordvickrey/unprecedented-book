@@ -290,8 +290,8 @@ call_user_func(function () {
             'mask_never' => $row[1],
             'mask_rarely' => $row[2],
             'mask_sometimes' => $row[3],
-            'mask_frequently' => $row[3],
-            'mask_always' => $row[4],
+            'mask_frequently' => $row[4],
+            'mask_always' => $row[5],
         ];
 
         $hydrator->hydrate($county, $arr);

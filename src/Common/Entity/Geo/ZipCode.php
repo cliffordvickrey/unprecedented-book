@@ -70,7 +70,9 @@ class ZipCode extends Aggregate
             $zip = (string) CastingUtilities::toString($zip);
         }
 
-        if (\strlen($zip) < 5) {
+        if (\strlen($zip) > 5) {
+            $zip = substr(str_pad($zip, 9, '0'), 0, 5);
+        } elseif (\strlen($zip) < 5) {
             $zip = str_pad($zip, 5, '0');
         }
 
