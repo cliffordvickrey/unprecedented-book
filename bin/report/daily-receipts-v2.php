@@ -92,7 +92,7 @@ call_user_func(function () {
 
         $data = array_combine($headers, array_fill(0, count($headers), 0));
 
-        $data['data'] = $now;
+        $data['date'] = $now;
 
         /** @var array<string, array<string, mixed>> $carry */
         $carry[$now] = $data;
