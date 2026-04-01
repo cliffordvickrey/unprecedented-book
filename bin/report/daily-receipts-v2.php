@@ -7,8 +7,6 @@ use CliffordVickrey\Book2024\Common\Entity\Combined\DonorPanel;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\DonorProfileCycle2024;
 use CliffordVickrey\Book2024\Common\Entity\Profile\Cycle\RecipientAttribute;
 use CliffordVickrey\Book2024\Common\Enum\CampaignType;
-use CliffordVickrey\Book2024\Common\Enum\Fec\CommitteeType;
-use CliffordVickrey\Book2024\Common\Enum\PacType;
 use CliffordVickrey\Book2024\Common\Repository\CommitteeAggregateRepository;
 use CliffordVickrey\Book2024\Common\Repository\DonorPanelRepository;
 use CliffordVickrey\Book2024\Common\Service\DonorProfileService;
@@ -41,10 +39,16 @@ call_user_func(function () {
         $bidenCommitteeIds
     );
 
-    foreach ($committees as $committee) {
-        $pacType = PacType::fromCommitteeType($committee->getLastCommittee()->CMTE_TP ?? CommitteeType::P);
+    $mainPacs = [
+        'C00703975', // PCC,
+        'C00744946', // HARRIS ACTION FUND,
+        'C00838912', // HARRIS VICTORY FUND,
+        'C00658476', // DEMOCRATIC GRASSROOTS VICTORY FUND
+        'C00010603', // DNC
+    ];
 
-        $isSuperPac = PacType::superPac === $pacType;
+    foreach ($committees as $committee) {
+        $isSuperPac = !in_array($committee->id, $mainPacs);
 
         if ($isSuperPac) {
             $bidenSuperPacs[$committee->slug] = true;
