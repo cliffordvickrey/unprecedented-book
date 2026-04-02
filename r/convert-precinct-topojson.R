@@ -8,7 +8,8 @@ path <- file.path(this_dir, "..", "data", "precinct")
 prec_2020_file <- file.path(path, "2020-precincts-with-results.geojson")
 prec_2024_file <- file.path(path, "2024-precincts-with-results.geojson")
 out_file <- file.path(path, "2024-precincts.rds")
-out_csv_file <- file.path(path, "2024-precincts-with-2020-results.csv");
+out_csv_file <- file.path(path, "2024-precincts-with-2020-results.csv")
+
 
 # read
 prec_2020 <- st_read(prec_2020_file)
@@ -41,7 +42,8 @@ df_with_imputations <- map(vote_vars, function(vote_var) {
     summarize(!!paste0(vote_var, "_2020") := sum(imputed, na.rm = TRUE),
               .groups = "drop") # allocate new variable
 }) |>
-  reduce(left_join, by = "GEOID") # now: merge the vote totals into one DF
+  reduce(left_join, by = "GEOID") |> # now: merge the vote totals into one DF
+  filter(votes_total_2020 >= 1) # drop edge cases
 
 # join back to the 2024 totals
 prec_2024 <- prec_2024 |>

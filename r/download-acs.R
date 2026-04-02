@@ -11,7 +11,6 @@ path <- file.path(this_dir, "..", "data", "precinct")
 out_file <- file.path(path, "2024-acs-tracts.rds")
 out_csv_file <- file.path(path, "2024-acs-tracts.csv")
 
-
 state_fips <- c(
   "01",
   "02",
