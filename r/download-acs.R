@@ -161,7 +161,7 @@ acs_vars <- c(
   vehicle_total_no_vehicle = "B08201_002"
 )
 
-# create national dataframe
+# create national ACS dataframe
 national_acs <- map_dfr(
   state_fips,
   ~ get_acs(
@@ -174,6 +174,27 @@ national_acs <- map_dfr(
   )
 )
 
+# create national decennial Census frame (for population density)
+national_decennial <- map_dfr(
+  state_fips,
+  ~ get_decennial(
+    geography = "tract",
+    variables = "P1_001N",
+    state = .x,
+    year = 2020,
+    geometry = TRUE
+  )
+)
+
+# compute population density
+national_decennial <- national_decennial |>
+  mutate(
+    area_sq_mi = as.numeric(st_area(geometry)) / 2589988.11,
+    # square meters to square mile
+    pop_density_2020 = value / area_sq_mi
+  ) |>
+  select(GEOID, pop_density_2020)
+
 # unpack vars; calculate percentages
 safe_divide <- function(num, denom) {
   ifelse(denom == 0 | is.na(denom), NA_real_, num / denom)
@@ -183,6 +204,8 @@ national_acs_parsed <- national_acs |>
   select(-moe) |>
   pivot_wider(names_from = variable, values_from = estimate) |>
   mutate(
+    median_income = inc_med_household_income,
+    median_gross_rent = rent_med_gross_rent,
     pct_age_18_to_34 = safe_divide(
       age_total_18_19_m + age_total_20_m + age_total_21_m +
         age_total_22_24_m + age_total_25_29_m + age_total_30_34_m +
@@ -209,13 +232,13 @@ national_acs_parsed <- national_acs |>
     ),
     pct_below_poverty = safe_divide(pov_total_below_poverty, pov_total),
     pct_black = safe_divide(race_total_black_hispanic + race_total_black_nh, race_total),
-    pct_minority = 1 - safe_divide(race_total_white_nh, race_total),
     pct_hispanic = safe_divide(race_total_hispanic, race_total),
     pct_housing_burden = safe_divide(
       rent_burden_total_30_to_35 + rent_burden_total_35_to_40 +
         rent_burden_total_40_to_50 + rent_burden_total_50_or_over,
       rent_burden_total
     ),
+    pct_minority = 1 - safe_divide(race_total_white_nh, race_total),
     pct_no_vehicle = safe_divide(vehicle_total_no_vehicle, vehicle_total),
     pct_non_bachelors = safe_divide(
       edu_total_below_ba_1 + edu_total_below_ba_2 + edu_total_below_ba_3 +
@@ -236,6 +259,13 @@ national_acs_parsed <- national_acs |>
          starts_with("median_"),
          starts_with("pct_"),
          geometry)
+
+# merge in population density
+national_decennial_nogeo <- national_decennial |> 
+  st_drop_geometry()
+
+national_acs_parsed <- national_acs_parsed |>
+  left_join(national_decennial_nogeo, by = "GEOID")
 
 saveRDS(national_acs_parsed, out_file)
 

@@ -14,7 +14,7 @@ precincts <- readRDS(precincts_file)
 acs_tracts <- readRDS(acs_tracts_file)
 
 # work with all vars starting with pct or median
-acs_vars <- names(acs_tracts)[grepl("^pct_|^median_", names(acs_tracts))]
+acs_vars <- names(acs_tracts)[grepl("^pct_|^median_|^pop_", names(acs_tracts))]
 
 # transform Census data from EPSG:4269 to WebMercator; compute area for each tract
 acs_tracts <- acs_tracts |>
