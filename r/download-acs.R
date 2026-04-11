@@ -189,75 +189,62 @@ national_decennial <- map_dfr(
 # compute population density
 national_decennial <- national_decennial |>
   mutate(
-    area_sq_mi = as.numeric(st_area(geometry)) / 2589988.11,
-    # square meters to square mile
-    pop_density_2020 = value / area_sq_mi
+    area_sqmi = as.numeric(st_area(geometry)) / 2589988.11,
+    population = value
   ) |>
-  select(GEOID, pop_density_2020)
+  select(GEOID, area_sqmi, population)
 
-# unpack vars; calculate percentages
-safe_divide <- function(num, denom) {
-  ifelse(denom == 0 | is.na(denom), NA_real_, num / denom)
-}
-
+# unpack vars
 national_acs_parsed <- national_acs |>
   select(-moe) |>
   pivot_wider(names_from = variable, values_from = estimate) |>
   mutate(
-    median_income = inc_med_household_income,
-    median_gross_rent = rent_med_gross_rent,
-    pct_age_18_to_34 = safe_divide(
+    ct__age = age_total,
+	ct__education = edu_total,
+	ct__lab = lab_total,
+	ct__poverty = pov_total,
+	ct__race = race_total,
+	ct__rent = rent_total,
+	ct__rent_burden_total = rent_burden_total,
+	ct__vehicle_total = vehicle_total,
+    ct_age_18_to_34 =
       age_total_18_19_m + age_total_20_m + age_total_21_m +
         age_total_22_24_m + age_total_25_29_m + age_total_30_34_m +
         age_total_18_19_f + age_total_20_f + age_total_21_f +
         age_total_22_24_f + age_total_25_29_f + age_total_30_34_f,
-      age_total
-    ),
-    pct_age_65_plus = safe_divide(
+    ct_age_65_plus =
       age_total_65_66_m + age_total_67_69_m + age_total_70_74_m +
         age_total_75_79_m + age_total_80_84_m + age_total_85_plus_m +
         age_total_65_66_f + age_total_67_69_f + age_total_70_74_f +
         age_total_75_79_f + age_total_80_84_f + age_total_85_plus_f,
-      age_total
-    ),
-    pct_asian_pi = safe_divide(
-      race_total_asian_hispanic + race_total_asian_nh +
+    ct_asian_pi = race_total_asian_hispanic + race_total_asian_nh +
         race_total_pacific_islander_hispanic + race_total_pacific_islander_nh,
-      race_total
-    ),
-    pct_bachelors_plus = safe_divide(
+    ct_bachelors_plus =
       edu_total_bachelors + edu_total_masters +
-        edu_total_professional_school_degree + edu_total_doctorate,
-      edu_total
-    ),
-    pct_below_poverty = safe_divide(pov_total_below_poverty, pov_total),
-    pct_black = safe_divide(race_total_black_hispanic + race_total_black_nh, race_total),
-    pct_hispanic = safe_divide(race_total_hispanic, race_total),
-    pct_housing_burden = safe_divide(
-      rent_burden_total_30_to_35 + rent_burden_total_35_to_40 +
+        edu_total_professional_school_degree + edu_total_doctorate, 
+    ct_below_poverty = pov_total_below_poverty,
+    ct_black = race_total_black_hispanic + race_total_black_nh,
+    ct_hispanic = race_total_hispanic,
+    ct_housing_burden = rent_burden_total_30_to_35 + rent_burden_total_35_to_40 +
         rent_burden_total_40_to_50 + rent_burden_total_50_or_over,
-      rent_burden_total
-    ),
-    pct_minority = 1 - safe_divide(race_total_white_nh, race_total),
-    pct_no_vehicle = safe_divide(vehicle_total_no_vehicle, vehicle_total),
-    pct_non_bachelors = safe_divide(
-      edu_total_below_ba_1 + edu_total_below_ba_2 + edu_total_below_ba_3 +
+    ct_no_vehicle = vehicle_total_no_vehicle,
+    ct_non_bachelors = edu_total_below_ba_1 + edu_total_below_ba_2 + edu_total_below_ba_3 +
         edu_total_below_ba_4 + edu_total_below_ba_5 + edu_total_below_ba_6 +
         edu_total_below_ba_7 + edu_total_below_ba_8 + edu_total_below_ba_9 +
         edu_total_below_ba_10 + edu_total_below_ba_11 + edu_total_below_ba_12 +
         edu_total_below_ba_13 + edu_total_below_ba_14 + edu_total_below_ba_15 +
         edu_total_below_ba_16 + edu_total_below_ba_17 + edu_total_below_ba_18 +
         edu_total_below_ba_19 + edu_total_below_ba_20,
-      edu_total
-    ),
-    pct_renters = safe_divide(rent_total_renters, rent_total),
-    pct_unemployed = safe_divide(lab_total_unemployed, lab_total),
-    pct_white_non_hispanic = safe_divide(race_total_white_nh, race_total)
+	ct_renters = rent_total_renters,
+    ct_unemployed = lab_total_unemployed,
+    ct_white_non_hispanic = race_total_white_nh,
+    median_income = inc_med_household_income,
+    median_gross_rent = rent_med_gross_rent
   ) |>
   select(GEOID,
          NAME,
+         starts_with("ct_"),
          starts_with("median_"),
-         starts_with("pct_"),
          geometry)
 
 # merge in population density

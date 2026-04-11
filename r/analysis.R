@@ -1,15 +1,23 @@
 library(dplyr)
 library(purrr)
 library(sf)
+library(tidyr)
 
 this_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
 path <- file.path(this_dir, "..", "data", "precinct")
 
 in_file <- file.path(path, "2024-precincts-merged.rds")
 
-df <- readRDS(in_file)
+# compute needed vars
+df <- readRDS(in_file) |> mutate(
+  pct_biden_2020 = votes_dem_2020 / votes_total_2020,
+  pct_trump_2020 = votes_rep_2020 / votes_total_2020,
+  pct_harris_2024 = votes_dem / votes_total,
+  pct_trump_2024 = votes_rep / votes_total,
+  demobilization = (pct_harris_2024 - pct_biden_2020) - (pct_trump_2024 - pct_trump_2020)
+)
 
-# step 1: group Philadelphia + Detroit precincts into deciles by % 
+# step 1: group Philadelphia + Detroit precincts into deciles by %
 # African-American
 
 philadelphia_precincts <- c(
@@ -542,8 +550,31 @@ create_pct_black_deciles <- function(precincts, cty) {
     st_drop_geometry() |>
     filter(GEOID %in% precincts) |>
     mutate(city_name = cty,
-           pct_black_bin = ntile(pct_black, min(10, n()))
-    )
+           pct_black_bin = ntile(pct_black, min(10, n())))
 }
 
 df_with_deciles <- imap(city_precincts, create_pct_black_deciles) |> bind_rows()
+
+# compute avg demobilization by bin + city
+demob_tbl <- df_with_deciles |>
+  group_by(pct_black_bin, city_name) |>
+  summarise(avg_demobilization = mean(demobilization, na.rm = TRUE),
+            .groups = "drop") |>
+  pivot_wider(names_from = city_name,
+              values_from = avg_demobilization,
+              names_prefix = "avg_") |>
+  rename(
+    avg_philadelphia_demobilization = avg_philadelphia,
+    avg_detroit_demobilization = avg_detroit
+  )
+
+# compute avg pct_black per bin (across both cities)
+pct_black_tbl <- df_with_deciles |>
+  group_by(pct_black_bin) |>
+  summarise(pct_black = mean(pct_black, na.rm = TRUE),
+            .groups = "drop")
+
+# merge into final table
+summary_tbl <- demob_tbl |>
+  left_join(pct_black_tbl, by = "pct_black_bin") |>
+  arrange(pct_black_bin)
