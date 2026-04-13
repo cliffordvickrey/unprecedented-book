@@ -121,6 +121,14 @@ acs_vars <- c(
   
   # income
   inc_med_household_income = "B19013_001",
+  inc_total = "B19001_001",
+  inc_total_lt_10k = "B19001_002",
+  inc_total_10_15 = "B19001_003",
+  inc_total_15_20 = "B19001_004",
+  inc_total_20_25 = "B19001_005",
+  inc_total_25_30 = "B19001_006",
+  inc_total_30_35 = "B19001_007",
+  inc_total_35_40 = "B19001_008",
   
   # labor
   lab_total = "B23025_003",
@@ -188,10 +196,8 @@ national_decennial <- map_dfr(
 
 # compute population density
 national_decennial <- national_decennial |>
-  mutate(
-    area_sqmi = as.numeric(st_area(geometry)) / 2589988.11,
-    population = value
-  ) |>
+  mutate(area_sqmi = as.numeric(st_area(geometry)) / 2589988.11,
+         population = value) |>
   select(GEOID, area_sqmi, population)
 
 # unpack vars
@@ -200,42 +206,47 @@ national_acs_parsed <- national_acs |>
   pivot_wider(names_from = variable, values_from = estimate) |>
   mutate(
     ct__age = age_total,
-	ct__education = edu_total,
-	ct__lab = lab_total,
-	ct__poverty = pov_total,
-	ct__race = race_total,
-	ct__rent = rent_total,
-	ct__rent_burden_total = rent_burden_total,
-	ct__vehicle_total = vehicle_total,
+    ct__education = edu_total,
+    ct__housing_burden = rent_burden_total,
+    ct__inc = inc_total,
+    ct__lab = lab_total,
+    ct__poverty = pov_total,
+    ct__race = race_total,
+    ct__renters = rent_total,
+    ct__vehicle = vehicle_total,
     ct_age_18_to_34 =
       age_total_18_19_m + age_total_20_m + age_total_21_m +
-        age_total_22_24_m + age_total_25_29_m + age_total_30_34_m +
-        age_total_18_19_f + age_total_20_f + age_total_21_f +
-        age_total_22_24_f + age_total_25_29_f + age_total_30_34_f,
+      age_total_22_24_m + age_total_25_29_m + age_total_30_34_m +
+      age_total_18_19_f + age_total_20_f + age_total_21_f +
+      age_total_22_24_f + age_total_25_29_f + age_total_30_34_f,
     ct_age_65_plus =
       age_total_65_66_m + age_total_67_69_m + age_total_70_74_m +
-        age_total_75_79_m + age_total_80_84_m + age_total_85_plus_m +
-        age_total_65_66_f + age_total_67_69_f + age_total_70_74_f +
-        age_total_75_79_f + age_total_80_84_f + age_total_85_plus_f,
+      age_total_75_79_m + age_total_80_84_m + age_total_85_plus_m +
+      age_total_65_66_f + age_total_67_69_f + age_total_70_74_f +
+      age_total_75_79_f + age_total_80_84_f + age_total_85_plus_f,
     ct_asian_pi = race_total_asian_hispanic + race_total_asian_nh +
-        race_total_pacific_islander_hispanic + race_total_pacific_islander_nh,
+      race_total_pacific_islander_hispanic + race_total_pacific_islander_nh,
     ct_bachelors_plus =
       edu_total_bachelors + edu_total_masters +
-        edu_total_professional_school_degree + edu_total_doctorate, 
+      edu_total_professional_school_degree + edu_total_doctorate,
     ct_below_poverty = pov_total_below_poverty,
     ct_black = race_total_black_hispanic + race_total_black_nh,
     ct_hispanic = race_total_hispanic,
     ct_housing_burden = rent_burden_total_30_to_35 + rent_burden_total_35_to_40 +
-        rent_burden_total_40_to_50 + rent_burden_total_50_or_over,
+      rent_burden_total_40_to_50 + rent_burden_total_50_or_over,
+    ct_inc_lt_40k = inc_total_lt_10k + inc_total_10_15
+    + inc_total_15_20 + inc_total_20_25
+    + inc_total_25_30 + inc_total_30_35
+    + inc_total_35_40,
     ct_no_vehicle = vehicle_total_no_vehicle,
     ct_non_bachelors = edu_total_below_ba_1 + edu_total_below_ba_2 + edu_total_below_ba_3 +
-        edu_total_below_ba_4 + edu_total_below_ba_5 + edu_total_below_ba_6 +
-        edu_total_below_ba_7 + edu_total_below_ba_8 + edu_total_below_ba_9 +
-        edu_total_below_ba_10 + edu_total_below_ba_11 + edu_total_below_ba_12 +
-        edu_total_below_ba_13 + edu_total_below_ba_14 + edu_total_below_ba_15 +
-        edu_total_below_ba_16 + edu_total_below_ba_17 + edu_total_below_ba_18 +
-        edu_total_below_ba_19 + edu_total_below_ba_20,
-	ct_renters = rent_total_renters,
+      edu_total_below_ba_4 + edu_total_below_ba_5 + edu_total_below_ba_6 +
+      edu_total_below_ba_7 + edu_total_below_ba_8 + edu_total_below_ba_9 +
+      edu_total_below_ba_10 + edu_total_below_ba_11 + edu_total_below_ba_12 +
+      edu_total_below_ba_13 + edu_total_below_ba_14 + edu_total_below_ba_15 +
+      edu_total_below_ba_16 + edu_total_below_ba_17 + edu_total_below_ba_18 +
+      edu_total_below_ba_19 + edu_total_below_ba_20,
+    ct_renters = rent_total_renters,
     ct_unemployed = lab_total_unemployed,
     ct_white_non_hispanic = race_total_white_nh,
     median_income = inc_med_household_income,
@@ -248,7 +259,7 @@ national_acs_parsed <- national_acs |>
          geometry)
 
 # merge in population density
-national_decennial_nogeo <- national_decennial |> 
+national_decennial_nogeo <- national_decennial |>
   st_drop_geometry()
 
 national_acs_parsed <- national_acs_parsed |>

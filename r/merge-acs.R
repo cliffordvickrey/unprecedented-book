@@ -52,10 +52,11 @@ df_acs_imputed_with_percentages = df_acs_imputed |>
     pct_below_poverty = safe_divide(ct_below_poverty, ct__poverty),
     pct_black = safe_divide(ct_black, ct__race),
     pct_hispanic = safe_divide(ct_hispanic, ct__race),
-    pct_housing_burden = safe_divide(ct_housing_burden, ct__rent_burden_total),
-    pct_no_vehicle = safe_divide(ct_no_vehicle, ct__vehicle_total),
+    pct_housing_burden = safe_divide(ct_housing_burden, ct__housing_burden),
+    pct_inc_lt_40k = safe_divide(ct_inc_lt_40k, ct__inc),
+    pct_no_vehicle = safe_divide(ct_no_vehicle, ct__vehicle),
     pct_non_bachelors = safe_divide(ct_non_bachelors, ct__education),
-    pct_renters = safe_divide(ct_renters, ct__rent),
+    pct_renters = safe_divide(ct_renters, ct__renters),
     pct_unemployed = safe_divide(ct_unemployed, ct__lab),
     pct_white_non_hispanic = safe_divide(ct_white_non_hispanic, ct__race),
     pop_density = safe_divide(population, area_sqmi)
@@ -63,7 +64,8 @@ df_acs_imputed_with_percentages = df_acs_imputed |>
   select(precinct_GEOID,
          starts_with("median_"),
          starts_with("pct_"),
-         starts_with("pop_"),)
+         starts_with("pop_"),
+  )
 
 # join back with precinct data
 precincts_merged <- precincts |>

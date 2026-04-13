@@ -3,6 +3,10 @@ library(purrr)
 library(sf)
 library(tidyr)
 
+###################################################
+# Phase 1: Geographic Baseline (The Urban Anchor) #
+###################################################
+
 this_dir <- dirname(rstudioapi::getSourceEditorContext()$path)
 path <- file.path(this_dir, "..", "data", "precinct")
 
@@ -11,10 +15,15 @@ in_file <- file.path(path, "2024-precincts-merged.rds")
 # compute needed vars
 df <- readRDS(in_file) |> mutate(
   pct_biden_2020 = votes_dem_2020 / votes_total_2020,
-  pct_trump_2020 = votes_rep_2020 / votes_total_2020,
   pct_harris_2024 = votes_dem / votes_total,
+  pct_trump_2020 = votes_rep_2020 / votes_total_2020,
   pct_trump_2024 = votes_rep / votes_total,
-  demobilization = (pct_harris_2024 - pct_biden_2020) - (pct_trump_2024 - pct_trump_2020)
+  demobilization = (pct_harris_2024 - pct_biden_2020) - (pct_trump_2024 - pct_trump_2020),
+  pct_minority = 1 - pct_white_non_hispanic,
+  pct_white_working_class = pct_white_non_hispanic * pct_non_bachelors,
+  switching = ((pct_trump_2024 - pct_trump_2020) - (pct_harris_2024 - pct_biden_2020)
+  ) / 2,
+  triple_jeopardy = pct_age_18_to_34 * pct_inc_lt_40k * pct_minority
 )
 
 # step 1: group Philadelphia + Detroit precincts into deciles by %
@@ -578,3 +587,17 @@ pct_black_tbl <- df_with_deciles |>
 summary_tbl <- demob_tbl |>
   left_join(pct_black_tbl, by = "pct_black_bin") |>
   arrange(pct_black_bin)
+
+##############################################################
+# Phase 2: The "Garbage Can" Regression (Prior Calibration)) #
+##############################################################
+
+model <- lm(demobilization ~ pct_white_working_class + triple_jeopardy,
+            data = df)
+
+b_white_working_class <- coef(model)[["pct_white_working_class"]]
+b_triple_jeopardy <- coef(model)[["triple_jeopardy"]]
+
+df <- df |>
+  mutate(beta_white_working_class = b_white_working_class,
+         beta_triple_jeopardy = b_triple_jeopardy)
