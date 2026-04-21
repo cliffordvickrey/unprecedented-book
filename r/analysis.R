@@ -13,18 +13,41 @@ path <- file.path(this_dir, "..", "data", "precinct")
 in_file <- file.path(path, "2024-precincts-merged.rds")
 
 # compute needed vars
+blue_wall_states <- c("MI", "PA", "WI")
+sun_belt_states <- c("AL",
+                     "AZ",
+                     "CA",
+                     "FL",
+                     "GA",
+                     "LA",
+                     "MS",
+                     "NV",
+                     "NM",
+                     "NC",
+                     "OK",
+                     "SC",
+                     "TN",
+                     "TX")
+
 df <- readRDS(in_file) |> mutate(
   pct_biden_2020 = votes_dem_2020 / votes_total_2020,
   pct_harris_2024 = votes_dem / votes_total,
   pct_trump_2020 = votes_rep_2020 / votes_total_2020,
   pct_trump_2024 = votes_rep / votes_total,
-  demobilization = (pct_harris_2024 - pct_biden_2020) - (pct_trump_2024 - pct_trump_2020),
+  demobilization = pmax((pct_trump_2024 - pct_trump_2020) - (pct_harris_2024 - pct_biden_2020),
+                        0
+  ),
   pct_minority = 1 - pct_white_non_hispanic,
   pct_white_working_class = pct_white_non_hispanic * pct_non_bachelors,
-  switching = ((pct_trump_2024 - pct_trump_2020) - (pct_harris_2024 - pct_biden_2020)
-  ) / 2,
-  triple_jeopardy = pct_age_18_to_34 * pct_inc_lt_40k * pct_minority
+  switching = pmax(((pct_trump_2024 - pct_trump_2020) - (pct_harris_2024 - pct_biden_2020)
+  ) / 2, 0),
+  retention = 1 - demobilization - switching,
+  triple_jeopardy = pct_age_18_to_34 * pct_inc_lt_40k * pct_minority,
+  blue_wall_state = state %in% blue_wall_states,
+  sun_belt_state = state %in% sun_belt_states
 )
+
+df <- sf::st_drop_geometry(df)
 
 # step 1: group Philadelphia + Detroit precincts into deciles by %
 # African-American
@@ -595,9 +618,49 @@ summary_tbl <- demob_tbl |>
 model <- lm(demobilization ~ pct_white_working_class + triple_jeopardy,
             data = df)
 
-b_white_working_class <- coef(model)[["pct_white_working_class"]]
-b_triple_jeopardy <- coef(model)[["triple_jeopardy"]]
+models <- list(
+  demobilization = lm(
+    demobilization ~ pct_white_working_class + triple_jeopardy,
+    data = df
+  ),
+  switching      = lm(switching ~ pct_white_working_class + triple_jeopardy, data = df),
+  retention      = lm(retention ~ pct_white_working_class + triple_jeopardy, data = df)
+)
 
-df <- df |>
-  mutate(beta_white_working_class = b_white_working_class,
-         beta_triple_jeopardy = b_triple_jeopardy)
+for (v in names(models)) {
+  prior_name <- paste0(v, "_prior")
+  df[[prior_name]] <- predict(models[[v]], newdata = df)
+  df[[prior_name]][is.na(df[[prior_name]])] <- df[[v]][is.na(df[[prior_name]])]
+}
+
+shrink_towards_priors <- function(raw, prior, w = 0.5) {
+  pmax(pmin(w * raw + (1 - w) * prior, 1), 0)
+}
+
+df <- df |> mutate(
+  demobilization_post = shrink_towards_priors(demobilization, demobilization_prior),
+  switching_post      = shrink_towards_priors(switching, switching_prior),
+  retention_post      = shrink_towards_priors(retention, retention_prior)
+)
+
+df <- df |> mutate(weight = votes_dem_2020)
+
+agg <- function(data) {
+  data |> summarize(
+    retention = weighted.mean(retention_post, weight, na.rm = TRUE),
+    demobilization = weighted.mean(demobilization_post, weight, na.rm = TRUE),
+    switching = weighted.mean(switching_post, weight, na.rm = TRUE)
+  )
+}
+
+national  <- agg(df)
+blue_wall <- agg(df |> filter(blue_wall_state))
+sun_belt  <- agg(df |> filter(sun_belt_state))
+
+transition_table <- bind_rows(
+  Nationwide = national,
+  Blue_Wall = blue_wall,
+  Sun_Belt = sun_belt,
+  .id = "Region"
+) |>
+  mutate(across(-Region, ~ round(. * 100, 1)))
